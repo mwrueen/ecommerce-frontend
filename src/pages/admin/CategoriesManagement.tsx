@@ -11,7 +11,7 @@ export default function CategoriesManagement() {
   const navigate = useNavigate();
   
   const { data, isLoading } = useGetCategoriesQuery({ paginate: true });
-
+  const categories = data?.data || [];
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -56,7 +56,7 @@ export default function CategoriesManagement() {
                 <TableCell colSpan={7} className="text-center">Loading...</TableCell>
               </TableRow>
             ) : (
-              data?.data?.map((category: any) => (
+              categories?.data?.map((category: any) => (
                 <TableRow key={category.id}>
                   <TableCell>
                     <img
