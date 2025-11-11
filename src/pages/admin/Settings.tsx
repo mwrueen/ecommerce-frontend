@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -5,16 +6,37 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
+import { useGetSiteSettingsQuery, useUpdateSiteSettingsMutation } from '@/hooks/useApi';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 export default function Settings() {
-  const { toast } = useToast();
-  const { register, handleSubmit } = useForm();
+  const { data: settingsData, isLoading } = useGetSiteSettingsQuery({});
+  const [updateSettings, { isLoading: isUpdating }] = useUpdateSiteSettingsMutation();
+  const { register, handleSubmit, reset } = useForm();
 
-  const onSubmit = (data: any) => {
-    console.log(data);
-    toast({ title: 'Settings updated successfully' });
+  useEffect(() => {
+    if (settingsData?.data) {
+      reset(settingsData.data);
+    }
+  }, [settingsData, reset]);
+
+  const onSubmit = async (data: any) => {
+    try {
+      await updateSettings(data).unwrap();
+      toast.success('Settings updated successfully');
+    } catch (error: any) {
+      toast.error(error?.data?.message || 'Failed to update settings');
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -51,11 +73,24 @@ export default function Settings() {
                   <Label htmlFor="description">Description</Label>
                   <Textarea id="description" {...register('description')} rows={4} />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="currency">Currency</Label>
-                  <Input id="currency" {...register('currency')} placeholder="USD" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="currency">Currency</Label>
+                    <Input id="currency" {...register('currency')} placeholder="USD" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="currency_symbol">Currency Symbol</Label>
+                    <Input id="currency_symbol" {...register('currency_symbol')} placeholder="$" />
+                  </div>
                 </div>
-                <Button type="submit">Save Changes</Button>
+                <div className="space-y-2">
+                  <Label htmlFor="business_name">Business Name</Label>
+                  <Input id="business_name" {...register('business_name')} placeholder="My Business LLC" />
+                </div>
+                <Button type="submit" disabled={isUpdating}>
+                  {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Changes
+                </Button>
               </form>
             </CardContent>
           </Card>
@@ -71,17 +106,24 @@ export default function Settings() {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" {...register('email')} />
+                  <Input id="email" type="email" {...register('email')} placeholder="contact@mystore.com" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" {...register('phone')} />
+                  <Label htmlFor="support_email">Support Email</Label>
+                  <Input id="support_email" type="email" {...register('support_email')} placeholder="support@mystore.com" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contact_number">Phone</Label>
+                  <Input id="contact_number" {...register('contact_number')} placeholder="+1-234-567-8900" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="address">Address</Label>
-                  <Textarea id="address" {...register('address')} rows={3} />
+                  <Textarea id="address" {...register('address')} rows={3} placeholder="123 Business Street, City, State" />
                 </div>
-                <Button type="submit">Save Changes</Button>
+                <Button type="submit" disabled={isUpdating}>
+                  {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Changes
+                </Button>
               </form>
             </CardContent>
           </Card>
@@ -96,18 +138,29 @@ export default function Settings() {
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="facebook">Facebook</Label>
-                  <Input id="facebook" {...register('facebook')} placeholder="https://facebook.com/yourpage" />
+                  <Label htmlFor="social_links.facebook">Facebook</Label>
+                  <Input id="social_links.facebook" {...register('social_links.facebook')} placeholder="https://facebook.com/yourpage" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="twitter">Twitter</Label>
-                  <Input id="twitter" {...register('twitter')} placeholder="https://twitter.com/yourhandle" />
+                  <Label htmlFor="social_links.twitter">Twitter</Label>
+                  <Input id="social_links.twitter" {...register('social_links.twitter')} placeholder="https://twitter.com/yourhandle" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="instagram">Instagram</Label>
-                  <Input id="instagram" {...register('instagram')} placeholder="https://instagram.com/yourhandle" />
+                  <Label htmlFor="social_links.instagram">Instagram</Label>
+                  <Input id="social_links.instagram" {...register('social_links.instagram')} placeholder="https://instagram.com/yourhandle" />
                 </div>
-                <Button type="submit">Save Changes</Button>
+                <div className="space-y-2">
+                  <Label htmlFor="social_links.linkedin">LinkedIn</Label>
+                  <Input id="social_links.linkedin" {...register('social_links.linkedin')} placeholder="https://linkedin.com/company/yourcompany" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="social_links.youtube">YouTube</Label>
+                  <Input id="social_links.youtube" {...register('social_links.youtube')} placeholder="https://youtube.com/c/yourchannel" />
+                </div>
+                <Button type="submit" disabled={isUpdating}>
+                  {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Changes
+                </Button>
               </form>
             </CardContent>
           </Card>
@@ -122,18 +175,29 @@ export default function Settings() {
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="metaTitle">Meta Title</Label>
-                  <Input id="metaTitle" {...register('metaTitle')} />
+                  <Label htmlFor="meta_title">Meta Title</Label>
+                  <Input id="meta_title" {...register('meta_title')} placeholder="Store Name - Best Products Online" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="metaDescription">Meta Description</Label>
-                  <Textarea id="metaDescription" {...register('metaDescription')} rows={3} />
+                  <Label htmlFor="meta_description">Meta Description</Label>
+                  <Textarea id="meta_description" {...register('meta_description')} rows={3} placeholder="Shop the best products with great deals..." />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="metaKeywords">Meta Keywords</Label>
-                  <Input id="metaKeywords" {...register('metaKeywords')} />
+                  <Label htmlFor="meta_keywords">Meta Keywords</Label>
+                  <Input id="meta_keywords" {...register('meta_keywords')} placeholder="ecommerce, online shopping, products" />
                 </div>
-                <Button type="submit">Save Changes</Button>
+                <div className="space-y-2">
+                  <Label htmlFor="google_analytics_id">Google Analytics ID</Label>
+                  <Input id="google_analytics_id" {...register('google_analytics_id')} placeholder="GA-XXXXXXXXX" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="facebook_pixel_id">Facebook Pixel ID</Label>
+                  <Input id="facebook_pixel_id" {...register('facebook_pixel_id')} placeholder="123456789012345" />
+                </div>
+                <Button type="submit" disabled={isUpdating}>
+                  {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Changes
+                </Button>
               </form>
             </CardContent>
           </Card>

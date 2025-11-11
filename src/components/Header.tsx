@@ -16,13 +16,17 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { RootState } from '@/store';
 import { logout } from '@/store/slices/authSlice';
 import { useLogoutMutation } from '@/store/api/authApi';
+import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { toast } from 'sonner';
 
 const Header = () => {
   const dispatch = useDispatch();
   const [logoutMutation] = useLogoutMutation();
+  const { data: settingsData } = useGetPublicSettingsQuery({});
   const { items } = useSelector((state: RootState) => state.cart);
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  
+  const settings = settingsData?.data;
   
   const cartItemsCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -41,8 +45,12 @@ const Header = () => {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary-dark" />
-            <span className="text-xl font-bold text-foreground">ShopHub</span>
+            {settings?.header_logo ? (
+              <img src={settings.header_logo} alt={settings.title} className="h-8 w-auto" />
+            ) : (
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary-dark" />
+            )}
+            <span className="text-xl font-bold text-foreground">{settings?.title || 'ShopHub'}</span>
           </Link>
           
           <nav className="hidden md:flex items-center gap-6">
