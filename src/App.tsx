@@ -13,6 +13,13 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
+import { AdminLayout } from "./components/admin/AdminLayout";
+import { ProtectedRoute } from "./components/admin/ProtectedRoute";
+import Dashboard from "./pages/admin/Dashboard";
+import ProductsManagement from "./pages/admin/ProductsManagement";
+import CategoriesManagement from "./pages/admin/CategoriesManagement";
+import UsersManagement from "./pages/admin/UsersManagement";
+import Settings from "./pages/admin/Settings";
 
 const App = () => (
   <Provider store={store}>
@@ -30,6 +37,22 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
           </Route>
+          
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="products" element={<ProductsManagement />} />
+            <Route path="categories" element={<CategoriesManagement />} />
+            <Route path="users" element={<UsersManagement />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

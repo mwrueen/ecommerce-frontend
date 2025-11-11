@@ -9,3 +9,4 @@ export * from '@/store/api/productsApi';
 export * from '@/store/api/categoriesApi';
 export * from '@/store/api/ordersApi';
 export * from '@/store/api/siteSettingsApi';
+export * from '@/store/api/usersApi';
