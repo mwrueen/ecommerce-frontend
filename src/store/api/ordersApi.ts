@@ -3,9 +3,24 @@ import { apiSlice } from './apiSlice';
 export const ordersApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getOrders: builder.query({
-      query: (params: { page?: number; per_page?: number } = {}) => {
-        const { page = 1, per_page = 10 } = params;
-        return `/orders?page=${page}&per_page=${per_page}`;
+      query: (params: { 
+        page?: number; 
+        per_page?: number;
+        status?: string;
+        customer_id?: number;
+        search?: string;
+        date_from?: string;
+        date_to?: string;
+        sort_by?: string;
+        sort_order?: string;
+      } = {}) => {
+        const queryParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined) {
+            queryParams.append(key, value.toString());
+          }
+        });
+        return `/orders?${queryParams.toString()}`;
       },
       providesTags: ['Order'],
     }),
@@ -27,7 +42,23 @@ export const ordersApi = apiSlice.injectEndpoints({
         method: 'PUT',
         body: { status },
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'Order', id }],
+      invalidatesTags: (result, error, { id }) => [{ type: 'Order', id }, 'Order'],
+    }),
+    deleteOrder: builder.mutation({
+      query: (id) => ({
+        url: `/orders/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Order'],
+    }),
+    getOrderStats: builder.query({
+      query: (params: { date_from?: string; date_to?: string } = {}) => {
+        const queryParams = new URLSearchParams();
+        if (params.date_from) queryParams.append('date_from', params.date_from);
+        if (params.date_to) queryParams.append('date_to', params.date_to);
+        return `/orders/stats?${queryParams.toString()}`;
+      },
+      providesTags: ['Order'],
     }),
   }),
 });
@@ -37,4 +68,6 @@ export const {
   useGetOrderQuery,
   useCreateOrderMutation,
   useUpdateOrderStatusMutation,
+  useDeleteOrderMutation,
+  useGetOrderStatsQuery,
 } = ordersApi;

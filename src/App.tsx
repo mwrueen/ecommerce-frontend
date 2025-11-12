@@ -13,6 +13,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import CustomerAuth from "./pages/CustomerAuth";
 import CustomerProfile from "./pages/CustomerProfile";
+import Orders from "./pages/Orders";
+import OrderDetail from "./pages/OrderDetail";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
 import { AdminLayout } from "./components/admin/AdminLayout";
@@ -26,6 +28,8 @@ import CategoryForm from "./pages/admin/CategoryForm";
 import UsersManagement from "./pages/admin/UsersManagement";
 import Settings from "./pages/admin/Settings";
 import InventoryManagement from "./pages/admin/InventoryManagement";
+import OrdersManagement from "./pages/admin/OrdersManagement";
+import OrderDetails from "./pages/admin/OrderDetails";
 
 const App = () => (
   <Provider store={store}>
@@ -44,6 +48,8 @@ const App = () => (
             <Route path="/register" element={<Register />} />
             <Route path="/customer-auth" element={<CustomerAuth />} />
             <Route path="/customer/profile" element={<CustomerProfile />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/orders/:id" element={<OrderDetail />} />
           </Route>
           
           <Route
@@ -63,6 +69,8 @@ const App = () => (
             <Route path="categories/create" element={<CategoryForm />} />
             <Route path="categories/:id/edit" element={<CategoryForm />} />
             <Route path="inventory" element={<InventoryManagement />} />
+            <Route path="orders" element={<OrdersManagement />} />
+            <Route path="orders/:id" element={<OrderDetails />} />
             <Route path="users" element={<UsersManagement />} />
             <Route path="settings" element={<Settings />} />
           </Route>
