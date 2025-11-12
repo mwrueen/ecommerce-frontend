@@ -16,12 +16,14 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { RootState } from '@/store';
 import { logout } from '@/store/slices/authSlice';
 import { useLogoutMutation } from '@/store/api/authApi';
+import { useLogoutCustomerMutation } from '@/store/api/customerAuthApi';
 import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { toast } from 'sonner';
 
 const Header = () => {
   const dispatch = useDispatch();
   const [logoutMutation] = useLogoutMutation();
+  const [logoutCustomerMutation] = useLogoutCustomerMutation();
   const { data: settingsData } = useGetPublicSettingsQuery({});
   const { items } = useSelector((state: RootState) => state.cart);
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -32,7 +34,12 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
-      await logoutMutation({}).unwrap();
+      // Use appropriate logout endpoint based on user role
+      if (user?.role === 'customer') {
+        await logoutCustomerMutation({}).unwrap();
+      } else {
+        await logoutMutation({}).unwrap();
+      }
       dispatch(logout());
       toast.success('Logged out successfully');
     } catch (error) {
@@ -99,8 +106,8 @@ const Header = () => {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">{user?.name}</p>
-                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    <p className="text-sm font-medium">{user?.name || 'User'}</p>
+                    <p className="text-xs text-muted-foreground">{user?.email || user?.phone}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -112,7 +119,14 @@ const Header = () => {
                     <DropdownMenuSeparator />
                   </>
                 )}
-                <DropdownMenuItem>Profile</DropdownMenuItem>
+                {user?.role === 'customer' && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/customer/profile">My Profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem>Orders</DropdownMenuItem>
                 <DropdownMenuItem>Settings</DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -123,11 +137,21 @@ const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link to="/login">
-              <Button variant="ghost" size="sm">
-                Sign In
-              </Button>
-            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  Sign In
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/customer-auth">Customer Login</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/login">Admin/Staff Login</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
 
           <Sheet>

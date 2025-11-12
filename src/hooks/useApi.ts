@@ -5,6 +5,7 @@
 
 // Re-export all API hooks for convenience
 export * from '@/store/api/authApi';
+export * from '@/store/api/customerAuthApi';
 export * from '@/store/api/productsApi';
 export * from '@/store/api/categoriesApi';
 export * from '@/store/api/ordersApi';
