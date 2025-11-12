@@ -4,6 +4,7 @@ import { useGetProductQuery, useCreateProductMutation, useUpdateProductMutation,
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -242,21 +243,19 @@ export default function ProductForm() {
 
                 <div className="space-y-2">
                   <Label htmlFor="description">Short Description</Label>
-                  <Textarea
-                    id="description"
+                  <RichTextEditor
                     value={formData.description}
-                    onChange={(e) => handleChange('description', e.target.value)}
-                    rows={3}
+                    onChange={(value) => handleChange('description', value)}
+                    placeholder="Enter a short description of the product..."
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="long_description">Long Description</Label>
-                  <Textarea
-                    id="long_description"
+                  <RichTextEditor
                     value={formData.long_description}
-                    onChange={(e) => handleChange('long_description', e.target.value)}
-                    rows={5}
+                    onChange={(value) => handleChange('long_description', value)}
+                    placeholder="Enter a detailed description of the product..."
                   />
                 </div>
 
