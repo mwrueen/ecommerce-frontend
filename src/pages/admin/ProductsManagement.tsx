@@ -78,11 +78,16 @@ export default function ProductsManagement() {
                 <TableCell colSpan={7} className="text-center">Loading...</TableCell>
               </TableRow>
             ) : (
-              data?.data?.map((product: any) => (
+              data?.data?.map((product: any) => {
+                const productImage = product.media?.find((m: any) => m.is_thumbnail)?.url || 
+                                    product.media?.[0]?.url || 
+                                    product.image_url || 
+                                    '/placeholder.svg';
+                return (
                 <TableRow key={product.id}>
                   <TableCell>
                     <img
-                      src={product.image_url || '/placeholder.svg'}
+                      src={productImage}
                       alt={product.name}
                       className="h-10 w-10 rounded object-cover"
                     />
@@ -122,7 +127,8 @@ export default function ProductsManagement() {
                     </div>
                   </TableCell>
                 </TableRow>
-              ))
+              );
+              })
             )}
           </TableBody>
         </Table>

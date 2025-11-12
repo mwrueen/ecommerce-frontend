@@ -14,6 +14,11 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const dispatch = useDispatch();
 
+  // Get thumbnail or first media image
+  const productImage = product.media?.find((m: any) => m.is_thumbnail)?.url || 
+                       product.media?.[0]?.url || 
+                       product.image_url;
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     dispatch(addToCart({
@@ -21,7 +26,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       name: product.name,
       price: product.price,
       quantity: 1,
-      image_url: product.image_url,
+      image_url: productImage,
       slug: product.slug,
     }));
     toast.success('Added to cart');
@@ -31,9 +36,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
     <Link to={`/products/${product.slug}`}>
       <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300">
         <div className="relative aspect-square overflow-hidden bg-secondary">
-          {product.image_url ? (
+          {productImage ? (
             <img
-              src={product.image_url}
+              src={productImage}
               alt={product.name}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
             />
