@@ -27,7 +27,7 @@ export const productsApi = apiSlice.injectEndpoints({
         method: 'PUT',
         body: product,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'Product', id }],
+      invalidatesTags: (result, error, { id }) => [{ type: 'Product', id }, 'Product'],
     }),
     deleteProduct: builder.mutation({
       query: (id) => ({
@@ -35,6 +35,36 @@ export const productsApi = apiSlice.injectEndpoints({
         method: 'DELETE',
       }),
       invalidatesTags: ['Product'],
+    }),
+    uploadProductImages: builder.mutation({
+      query: ({ productId, formData }) => ({
+        url: `/products/${productId}/images`,
+        method: 'POST',
+        body: formData,
+      }),
+      invalidatesTags: (result, error, { productId }) => [{ type: 'Product', id: productId }, 'Product'],
+    }),
+    removeProductImage: builder.mutation({
+      query: ({ productId, mediaId }) => ({
+        url: `/products/${productId}/images/${mediaId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (result, error, { productId }) => [{ type: 'Product', id: productId }],
+    }),
+    setProductThumbnail: builder.mutation({
+      query: ({ productId, mediaId }) => ({
+        url: `/products/${productId}/images/${mediaId}/thumbnail`,
+        method: 'PUT',
+      }),
+      invalidatesTags: (result, error, { productId }) => [{ type: 'Product', id: productId }],
+    }),
+    updateImageDetails: builder.mutation({
+      query: ({ productId, mediaId, ...data }) => ({
+        url: `/products/${productId}/images/${mediaId}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { productId }) => [{ type: 'Product', id: productId }],
     }),
   }),
 });
@@ -45,4 +75,8 @@ export const {
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
+  useUploadProductImagesMutation,
+  useRemoveProductImageMutation,
+  useSetProductThumbnailMutation,
+  useUpdateImageDetailsMutation,
 } = productsApi;

@@ -6,24 +6,31 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 
 export default function ProductsManagement() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [deleteId, setDeleteId] = useState<number | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   
   const { data, isLoading } = useGetProductsQuery({ page, per_page: 10 });
-  const [deleteProduct] = useDeleteProductMutation();
+  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
 
-  const handleDelete = async (id: number, name: string) => {
-    if (window.confirm(`Delete product "${name}"?`)) {
-      try {
-        await deleteProduct(id).unwrap();
-        toast({ title: 'Product deleted successfully' });
-      } catch (error) {
-        toast({ title: 'Failed to delete product', variant: 'destructive' });
-      }
+  const handleDelete = async () => {
+    if (!deleteId) return;
+
+    try {
+      await deleteProduct(deleteId).unwrap();
+      toast({ title: 'Product deleted successfully' });
+      setDeleteId(null);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error?.data?.message || 'Failed to delete product',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -101,7 +108,7 @@ export default function ProductsManagement() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDelete(product.id, product.name)}
+                        onClick={() => setDeleteId(product.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -135,6 +142,16 @@ export default function ProductsManagement() {
           </Button>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        onConfirm={handleDelete}
+        title="Delete Product"
+        description="Are you sure you want to delete this product? This action cannot be undone. Products with existing orders cannot be deleted."
+        confirmText="Delete"
+        variant="destructive"
+      />
     </div>
   );
 }
