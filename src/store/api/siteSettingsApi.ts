@@ -11,11 +11,18 @@ export const siteSettingsApi = apiSlice.injectEndpoints({
       providesTags: ['SiteSettings'],
     }),
     updateSiteSettings: builder.mutation({
-      query: (data) => ({
-        url: '/site-settings',
-        method: 'POST',
-        body: data,
-      }),
+      query: (data) => {
+        // Check if data is FormData (for file uploads)
+        const isFormData = data instanceof FormData;
+        
+        return {
+          url: '/site-settings',
+          method: 'POST',
+          body: data,
+          // Don't set Content-Type header for FormData - browser will set it with boundary
+          headers: isFormData ? {} : { 'Content-Type': 'application/json' },
+        };
+      },
       invalidatesTags: ['SiteSettings'],
     }),
   }),
