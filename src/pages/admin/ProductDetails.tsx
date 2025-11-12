@@ -4,6 +4,7 @@ import { useGetProductQuery, useUpdateProductMutation, useUploadProductImagesMut
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -155,7 +156,7 @@ export default function ProductDetails() {
     }
   };
 
-  const renderEditableField = (label: string, field: string, value: any, type: 'input' | 'textarea' = 'input') => {
+  const renderEditableField = (label: string, field: string, value: any, type: 'input' | 'textarea' | 'richtext' = 'input') => {
     const isEditing = editingField === field;
 
     return (
@@ -179,6 +180,12 @@ export default function ProductDetails() {
                 value={editValues[field]}
                 onChange={(e) => setEditValues({ ...editValues, [field]: e.target.value })}
               />
+            ) : type === 'richtext' ? (
+              <RichTextEditor
+                value={editValues[field] || ''}
+                onChange={(value) => setEditValues({ ...editValues, [field]: value })}
+                placeholder={`Enter ${label.toLowerCase()}...`}
+              />
             ) : (
               <Textarea
                 value={editValues[field]}
@@ -198,7 +205,7 @@ export default function ProductDetails() {
             </div>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">{value || 'Not set'}</p>
+          <div className="text-sm text-muted-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: value || 'Not set' }} />
         )}
       </div>
     );
@@ -237,7 +244,7 @@ export default function ProductDetails() {
           </CardHeader>
           <CardContent className="space-y-4">
             {renderEditableField('Name', 'name', product.name)}
-            {renderEditableField('Description', 'description', product.description, 'textarea')}
+            {renderEditableField('Description', 'description', product.description, 'richtext')}
             {renderEditableField('Price', 'price', product.price)}
             {renderEditableField('Stock Quantity', 'stock_quantity', product.stock_quantity)}
             {renderEditableField('Brand', 'brand', product.brand)}
@@ -404,7 +411,7 @@ export default function ProductDetails() {
           <CardTitle>Long Description</CardTitle>
         </CardHeader>
         <CardContent>
-          {renderEditableField('', 'long_description', product.long_description, 'textarea')}
+          {renderEditableField('', 'long_description', product.long_description, 'richtext')}
         </CardContent>
       </Card>
 
@@ -415,7 +422,7 @@ export default function ProductDetails() {
         </CardHeader>
         <CardContent className="space-y-4">
           {renderEditableField('Meta Title', 'meta_title', product.meta_title)}
-          {renderEditableField('Meta Description', 'meta_description', product.meta_description, 'textarea')}
+          {renderEditableField('Meta Description', 'meta_description', product.meta_description, 'richtext')}
           {renderEditableField('Meta Keywords', 'meta_keywords', product.meta_keywords)}
         </CardContent>
       </Card>

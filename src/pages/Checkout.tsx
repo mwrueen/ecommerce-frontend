@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
@@ -113,11 +114,10 @@ const Checkout = () => {
                 </div>
                 <div>
                   <Label htmlFor="notes">Order Notes (Optional)</Label>
-                  <Textarea
-                    id="notes"
+                  <RichTextEditor
                     value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    placeholder="Any special instructions for your order"
+                    onChange={(value) => setFormData({ ...formData, notes: value })}
+                    placeholder="Any special instructions for your order..."
                   />
                 </div>
               </CardContent>

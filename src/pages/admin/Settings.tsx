@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +14,7 @@ import { Loader2 } from 'lucide-react';
 export default function Settings() {
   const { data: settingsData, isLoading } = useGetSiteSettingsQuery({});
   const [updateSettings, { isLoading: isUpdating }] = useUpdateSiteSettingsMutation();
-  const { register, handleSubmit, reset } = useForm();
+  const { register, handleSubmit, reset, watch, setValue } = useForm();
 
   useEffect(() => {
     if (settingsData?.data) {
@@ -71,7 +72,11 @@ export default function Settings() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" {...register('description')} rows={4} />
+                  <RichTextEditor
+                    value={watch('description') || ''}
+                    onChange={(value) => setValue('description', value)}
+                    placeholder="Enter store description..."
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
