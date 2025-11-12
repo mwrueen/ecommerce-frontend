@@ -5,13 +5,13 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
 import { NavLink } from '@/components/NavLink';
+import { useGetPublicSettingsQuery } from '@/store/api/siteSettingsApi';
 
 const menuItems = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
@@ -26,14 +26,43 @@ export function AdminSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const collapsed = state === 'collapsed';
+  const { data: settings } = useGetPublicSettingsQuery({});
 
   return (
     <Sidebar className={collapsed ? 'w-14' : 'w-64'} collapsible="icon">
       <SidebarContent className="bg-sidebar">
-        <div className="p-4 border-b border-sidebar-border">
-          <h2 className={`font-bold text-sidebar-foreground transition-all ${collapsed ? 'text-xs text-center' : 'text-lg'}`}>
-            {collapsed ? 'AP' : 'Admin Panel'}
-          </h2>
+        <div className="p-4 border-b border-sidebar-border bg-sidebar-accent/30">
+          {collapsed ? (
+            <div className="flex items-center justify-center">
+              {settings?.data?.favicon ? (
+                <img 
+                  src={settings.data.favicon} 
+                  alt="Logo" 
+                  className="h-8 w-8 object-contain rounded"
+                />
+              ) : (
+                <div className="h-8 w-8 bg-sidebar-primary rounded flex items-center justify-center">
+                  <span className="text-sidebar-primary-foreground font-bold text-xs">AP</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              {settings?.data?.favicon && (
+                <img 
+                  src={settings.data.favicon} 
+                  alt="Logo" 
+                  className="h-10 w-10 object-contain rounded"
+                />
+              )}
+              <div className="flex flex-col">
+                <h2 className="font-bold text-sidebar-foreground text-base">
+                  {settings?.data?.title || 'Admin Panel'}
+                </h2>
+                <p className="text-xs text-sidebar-foreground/60">Management</p>
+              </div>
+            </div>
+          )}
         </div>
         <SidebarGroup className="pt-4">
           <SidebarGroupContent>
@@ -56,6 +85,15 @@ export function AdminSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        {!collapsed && settings?.data?.footer_logo && (
+          <div className="mt-auto p-4 border-t border-sidebar-border">
+            <img 
+              src={settings.data.footer_logo} 
+              alt="Footer Logo" 
+              className="h-8 object-contain opacity-60"
+            />
+          </div>
+        )}
       </SidebarContent>
     </Sidebar>
   );
