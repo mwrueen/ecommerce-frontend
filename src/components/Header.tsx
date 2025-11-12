@@ -124,11 +124,17 @@ const Header = () => {
                     <DropdownMenuItem asChild>
                       <Link to="/customer/profile">My Profile</Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/orders">My Orders</Link>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>
                 )}
-                <DropdownMenuItem>Orders</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
+                {(user?.role === 'admin' || user?.role === 'user') && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/orders">My Orders</Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
