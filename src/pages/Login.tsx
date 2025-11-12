@@ -89,12 +89,20 @@ const Login = () => {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Logging in...' : 'Login'}
             </Button>
-            <p className="text-sm text-center text-muted-foreground">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-primary hover:underline font-medium">
-                Sign up
-              </Link>
-            </p>
+            <div className="flex flex-col gap-2 text-sm text-center text-muted-foreground">
+              <p>
+                Admin Registration?{' '}
+                <Link to="/register" className="text-primary hover:underline font-medium">
+                  Sign up
+                </Link>
+              </p>
+              <p>
+                Customer?{' '}
+                <Link to="/customer-auth" className="text-primary hover:underline font-medium">
+                  Login with Phone
+                </Link>
+              </p>
+            </div>
           </CardFooter>
         </form>
       </Card>
