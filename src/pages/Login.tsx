@@ -38,13 +38,13 @@ const Login = () => {
     try {
       const result = await login(formData).unwrap();
       dispatch(setCredentials({
-        user: result.customer,
+        user: result.user,
         token: result.token,
       }));
       toast.success('Login successful!');
       
       // Role-based redirection
-      if (result.customer.role === 'admin') {
+      if (result.user.role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/');
