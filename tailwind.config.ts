@@ -62,6 +62,14 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        "admin-header": {
+          DEFAULT: "hsl(var(--admin-header-bg))",
+          foreground: "hsl(var(--admin-header-foreground))",
+          border: "hsl(var(--admin-header-border))",
+        },
+        "admin-content": {
+          DEFAULT: "hsl(var(--admin-content-bg))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

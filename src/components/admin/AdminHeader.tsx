@@ -18,23 +18,23 @@ export const AdminHeader = () => {
   };
 
   return (
-    <header className="h-16 border-b bg-card flex items-center justify-between px-6">
+    <header className="h-16 border-b border-admin-header-border bg-admin-header shadow-sm flex items-center justify-between px-6">
       <div className="flex items-center gap-4">
-        <SidebarTrigger />
-        <h1 className="text-xl font-semibold text-foreground">Admin Dashboard</h1>
+        <SidebarTrigger className="text-admin-header-foreground" />
+        <h1 className="text-xl font-semibold text-admin-header-foreground">Admin Dashboard</h1>
       </div>
       <div className="flex items-center gap-4">
         <Link to="/">
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" className="text-admin-header-foreground hover:bg-admin-header-foreground/10">
             <Home className="h-4 w-4 mr-2" />
             Back to Store
           </Button>
         </Link>
         <div className="flex items-center gap-2 text-sm">
-          <User className="h-4 w-4" />
-          <span className="text-muted-foreground">{user?.name}</span>
+          <User className="h-4 w-4 text-admin-header-foreground" />
+          <span className="text-admin-header-foreground font-medium">{user?.name}</span>
         </div>
-        <Button variant="ghost" size="sm" onClick={handleLogout}>
+        <Button variant="ghost" size="sm" onClick={handleLogout} className="text-admin-header-foreground hover:bg-admin-header-foreground/10">
           <LogOut className="h-4 w-4 mr-2" />
           Logout
         </Button>

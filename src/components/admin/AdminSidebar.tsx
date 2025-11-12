@@ -28,10 +28,14 @@ export function AdminSidebar() {
   const collapsed = state === 'collapsed';
 
   return (
-    <Sidebar className={collapsed ? 'w-14' : 'w-60'} collapsible="icon">
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Admin Panel</SidebarGroupLabel>
+    <Sidebar className={collapsed ? 'w-14' : 'w-64'} collapsible="icon">
+      <SidebarContent className="bg-sidebar">
+        <div className="p-4 border-b border-sidebar-border">
+          <h2 className={`font-bold text-sidebar-foreground transition-all ${collapsed ? 'text-xs text-center' : 'text-lg'}`}>
+            {collapsed ? 'AP' : 'Admin Panel'}
+          </h2>
+        </div>
+        <SidebarGroup className="pt-4">
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
@@ -40,11 +44,11 @@ export function AdminSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.url === '/admin'}
-                      className="hover:bg-muted/50"
-                      activeClassName="bg-primary/10 text-primary font-medium"
+                      className="hover:bg-sidebar-accent transition-colors text-sidebar-foreground/80 hover:text-sidebar-foreground py-3"
+                      activeClassName="bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-md"
                     >
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span className="ml-2">{item.title}</span>}
+                      <item.icon className="h-5 w-5" />
+                      {!collapsed && <span className="ml-3">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
