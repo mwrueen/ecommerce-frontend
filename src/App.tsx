@@ -23,6 +23,7 @@ import CategoriesManagement from "./pages/admin/CategoriesManagement";
 import CategoryForm from "./pages/admin/CategoryForm";
 import UsersManagement from "./pages/admin/UsersManagement";
 import Settings from "./pages/admin/Settings";
+import InventoryManagement from "./pages/admin/InventoryManagement";
 
 const App = () => (
   <Provider store={store}>
@@ -57,6 +58,7 @@ const App = () => (
             <Route path="categories" element={<CategoriesManagement />} />
             <Route path="categories/create" element={<CategoryForm />} />
             <Route path="categories/:id/edit" element={<CategoryForm />} />
+            <Route path="inventory" element={<InventoryManagement />} />
             <Route path="users" element={<UsersManagement />} />
             <Route path="settings" element={<Settings />} />
           </Route>

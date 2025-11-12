@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, FolderTree, Users, Settings } from 'lucide-react';
+import { LayoutDashboard, Package, FolderTree, Users, Settings, Warehouse } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import {
   Sidebar,
@@ -17,6 +17,7 @@ const menuItems = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
   { title: 'Products', url: '/admin/products', icon: Package },
   { title: 'Categories', url: '/admin/categories', icon: FolderTree },
+  { title: 'Inventory', url: '/admin/inventory', icon: Warehouse },
   { title: 'Users', url: '/admin/users', icon: Users },
   { title: 'Settings', url: '/admin/settings', icon: Settings },
 ];

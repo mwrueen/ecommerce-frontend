@@ -10,3 +10,4 @@ export * from '@/store/api/categoriesApi';
 export * from '@/store/api/ordersApi';
 export * from '@/store/api/siteSettingsApi';
 export * from '@/store/api/usersApi';
+export * from '@/store/api/inventoryApi';
