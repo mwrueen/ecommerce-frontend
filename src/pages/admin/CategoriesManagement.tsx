@@ -1,17 +1,59 @@
 import { useState } from 'react';
-import { useGetCategoriesQuery } from '@/hooks/useApi';
+import { useGetCategoriesQuery, useDeleteCategoryMutation, useToggleFeaturedMutation } from '@/hooks/useApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Trash2, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 
 export default function CategoriesManagement() {
   const [search, setSearch] = useState('');
+  const [deleteId, setDeleteId] = useState<number | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   const { data, isLoading } = useGetCategoriesQuery({ paginate: true });
   const categories = data?.data || [];
+
+  const [deleteCategory, { isLoading: isDeleting }] = useDeleteCategoryMutation();
+  const [toggleFeatured] = useToggleFeaturedMutation();
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+
+    try {
+      await deleteCategory(deleteId).unwrap();
+      toast({
+        title: 'Success',
+        description: 'Category deleted successfully',
+      });
+      setDeleteId(null);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error?.data?.message || 'Failed to delete category',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleToggleFeatured = async (id: number) => {
+    try {
+      await toggleFeatured(id).unwrap();
+      toast({
+        title: 'Success',
+        description: 'Featured status updated',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error?.data?.message || 'Failed to update featured status',
+        variant: 'destructive',
+      });
+    }
+  };
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -69,7 +111,15 @@ export default function CategoriesManagement() {
                   <TableCell>{category.slug}</TableCell>
                   <TableCell>{category.active_products_count || 0}</TableCell>
                   <TableCell>
-                    {category.is_featured ? '⭐' : '-'}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleToggleFeatured(category.id)}
+                    >
+                      <Star
+                        className={`h-4 w-4 ${category.is_featured ? 'fill-primary text-primary' : ''}`}
+                      />
+                    </Button>
                   </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded text-xs ${category.is_active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
@@ -85,7 +135,11 @@ export default function CategoriesManagement() {
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeleteId(category.id)}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -96,6 +150,16 @@ export default function CategoriesManagement() {
           </TableBody>
         </Table>
       </div>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        onConfirm={handleDelete}
+        title="Delete Category"
+        description="Are you sure you want to delete this category? This action cannot be undone. Make sure there are no products in this category."
+        confirmText="Delete"
+        variant="destructive"
+      />
     </div>
   );
 }

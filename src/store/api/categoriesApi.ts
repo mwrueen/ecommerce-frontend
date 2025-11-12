@@ -17,6 +17,43 @@ export const categoriesApi = apiSlice.injectEndpoints({
       query: (identifier) => `/categories/${identifier}`,
       providesTags: (result, error, id) => [{ type: 'Category', id }],
     }),
+    createCategory: builder.mutation({
+      query: (data) => ({
+        url: '/categories',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Category'],
+    }),
+    updateCategory: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/categories/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['Category'],
+    }),
+    deleteCategory: builder.mutation({
+      query: (id) => ({
+        url: `/categories/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Category'],
+    }),
+    toggleFeatured: builder.mutation({
+      query: (id) => ({
+        url: `/categories/${id}/toggle-featured`,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['Category'],
+    }),
+    toggleActive: builder.mutation({
+      query: (id) => ({
+        url: `/categories/${id}/toggle-active`,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['Category'],
+    }),
   }),
 });
 
@@ -24,4 +61,9 @@ export const {
   useGetCategoriesQuery,
   useGetFeaturedCategoriesQuery,
   useGetCategoryQuery,
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
+  useToggleFeaturedMutation,
+  useToggleActiveMutation,
 } = categoriesApi;
