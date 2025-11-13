@@ -1,23 +1,11 @@
-import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { LogOut, User, Home, Mail, MapPin } from 'lucide-react';
-import { logout } from '@/store/slices/authSlice';
-import { RootState } from '@/store';
+import { Home, Mail, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGetPublicSettingsQuery } from '@/store/api/siteSettingsApi';
 
 export const AdminHeader = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const user = useSelector((state: RootState) => state.auth.user);
   const { data: settings } = useGetPublicSettingsQuery({});
-
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate('/login');
-  };
 
   return (
     <header className="h-20 border-b border-admin-header-border bg-admin-header shadow-sm flex items-center justify-between px-6">
@@ -60,14 +48,6 @@ export const AdminHeader = () => {
             Back to Store
           </Button>
         </Link>
-        <div className="flex items-center gap-2 text-sm">
-          <User className="h-4 w-4 text-admin-header-foreground" />
-          <span className="text-admin-header-foreground font-medium">{user?.name}</span>
-        </div>
-        <Button variant="ghost" size="sm" onClick={handleLogout} className="text-admin-header-foreground hover:bg-admin-header-foreground/10">
-          <LogOut className="h-4 w-4 mr-2" />
-          Logout
-        </Button>
       </div>
     </header>
   );
