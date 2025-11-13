@@ -9,8 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { toast } from 'sonner';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RootState } from '@/store';
+import { Phone, ShieldCheck } from 'lucide-react';
 
 const CustomerAuth = () => {
   const navigate = useNavigate();
@@ -23,7 +23,6 @@ const CustomerAuth = () => {
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
-  const [mode, setMode] = useState<'register' | 'login'>('login');
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -57,169 +56,126 @@ const CustomerAuth = () => {
     }
 
     try {
-      const mutation = mode === 'register' ? registerCustomer : loginCustomer;
-      const result = await mutation({ phone, otp }).unwrap();
+      // Try login first
+      let result;
+      try {
+        result = await loginCustomer({ phone, otp }).unwrap();
+        toast.success('Welcome back!');
+      } catch (loginError: any) {
+        // If login fails, try registration
+        if (loginError?.data?.message?.includes('not found') || loginError?.status === 404) {
+          result = await registerCustomer({ phone, otp }).unwrap();
+          toast.success('Account created successfully!');
+        } else {
+          throw loginError;
+        }
+      }
       
       dispatch(setCredentials({
         user: result.customer,
         token: result.token,
       }));
       
-      toast.success(result.message);
-      
-      // If registering, go to profile completion, otherwise go home
-      if (mode === 'register') {
-        navigate('/customer/profile');
-      } else {
-        navigate('/');
-      }
+      navigate('/');
     } catch (error: any) {
       toast.error(error?.data?.message || error?.data?.errors?.otp?.[0] || 'Authentication failed');
     }
   };
 
-  const handleTabChange = (value: string) => {
-    setMode(value as 'register' | 'login');
-    setOtpSent(false);
-    setOtp('');
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl">Customer Authentication</CardTitle>
-          <CardDescription>Login or register using your phone number</CardDescription>
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-background via-background to-muted/20">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="text-center space-y-4 pb-8">
+          <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <Phone className="w-8 h-8 text-primary" />
+          </div>
+          <div>
+            <CardTitle className="text-3xl font-bold">Welcome</CardTitle>
+            <CardDescription className="text-base mt-2">
+              Enter your phone number to continue
+            </CardDescription>
+          </div>
         </CardHeader>
-        <Tabs value={mode} onValueChange={handleTabChange}>
-          <TabsList className="grid w-full grid-cols-2 mb-4 mx-6">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="register">Register</TabsTrigger>
-          </TabsList>
-          
-          <form onSubmit={handleSubmit}>
-            <TabsContent value="login">
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone-login">Phone Number</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="phone-login"
-                      type="tel"
-                      placeholder="+1234567890"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      disabled={otpSent}
-                    />
-                    <Button 
-                      type="button" 
-                      onClick={handleSendOtp} 
-                      disabled={isSendingOtp || otpSent}
-                    >
-                      {otpSent ? 'Sent' : 'Send OTP'}
-                    </Button>
-                  </div>
-                </div>
-                
-                {otpSent && (
-                  <div className="space-y-2">
-                    <Label htmlFor="otp-login">Enter OTP</Label>
-                    <InputOTP
-                      maxLength={6}
-                      value={otp}
-                      onChange={setOtp}
-                    >
-                      <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                        <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
-                      </InputOTPGroup>
-                    </InputOTP>
-                    <p className="text-xs text-muted-foreground">
-                      OTP expires in 10 minutes. Testing OTP: 654321
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </TabsContent>
-
-            <TabsContent value="register">
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone-register">Phone Number</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="phone-register"
-                      type="tel"
-                      placeholder="+1234567890"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      disabled={otpSent}
-                    />
-                    <Button 
-                      type="button" 
-                      onClick={handleSendOtp} 
-                      disabled={isSendingOtp || otpSent}
-                    >
-                      {otpSent ? 'Sent' : 'Send OTP'}
-                    </Button>
-                  </div>
-                </div>
-                
-                {otpSent && (
-                  <div className="space-y-2">
-                    <Label htmlFor="otp-register">Enter OTP</Label>
-                    <InputOTP
-                      maxLength={6}
-                      value={otp}
-                      onChange={setOtp}
-                    >
-                      <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                        <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
-                      </InputOTPGroup>
-                    </InputOTP>
-                    <p className="text-xs text-muted-foreground">
-                      OTP expires in 10 minutes. Testing OTP: 654321
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </TabsContent>
+        
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-base">Phone Number</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+1234567890"
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  disabled={otpSent}
+                  className="text-base h-12"
+                />
+                <Button 
+                  type="button" 
+                  onClick={handleSendOtp} 
+                  disabled={isSendingOtp || otpSent}
+                  className="h-12 px-6"
+                >
+                  {isSendingOtp ? 'Sending...' : otpSent ? 'Sent' : 'Send OTP'}
+                </Button>
+              </div>
+              {!otpSent && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-2">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  We'll send you a verification code
+                </p>
+              )}
+            </div>
             
-            <CardFooter className="flex flex-col gap-4">
-              {otpSent && (
+            {otpSent && (
+              <div className="space-y-3 animate-in fade-in-50 duration-300">
+                <Label htmlFor="otp" className="text-base">Enter Verification Code</Label>
+                <div className="flex justify-center">
+                  <InputOTP
+                    maxLength={6}
+                    value={otp}
+                    onChange={setOtp}
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} className="w-12 h-12 text-lg" />
+                      <InputOTPSlot index={1} className="w-12 h-12 text-lg" />
+                      <InputOTPSlot index={2} className="w-12 h-12 text-lg" />
+                      <InputOTPSlot index={3} className="w-12 h-12 text-lg" />
+                      <InputOTPSlot index={4} className="w-12 h-12 text-lg" />
+                      <InputOTPSlot index={5} className="w-12 h-12 text-lg" />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  Code expires in 10 minutes • Testing OTP: 654321
+                </p>
                 <Button 
                   type="submit" 
-                  className="w-full" 
-                  disabled={isRegistering || isLoggingIn}
+                  className="w-full h-12 text-base" 
+                  disabled={isRegistering || isLoggingIn || otp.length !== 6}
                 >
-                  {mode === 'register' 
-                    ? (isRegistering ? 'Registering...' : 'Register') 
-                    : (isLoggingIn ? 'Logging in...' : 'Login')
-                  }
+                  {isRegistering || isLoggingIn ? 'Verifying...' : 'Continue'}
                 </Button>
-              )}
-              <Button 
-                type="button" 
-                variant="link" 
-                onClick={() => navigate('/login')}
-                className="text-sm"
-              >
-                Admin/Staff Login
-              </Button>
-            </CardFooter>
-          </form>
-        </Tabs>
+              </div>
+            )}
+          </CardContent>
+          
+          <CardFooter className="flex flex-col gap-2 border-t pt-6">
+            <p className="text-xs text-center text-muted-foreground">
+              By continuing, you agree to our Terms of Service
+            </p>
+            <Button 
+              type="button" 
+              variant="ghost" 
+              onClick={() => navigate('/login')}
+              className="text-sm w-full"
+            >
+              Admin/Staff Login →
+            </Button>
+          </CardFooter>
+        </form>
       </Card>
     </div>
   );
