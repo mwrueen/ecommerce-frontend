@@ -94,45 +94,44 @@ export default function Settings() {
       const hasFiles = headerLogoFile || footerLogoFile || faviconFile;
       
       if (hasFiles) {
-        // Use FormData for file uploads
         const formData = new FormData();
-        
-        // Append all form fields with proper serialization
-        Object.keys(cleanData).forEach(key => {
-          const value = cleanData[key];
-          
-          if (value !== null && value !== undefined) {
-            if (typeof value === 'object') {
-              // Serialize objects/arrays as JSON strings
-              formData.append(key, JSON.stringify(value));
-            } else if (typeof value === 'boolean') {
-              // Send booleans as 1/0 for Laravel
-              formData.append(key, value ? '1' : '0');
-            } else {
-              // Send other values as strings
-              formData.append(key, String(value));
-            }
+
+        // Helper to append nested objects/arrays using bracket notation for Laravel
+        const append = (fd: FormData, key: string, val: any) => {
+          if (val === null || val === undefined) return;
+          if (val instanceof File || val instanceof Blob) {
+            fd.append(key, val as Blob);
+          } else if (Array.isArray(val)) {
+            // Append array items with []/index notation
+            val.forEach((item, index) => {
+              append(fd, `${key}[${index}]`, item);
+            });
+          } else if (typeof val === 'object') {
+            Object.keys(val).forEach((childKey) => {
+              append(fd, `${key}[${childKey}]`, val[childKey]);
+            });
+          } else if (typeof val === 'boolean') {
+            fd.append(key, val ? '1' : '0');
+          } else {
+            fd.append(key, String(val));
           }
+        };
+
+        // Append all fields; skip string logo fields if files are selected to avoid duplicates
+        Object.keys(cleanData).forEach((key) => {
+          if ((key === 'header_logo' && headerLogoFile) || (key === 'footer_logo' && footerLogoFile) || (key === 'favicon' && faviconFile)) {
+            return;
+          }
+          append(formData, key, cleanData[key]);
         });
-        
-        // Ensure required fields are present even if not in cleanData
-        if (!formData.has('social_links')) {
-          formData.append('social_links', JSON.stringify({}));
-        }
-        if (!formData.has('business_hours')) {
-          formData.append('business_hours', JSON.stringify({}));
-        }
-        if (!formData.has('additional_settings')) {
-          formData.append('additional_settings', JSON.stringify({}));
-        }
-        
+
         // Append files
         if (headerLogoFile) formData.append('header_logo', headerLogoFile);
         if (footerLogoFile) formData.append('footer_logo', footerLogoFile);
         if (faviconFile) formData.append('favicon', faviconFile);
-        
+
         console.log('FormData entries:', Array.from(formData.entries()));
-        
+
         await updateSettings(formData).unwrap();
       } else {
         // Use JSON for regular updates
