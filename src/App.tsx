@@ -33,6 +33,7 @@ import OrdersManagement from "./pages/admin/OrdersManagement";
 import OrderDetails from "./pages/admin/OrderDetails";
 import CustomersManagement from "./pages/admin/CustomersManagement";
 import CustomerDetails from "./pages/admin/CustomerDetails";
+import Notifications from "./pages/admin/Notifications";
 
 const App = () => (
   <Provider store={store}>
@@ -77,6 +78,7 @@ const App = () => (
             <Route path="orders/:id" element={<OrderDetails />} />
             <Route path="customers" element={<CustomersManagement />} />
             <Route path="customers/:id" element={<CustomerDetails />} />
+            <Route path="notifications" element={<Notifications />} />
             <Route path="users" element={<UsersManagement />} />
             <Route path="settings" element={<Settings />} />
           </Route>

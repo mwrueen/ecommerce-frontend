@@ -15,3 +15,4 @@ export * from '@/store/api/customersApi';
 export * from '@/store/api/inventoryApi';
 export * from '@/store/api/purchaseApi';
 export * from '@/store/api/adminPurchasesApi';
+export * from '@/store/api/notificationsApi';
