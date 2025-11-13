@@ -28,6 +28,7 @@ import CategoryForm from "./pages/admin/CategoryForm";
 import UsersManagement from "./pages/admin/UsersManagement";
 import Settings from "./pages/admin/Settings";
 import InventoryManagement from "./pages/admin/InventoryManagement";
+import PurchaseManagement from "./pages/admin/PurchaseManagement";
 import OrdersManagement from "./pages/admin/OrdersManagement";
 import OrderDetails from "./pages/admin/OrderDetails";
 
@@ -69,6 +70,7 @@ const App = () => (
             <Route path="categories/create" element={<CategoryForm />} />
             <Route path="categories/:id/edit" element={<CategoryForm />} />
             <Route path="inventory" element={<InventoryManagement />} />
+            <Route path="purchases" element={<PurchaseManagement />} />
             <Route path="orders" element={<OrdersManagement />} />
             <Route path="orders/:id" element={<OrderDetails />} />
             <Route path="users" element={<UsersManagement />} />
