@@ -31,6 +31,8 @@ import InventoryManagement from "./pages/admin/InventoryManagement";
 import PurchaseManagement from "./pages/admin/PurchaseManagement";
 import OrdersManagement from "./pages/admin/OrdersManagement";
 import OrderDetails from "./pages/admin/OrderDetails";
+import CustomersManagement from "./pages/admin/CustomersManagement";
+import CustomerDetails from "./pages/admin/CustomerDetails";
 
 const App = () => (
   <Provider store={store}>
@@ -73,6 +75,8 @@ const App = () => (
             <Route path="purchases" element={<PurchaseManagement />} />
             <Route path="orders" element={<OrdersManagement />} />
             <Route path="orders/:id" element={<OrderDetails />} />
+            <Route path="customers" element={<CustomersManagement />} />
+            <Route path="customers/:id" element={<CustomerDetails />} />
             <Route path="users" element={<UsersManagement />} />
             <Route path="settings" element={<Settings />} />
           </Route>

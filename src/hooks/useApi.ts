@@ -11,6 +11,7 @@ export * from '@/store/api/categoriesApi';
 export * from '@/store/api/ordersApi';
 export * from '@/store/api/siteSettingsApi';
 export * from '@/store/api/usersApi';
+export * from '@/store/api/customersApi';
 export * from '@/store/api/inventoryApi';
 export * from '@/store/api/purchaseApi';
 export * from '@/store/api/adminPurchasesApi';
