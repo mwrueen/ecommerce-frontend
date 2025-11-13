@@ -13,3 +13,4 @@ export * from '@/store/api/siteSettingsApi';
 export * from '@/store/api/usersApi';
 export * from '@/store/api/inventoryApi';
 export * from '@/store/api/purchaseApi';
+export * from '@/store/api/adminPurchasesApi';
