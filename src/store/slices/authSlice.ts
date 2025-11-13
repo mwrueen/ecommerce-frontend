@@ -17,8 +17,17 @@ interface AuthState {
   isAuthenticated: boolean;
 }
 
+const getStoredUser = (): User | null => {
+  try {
+    const stored = localStorage.getItem('user');
+    return stored && stored !== 'undefined' ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+};
+
 const initialState: AuthState = {
-  user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null,
+  user: getStoredUser(),
   token: localStorage.getItem('token') || null,
   isAuthenticated: !!localStorage.getItem('token'),
 };
