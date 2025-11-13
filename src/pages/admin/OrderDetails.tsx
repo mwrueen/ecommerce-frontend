@@ -30,6 +30,18 @@ const OrderDetails = () => {
 
   const order = orderData?.order;
 
+  // Define valid status transitions based on current status
+  const getValidNextStatuses = (currentStatus: string): string[] => {
+    const transitions: Record<string, string[]> = {
+      pending: ['processing', 'cancelled'],
+      processing: ['shipped', 'cancelled'],
+      shipped: ['delivered', 'cancelled'],
+      delivered: [], // Final state
+      cancelled: [], // Final state
+    };
+    return transitions[currentStatus] || [];
+  };
+
   const handleStatusUpdate = async (newStatus: string) => {
     try {
       await updateStatus({ id: parseInt(id!), status: newStatus }).unwrap();
@@ -166,7 +178,7 @@ const OrderDetails = () => {
                   {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                 </Badge>
               </div>
-              {order.status !== 'delivered' && order.status !== 'cancelled' && (
+              {getValidNextStatuses(order.status).length > 0 && (
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Update Status</label>
                   <Select
@@ -175,17 +187,27 @@ const OrderDetails = () => {
                     disabled={isUpdating}
                   >
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Select new status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="processing">Processing</SelectItem>
-                      <SelectItem value="shipped">Shipped</SelectItem>
-                      <SelectItem value="delivered">Delivered</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                      {getValidNextStatuses(order.status).map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {order.status === 'pending' && 'Can transition to: Processing or Cancelled'}
+                    {order.status === 'processing' && 'Can transition to: Shipped or Cancelled'}
+                    {order.status === 'shipped' && 'Can transition to: Delivered or Cancelled'}
+                  </p>
                 </div>
+              )}
+              {(order.status === 'delivered' || order.status === 'cancelled') && (
+                <p className="text-sm text-muted-foreground">
+                  This order is in a final state and cannot be modified.
+                </p>
               )}
             </CardContent>
           </Card>
