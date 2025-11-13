@@ -69,6 +69,33 @@ export default function Settings() {
 
   const onSubmit = async (data: any) => {
     try {
+      // Prepare clean data with proper types
+      const cleanData = { ...data };
+      
+      // Convert boolean fields
+      const booleanFields = ['store_enabled', 'tax_inclusive', 'email_notifications', 'sms_notifications'];
+      booleanFields.forEach(field => {
+        if (field in cleanData) {
+          cleanData[field] = Boolean(cleanData[field]);
+        }
+      });
+      
+      // Parse JSON string fields back to arrays/objects if they were stringified
+      const arrayFields = ['social_links', 'business_hours', 'additional_settings'];
+      arrayFields.forEach(field => {
+        if (field in cleanData && typeof cleanData[field] === 'string') {
+          try {
+            cleanData[field] = JSON.parse(cleanData[field]);
+          } catch {
+            // If parsing fails, ensure it's at least an empty array
+            cleanData[field] = [];
+          }
+        } else if (!(field in cleanData)) {
+          // Ensure array fields exist as empty arrays
+          cleanData[field] = [];
+        }
+      });
+      
       // Check if we have files to upload
       const hasFiles = headerLogoFile || footerLogoFile || faviconFile;
       
@@ -76,15 +103,15 @@ export default function Settings() {
         // Use FormData for file uploads
         const formData = new FormData();
         
-        // Append all form fields
-        Object.keys(data).forEach(key => {
-          if (data[key] !== null && data[key] !== undefined) {
-            if (typeof data[key] === 'object' && !Array.isArray(data[key])) {
-              formData.append(key, JSON.stringify(data[key]));
-            } else if (Array.isArray(data[key])) {
-              formData.append(key, JSON.stringify(data[key]));
+        // Append all form fields with proper serialization
+        Object.keys(cleanData).forEach(key => {
+          if (cleanData[key] !== null && cleanData[key] !== undefined) {
+            if (typeof cleanData[key] === 'object') {
+              formData.append(key, JSON.stringify(cleanData[key]));
+            } else if (typeof cleanData[key] === 'boolean') {
+              formData.append(key, cleanData[key] ? '1' : '0');
             } else {
-              formData.append(key, data[key]);
+              formData.append(key, String(cleanData[key]));
             }
           }
         });
@@ -96,8 +123,8 @@ export default function Settings() {
         
         await updateSettings(formData).unwrap();
       } else {
-        // Use JSON for regular updates
-        await updateSettings(data).unwrap();
+        // Use JSON for regular updates with clean data
+        await updateSettings(cleanData).unwrap();
       }
       
       toast.success('Settings updated successfully');
