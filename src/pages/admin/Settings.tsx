@@ -69,10 +69,18 @@ export default function Settings() {
 
   const onSubmit = async (data: any) => {
     try {
-      // Prepare clean data with proper types
-      const cleanData = { ...data };
+      console.log('Form data before processing:', data);
       
-      // Convert boolean fields
+      // Prepare clean data with proper types and ensure all required fields exist
+      const cleanData: any = {
+        ...data,
+        // Ensure required object fields always exist (Laravel expects these as arrays/objects)
+        social_links: data.social_links || {},
+        business_hours: data.business_hours || {},
+        additional_settings: data.additional_settings || {},
+      };
+      
+      // Convert boolean fields - ensure they're actual booleans
       const booleanFields = ['store_enabled', 'tax_inclusive', 'email_notifications', 'sms_notifications'];
       booleanFields.forEach(field => {
         if (field in cleanData) {
@@ -80,21 +88,7 @@ export default function Settings() {
         }
       });
       
-      // Parse JSON string fields back to arrays/objects if they were stringified
-      const arrayFields = ['social_links', 'business_hours', 'additional_settings'];
-      arrayFields.forEach(field => {
-        if (field in cleanData && typeof cleanData[field] === 'string') {
-          try {
-            cleanData[field] = JSON.parse(cleanData[field]);
-          } catch {
-            // If parsing fails, ensure it's at least an empty array
-            cleanData[field] = [];
-          }
-        } else if (!(field in cleanData)) {
-          // Ensure array fields exist as empty arrays
-          cleanData[field] = [];
-        }
-      });
+      console.log('Clean data after processing:', cleanData);
       
       // Check if we have files to upload
       const hasFiles = headerLogoFile || footerLogoFile || faviconFile;
@@ -105,25 +99,44 @@ export default function Settings() {
         
         // Append all form fields with proper serialization
         Object.keys(cleanData).forEach(key => {
-          if (cleanData[key] !== null && cleanData[key] !== undefined) {
-            if (typeof cleanData[key] === 'object') {
-              formData.append(key, JSON.stringify(cleanData[key]));
-            } else if (typeof cleanData[key] === 'boolean') {
-              formData.append(key, cleanData[key] ? '1' : '0');
+          const value = cleanData[key];
+          
+          if (value !== null && value !== undefined) {
+            if (typeof value === 'object') {
+              // Serialize objects/arrays as JSON strings
+              formData.append(key, JSON.stringify(value));
+            } else if (typeof value === 'boolean') {
+              // Send booleans as 1/0 for Laravel
+              formData.append(key, value ? '1' : '0');
             } else {
-              formData.append(key, String(cleanData[key]));
+              // Send other values as strings
+              formData.append(key, String(value));
             }
           }
         });
+        
+        // Ensure required fields are present even if not in cleanData
+        if (!formData.has('social_links')) {
+          formData.append('social_links', JSON.stringify({}));
+        }
+        if (!formData.has('business_hours')) {
+          formData.append('business_hours', JSON.stringify({}));
+        }
+        if (!formData.has('additional_settings')) {
+          formData.append('additional_settings', JSON.stringify({}));
+        }
         
         // Append files
         if (headerLogoFile) formData.append('header_logo', headerLogoFile);
         if (footerLogoFile) formData.append('footer_logo', footerLogoFile);
         if (faviconFile) formData.append('favicon', faviconFile);
         
+        console.log('FormData entries:', Array.from(formData.entries()));
+        
         await updateSettings(formData).unwrap();
       } else {
-        // Use JSON for regular updates with clean data
+        // Use JSON for regular updates
+        console.log('Sending JSON payload:', cleanData);
         await updateSettings(cleanData).unwrap();
       }
       
@@ -134,6 +147,8 @@ export default function Settings() {
       setFooterLogoFile(null);
       setFaviconFile(null);
     } catch (error: any) {
+      console.error('Settings update error:', error);
+      console.error('Error details:', error?.data);
       toast.error(error?.data?.message || 'Failed to update settings');
     }
   };
