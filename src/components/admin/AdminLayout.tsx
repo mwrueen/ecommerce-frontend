@@ -1,7 +1,8 @@
 import { Outlet } from 'react-router-dom';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
+import { AdminFooter } from './AdminFooter';
 
 export const AdminLayout = () => {
   return (
@@ -13,6 +14,7 @@ export const AdminLayout = () => {
           <main className="flex-1 p-6">
             <Outlet />
           </main>
+          <AdminFooter />
         </div>
       </div>
     </SidebarProvider>

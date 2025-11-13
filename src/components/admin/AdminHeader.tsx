@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Home, Mail, MapPin } from 'lucide-react';
+import { Home, Bell, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGetPublicSettingsQuery } from '@/store/api/siteSettingsApi';
 
@@ -27,21 +27,15 @@ export const AdminHeader = () => {
           )}
         </div>
       </div>
-      <div className="flex items-center gap-6">
-        <div className="hidden md:flex items-center gap-4 text-sm border-r border-admin-header-border pr-6">
-          {settings?.data?.email && (
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-admin-header-foreground/70" />
-              <span className="text-admin-header-foreground/80">{settings.data.email}</span>
-            </div>
-          )}
-          {settings?.data?.address && (
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-admin-header-foreground/70" />
-              <span className="text-admin-header-foreground/80">{settings.data.address}</span>
-            </div>
-          )}
-        </div>
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" className="text-admin-header-foreground hover:bg-admin-header-foreground/10 relative">
+          <Bell className="h-5 w-5" />
+          <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+        </Button>
+        <Button variant="ghost" size="icon" className="text-admin-header-foreground hover:bg-admin-header-foreground/10 relative">
+          <MessageSquare className="h-5 w-5" />
+          <span className="absolute top-1 right-1 h-2 w-2 bg-blue-500 rounded-full"></span>
+        </Button>
         <Link to="/">
           <Button variant="ghost" size="sm" className="text-admin-header-foreground hover:bg-admin-header-foreground/10">
             <Home className="h-4 w-4 mr-2" />
