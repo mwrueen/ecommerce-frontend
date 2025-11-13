@@ -143,10 +143,10 @@ export function AdminSidebar() {
                 </div>
               </div>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={handleLogout}
-                className="w-full justify-start text-sidebar-foreground border-sidebar-border hover:bg-sidebar-accent"
+                className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
