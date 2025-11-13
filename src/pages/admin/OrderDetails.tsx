@@ -257,16 +257,19 @@ const OrderDetails = () => {
                   <div className="space-y-3">
                     <label className="text-sm font-medium text-foreground">Change Status</label>
                     <Select
-                      value={order.status}
                       onValueChange={handleStatusUpdate}
                       disabled={isUpdating}
                     >
-                      <SelectTrigger className="bg-background">
+                      <SelectTrigger className="bg-background border-input">
                         <SelectValue placeholder="Select new status" />
                       </SelectTrigger>
-                      <SelectContent className="bg-popover z-50">
+                      <SelectContent className="bg-popover border border-border z-[100]">
                         {getValidNextStatuses(order.status).map((status) => (
-                          <SelectItem key={status} value={status}>
+                          <SelectItem 
+                            key={status} 
+                            value={status}
+                            className="cursor-pointer"
+                          >
                             {status.charAt(0).toUpperCase() + status.slice(1)}
                           </SelectItem>
                         ))}
