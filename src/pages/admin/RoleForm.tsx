@@ -19,7 +19,7 @@ import {
   useGetRoleQuery,
   useCreateRoleMutation,
   useUpdateRoleMutation,
-  useGetPermissionsQuery,
+  useGetGroupedPermissionsQuery,
   useAssignPermissionsToRoleMutation,
   useGetRolePermissionsQuery,
 } from '@/hooks/useApi';
@@ -40,7 +40,7 @@ const RoleForm = () => {
   const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
 
   const { data: roleData } = useGetRoleQuery(id, { skip: !isEditing });
-  const { data: permissionsData } = useGetPermissionsQuery({});
+  const { data: groupedPermissionsData } = useGetGroupedPermissionsQuery(undefined);
   const { data: rolePermissionsData } = useGetRolePermissionsQuery(id, { skip: !isEditing });
 
   const [createRole, { isLoading: isCreating }] = useCreateRoleMutation();
@@ -131,15 +131,8 @@ const RoleForm = () => {
     }
   };
 
-  // Group permissions by group
-  const groupedPermissions = permissionsData?.data?.reduce((acc: any, permission: any) => {
-    const group = permission.group || 'other';
-    if (!acc[group]) {
-      acc[group] = [];
-    }
-    acc[group].push(permission);
-    return acc;
-  }, {}) || {};
+  // Group permissions by group - using API grouped endpoint
+  const groupedPermissions = groupedPermissionsData?.data || {};
 
   const isLoading = isCreating || isUpdating;
 

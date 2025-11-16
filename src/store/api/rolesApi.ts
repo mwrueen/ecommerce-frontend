@@ -40,13 +40,35 @@ export const rolesApi = apiSlice.injectEndpoints({
       query: ({ roleId, permissionIds }) => ({
         url: `/roles/${roleId}/permissions`,
         method: 'POST',
-        body: { permission_ids: permissionIds },
+        body: { permissions: permissionIds },
+      }),
+      invalidatesTags: (result, error, { roleId }) => [{ type: 'Role', id: roleId }, 'Role'],
+    }),
+    removePermissionsFromRole: builder.mutation({
+      query: ({ roleId, permissionIds }) => ({
+        url: `/roles/${roleId}/permissions`,
+        method: 'DELETE',
+        body: { permissions: permissionIds },
       }),
       invalidatesTags: (result, error, { roleId }) => [{ type: 'Role', id: roleId }, 'Role'],
     }),
     getRolePermissions: builder.query({
       query: (roleId) => `/roles/${roleId}/permissions`,
       providesTags: (result, error, roleId) => [{ type: 'Role', id: roleId }],
+    }),
+    getRoleUsers: builder.query({
+      query: ({ roleId, ...params }) => {
+        const queryString = new URLSearchParams(params).toString();
+        return `/roles/${roleId}/users${queryString ? `?${queryString}` : ''}`;
+      },
+      providesTags: (result, error, { roleId }) => [{ type: 'Role', id: roleId }],
+    }),
+    toggleRoleActive: builder.mutation({
+      query: (roleId) => ({
+        url: `/roles/${roleId}/toggle-active`,
+        method: 'POST',
+      }),
+      invalidatesTags: (result, error, roleId) => [{ type: 'Role', id: roleId }, 'Role'],
     }),
   }),
 });
@@ -58,5 +80,8 @@ export const {
   useUpdateRoleMutation,
   useDeleteRoleMutation,
   useAssignPermissionsToRoleMutation,
+  useRemovePermissionsFromRoleMutation,
   useGetRolePermissionsQuery,
+  useGetRoleUsersQuery,
+  useToggleRoleActiveMutation,
 } = rolesApi;
