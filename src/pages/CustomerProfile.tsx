@@ -65,6 +65,7 @@ const CustomerProfile = () => {
 
     try {
       const formDataToSend = new FormData();
+      formDataToSend.append('_method', 'PUT');
       formDataToSend.append('name', formData.name);
       if (formData.email) {
         formDataToSend.append('email', formData.email);
