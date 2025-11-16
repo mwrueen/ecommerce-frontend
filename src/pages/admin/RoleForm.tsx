@@ -20,7 +20,6 @@ import {
   useCreateRoleMutation,
   useUpdateRoleMutation,
   useGetGroupedPermissionsQuery,
-  useAssignPermissionsToRoleMutation,
   useGetRolePermissionsQuery,
 } from '@/hooks/useApi';
 import { useToast } from '@/hooks/use-toast';
@@ -45,7 +44,6 @@ const RoleForm = () => {
 
   const [createRole, { isLoading: isCreating }] = useCreateRoleMutation();
   const [updateRole, { isLoading: isUpdating }] = useUpdateRoleMutation();
-  const [assignPermissions] = useAssignPermissionsToRoleMutation();
 
   useEffect(() => {
     if (roleData?.data) {
@@ -100,21 +98,15 @@ const RoleForm = () => {
     e.preventDefault();
 
     try {
-      let roleId = id;
+      const payload = {
+        ...formData,
+        permissions: selectedPermissions,
+      };
 
       if (isEditing) {
-        await updateRole({ id, ...formData }).unwrap();
+        await updateRole({ id, ...payload }).unwrap();
       } else {
-        const result = await createRole(formData).unwrap();
-        roleId = result.data.id;
-      }
-
-      // Assign permissions
-      if (roleId) {
-        await assignPermissions({
-          roleId,
-          permissionIds: selectedPermissions,
-        }).unwrap();
+        await createRole(payload).unwrap();
       }
 
       toast({
