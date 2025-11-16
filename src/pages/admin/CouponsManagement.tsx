@@ -31,8 +31,8 @@ import { toast } from '@/hooks/use-toast';
 export default function CouponsManagement() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [typeFilter, setTypeFilter] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedCouponId, setSelectedCouponId] = useState<number | null>(null);
 
@@ -40,8 +40,8 @@ export default function CouponsManagement() {
     page,
     per_page: 10,
     search,
-    type: typeFilter || undefined,
-    is_active: statusFilter ? statusFilter === 'active' : undefined,
+    type: typeFilter !== 'all' ? typeFilter : undefined,
+    is_active: statusFilter !== 'all' ? statusFilter === 'active' : undefined,
   });
 
   const [deleteCoupon] = useDeleteCouponMutation();
@@ -124,7 +124,7 @@ export default function CouponsManagement() {
                 <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="percentage">Percentage</SelectItem>
                 <SelectItem value="fixed">Fixed</SelectItem>
               </SelectContent>
@@ -134,7 +134,7 @@ export default function CouponsManagement() {
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
