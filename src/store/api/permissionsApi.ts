@@ -13,9 +13,43 @@ export const permissionsApi = apiSlice.injectEndpoints({
       query: (id) => `/permissions/${id}`,
       providesTags: (result, error, id) => [{ type: 'Permission', id }],
     }),
+    getGroupedPermissions: builder.query({
+      query: () => '/permissions/grouped',
+      providesTags: ['Permission'],
+    }),
     getPermissionGroups: builder.query({
       query: () => '/permissions/groups',
       providesTags: ['Permission'],
+    }),
+    createPermission: builder.mutation({
+      query: (data) => ({
+        url: '/permissions',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Permission'],
+    }),
+    updatePermission: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/permissions/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: 'Permission', id }, 'Permission'],
+    }),
+    deletePermission: builder.mutation({
+      query: (id) => ({
+        url: `/permissions/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Permission'],
+    }),
+    togglePermissionActive: builder.mutation({
+      query: (id) => ({
+        url: `/permissions/${id}/toggle-active`,
+        method: 'POST',
+      }),
+      invalidatesTags: (result, error, id) => [{ type: 'Permission', id }, 'Permission'],
     }),
     assignPermissionsToUser: builder.mutation({
       query: ({ userId, permissionIds }) => ({
@@ -35,7 +69,12 @@ export const permissionsApi = apiSlice.injectEndpoints({
 export const {
   useGetPermissionsQuery,
   useGetPermissionQuery,
+  useGetGroupedPermissionsQuery,
   useGetPermissionGroupsQuery,
+  useCreatePermissionMutation,
+  useUpdatePermissionMutation,
+  useDeletePermissionMutation,
+  useTogglePermissionActiveMutation,
   useAssignPermissionsToUserMutation,
   useGetUserPermissionsQuery,
 } = permissionsApi;
