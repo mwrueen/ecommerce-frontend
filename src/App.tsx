@@ -39,6 +39,9 @@ import OrderDetails from "./pages/admin/OrderDetails";
 import CustomersManagement from "./pages/admin/CustomersManagement";
 import CustomerDetails from "./pages/admin/CustomerDetails";
 import Notifications from "./pages/admin/Notifications";
+import CouponsManagement from "./pages/admin/CouponsManagement";
+import CouponForm from "./pages/admin/CouponForm";
+import CouponDetails from "./pages/admin/CouponDetails";
 
 const App = () => (
   <Provider store={store}>
@@ -91,6 +94,10 @@ const App = () => (
             <Route path="roles/create" element={<RoleForm />} />
             <Route path="roles/:id/edit" element={<RoleForm />} />
             <Route path="permissions" element={<PermissionsManagement />} />
+            <Route path="coupons" element={<CouponsManagement />} />
+            <Route path="coupons/new" element={<CouponForm />} />
+            <Route path="coupons/:id" element={<CouponDetails />} />
+            <Route path="coupons/:id/edit" element={<CouponForm />} />
             <Route path="settings" element={<Settings />} />
           </Route>
 

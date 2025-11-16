@@ -18,3 +18,4 @@ export * from '@/store/api/adminPurchasesApi';
 export * from '@/store/api/notificationsApi';
 export * from '@/store/api/rolesApi';
 export * from '@/store/api/permissionsApi';
+export * from '@/store/api/couponsApi';
