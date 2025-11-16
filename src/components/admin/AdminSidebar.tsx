@@ -111,7 +111,7 @@ export function AdminSidebar() {
         <div className="mt-auto border-t border-sidebar-border">
           {collapsed ? (
             <div className="p-3 flex flex-col items-center gap-2">
-              <Avatar className="h-8 w-8">
+              <Avatar className="h-8 w-8 cursor-pointer" onClick={() => navigate('/admin/profile')}>
                 <AvatarImage src={user?.profile_picture_url || ''} />
                 <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-xs">
                   {userInitials}
@@ -144,6 +144,15 @@ export function AdminSidebar() {
                   </p>
                 </div>
               </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/admin/profile')}
+                className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              >
+                <UserCog className="h-4 w-4 mr-2" />
+                My Profile
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
