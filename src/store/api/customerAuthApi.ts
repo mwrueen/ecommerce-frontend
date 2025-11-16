@@ -30,7 +30,7 @@ export const customerAuthApi = apiSlice.injectEndpoints({
     updateCustomerProfile: builder.mutation({
       query: (data) => ({
         url: '/customer/profile',
-        method: 'PUT',
+        method: 'POST',
         body: data,
       }),
       invalidatesTags: ['Customer'],
