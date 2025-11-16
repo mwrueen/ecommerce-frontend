@@ -45,6 +45,14 @@ export const usersApi = apiSlice.injectEndpoints({
     getUserStats: builder.query({
       query: () => '/users-stats',
     }),
+    assignRoleToUser: builder.mutation({
+      query: ({ userId, roleId }) => ({
+        url: `/users/${userId}/role`,
+        method: 'POST',
+        body: { role_id: roleId },
+      }),
+      invalidatesTags: (result, error, { userId }) => [{ type: 'User', id: userId }, 'User'],
+    }),
   }),
 });
 
@@ -56,4 +64,5 @@ export const {
   useBanUserMutation,
   useUnbanUserMutation,
   useGetUserStatsQuery,
+  useAssignRoleToUserMutation,
 } = usersApi;

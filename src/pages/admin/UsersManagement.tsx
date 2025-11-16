@@ -1,19 +1,52 @@
 import { useState } from 'react';
-import { useGetUsersQuery, useBanUserMutation, useUnbanUserMutation } from '@/hooks/useApi';
+import { 
+  useGetUsersQuery, 
+  useBanUserMutation, 
+  useUnbanUserMutation,
+  useGetRolesQuery,
+  useAssignRoleToUserMutation 
+} from '@/hooks/useApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Ban, CheckCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Search, Ban, CheckCircle, UserCog, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function UsersManagement() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedRoleId, setSelectedRoleId] = useState<string>('');
   const { toast } = useToast();
   
   const { data, isLoading } = useGetUsersQuery({ page, per_page: 10, search });
+  const { data: rolesData } = useGetRolesQuery({});
   const [banUser] = useBanUserMutation();
   const [unbanUser] = useUnbanUserMutation();
+  const [assignRole, { isLoading: isAssigning }] = useAssignRoleToUserMutation();
 
   const handleBanToggle = async (id: number, status: string, name: string) => {
     try {
@@ -29,12 +62,45 @@ export default function UsersManagement() {
     }
   };
 
+  const handleOpenRoleDialog = (user: any) => {
+    setSelectedUser(user);
+    setSelectedRoleId(user.role_id?.toString() || '');
+  };
+
+  const handleAssignRole = async () => {
+    if (!selectedUser || !selectedRoleId) return;
+
+    try {
+      await assignRole({
+        userId: selectedUser.id,
+        roleId: parseInt(selectedRoleId),
+      }).unwrap();
+      toast({
+        title: 'Success',
+        description: 'Role assigned successfully',
+      });
+      setSelectedUser(null);
+      setSelectedRoleId('');
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error?.data?.message || 'Failed to assign role',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const roles = rolesData?.data || [];
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold text-foreground">Users</h2>
-          <p className="text-muted-foreground">Manage user accounts</p>
+          <h2 className="text-3xl font-bold text-foreground flex items-center gap-2">
+            <UserCog className="h-8 w-8 text-primary" />
+            Users Management
+          </h2>
+          <p className="text-muted-foreground">Manage admin user accounts and roles</p>
         </div>
       </div>
 
@@ -50,13 +116,14 @@ export default function UsersManagement() {
         </div>
       </div>
 
-      <div className="border rounded-lg">
+      <div className="bg-card rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>System Role</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Orders</TableHead>
               <TableHead>Total Spent</TableHead>
@@ -66,7 +133,11 @@ export default function UsersManagement() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center">Loading...</TableCell>
+                <TableCell colSpan={8} className="text-center py-8">Loading...</TableCell>
+              </TableRow>
+            ) : data?.data?.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center py-8">No users found</TableCell>
               </TableRow>
             ) : (
               data?.data?.map((user: any) => (
@@ -74,36 +145,52 @@ export default function UsersManagement() {
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded text-xs ${user.role === 'admin' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
-                      {user.role}
-                    </span>
+                    {user.role_model ? (
+                      <Badge variant="secondary">
+                        {user.role_model.name}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">No Role</Badge>
+                    )}
                   </TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      user.status === 'active' 
-                        ? 'bg-primary/10 text-primary' 
-                        : user.status === 'banned'
-                        ? 'bg-destructive/10 text-destructive'
-                        : 'bg-muted text-muted-foreground'
-                    }`}>
-                      {user.status}
-                    </span>
+                    <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                      {user.role}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {user.status === 'active' ? (
+                      <Badge variant="default">Active</Badge>
+                    ) : user.status === 'banned' ? (
+                      <Badge variant="destructive">Banned</Badge>
+                    ) : (
+                      <Badge variant="secondary">{user.status}</Badge>
+                    )}
                   </TableCell>
                   <TableCell>{user.orders_count || 0}</TableCell>
-                  <TableCell>${user.total_spent || 0}</TableCell>
+                  <TableCell>${user.total_spent || '0.00'}</TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleBanToggle(user.id, user.status, user.name)}
-                      disabled={user.role === 'admin'}
-                    >
-                      {user.status === 'banned' ? (
-                        <CheckCircle className="h-4 w-4" />
-                      ) : (
-                        <Ban className="h-4 w-4" />
-                      )}
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleOpenRoleDialog(user)}
+                      >
+                        <Shield className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleBanToggle(user.id, user.status, user.name)}
+                        disabled={user.role === 'admin'}
+                      >
+                        {user.status === 'banned' ? (
+                          <CheckCircle className="h-4 w-4 text-primary" />
+                        ) : (
+                          <Ban className="h-4 w-4 text-destructive" />
+                        )}
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -112,27 +199,77 @@ export default function UsersManagement() {
         </Table>
       </div>
 
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground">
-          Showing {data?.meta?.from || 0} to {data?.meta?.to || 0} of {data?.meta?.total || 0} users
-        </p>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setPage(p => p + 1)}
-            disabled={page >= (data?.meta?.last_page || 1)}
-          >
-            Next
-          </Button>
+      {data?.pagination && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Showing {(data.pagination.current_page - 1) * data.pagination.per_page + 1} to{' '}
+            {Math.min(data.pagination.current_page * data.pagination.per_page, data.pagination.total)} of{' '}
+            {data.pagination.total} users
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setPage(page - 1)}
+              disabled={data.pagination.current_page === 1}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setPage(page + 1)}
+              disabled={data.pagination.current_page === data.pagination.last_page}
+            >
+              Next
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
+
+      <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign Role</DialogTitle>
+            <DialogDescription>
+              Assign a role to {selectedUser?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Select Role</label>
+              <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  {roles.map((role: any) => (
+                    <SelectItem key={role.id} value={role.id.toString()}>
+                      <div className="flex items-center gap-2">
+                        <span>{role.name}</span>
+                        {role.is_active && (
+                          <Badge variant="secondary" className="text-xs">Active</Badge>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedUser?.role_model && (
+              <div className="text-sm text-muted-foreground">
+                Current role: <strong>{selectedUser.role_model.name}</strong>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSelectedUser(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAssignRole} disabled={isAssigning || !selectedRoleId}>
+              {isAssigning ? 'Assigning...' : 'Assign Role'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
