@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { useUpdateCustomerProfileMutation } from '@/store/api/customerAuthApi';
+import { useGetCustomerProfileQuery, useUpdateCustomerProfileMutation } from '@/store/api/customerAuthApi';
 import { setCredentials } from '@/store/slices/authSlice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,33 +9,39 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { RootState } from '@/store';
+import { Loader2 } from 'lucide-react';
 
 const CustomerProfile = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user, token } = useSelector((state: RootState) => state.auth);
-  const [updateProfile, { isLoading }] = useUpdateCustomerProfileMutation();
+  const { token } = useSelector((state: RootState) => state.auth);
+  const { data: profileData, isLoading: isLoadingProfile, error: profileError } = useGetCustomerProfileQuery(undefined);
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateCustomerProfileMutation();
   
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
     address: '',
   });
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
 
   useEffect(() => {
-    if (user) {
+    if (profileData?.data) {
+      const profile = profileData.data;
       setFormData({
-        name: user.name || '',
-        address: user.address || '',
+        name: profile.name || '',
+        email: profile.email || '',
+        address: profile.address || '',
       });
-      if (user.profile_picture_url) {
-        setPreviewUrl(user.profile_picture_url);
+      if (profile.profile_picture_url) {
+        setPreviewUrl(profile.profile_picture_url);
       }
     }
-  }, [user]);
+  }, [profileData]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -60,6 +66,9 @@ const CustomerProfile = () => {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
+      if (formData.email) {
+        formDataToSend.append('email', formData.email);
+      }
       formDataToSend.append('address', formData.address);
       
       if (profilePicture) {
@@ -69,14 +78,22 @@ const CustomerProfile = () => {
       const result = await updateProfile(formDataToSend).unwrap();
       
       dispatch(setCredentials({
-        user: result.customer,
+        user: result.data,
         token: token!,
       }));
       
       toast.success(result.message);
-      navigate('/');
     } catch (error: any) {
-      toast.error(error?.data?.message || 'Failed to update profile');
+      const errorMessage = error?.data?.message || 'Failed to update profile';
+      const errors = error?.data?.errors;
+      
+      if (errors) {
+        Object.keys(errors).forEach((key) => {
+          errors[key].forEach((msg: string) => toast.error(msg));
+        });
+      } else {
+        toast.error(errorMessage);
+      }
     }
   };
 
@@ -84,15 +101,55 @@ const CustomerProfile = () => {
     if (formData.name) {
       return formData.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     }
-    return user?.phone?.slice(-2) || '??';
+    return profileData?.data?.phone?.slice(-2) || '??';
   };
+
+  if (isLoadingProfile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center py-12 px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-64 mt-2" />
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex flex-col items-center gap-4">
+              <Skeleton className="h-24 w-24 rounded-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-24 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (profileError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center py-12 px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl text-destructive">Error Loading Profile</CardTitle>
+            <CardDescription>Failed to load your profile information</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => navigate('/')} className="w-full">
+              Go Back to Home
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Complete Your Profile</CardTitle>
-          <CardDescription>Add your details to personalize your account</CardDescription>
+          <CardTitle className="text-2xl">My Profile</CardTitle>
+          <CardDescription>Update your profile information</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
@@ -135,14 +192,28 @@ const CustomerProfile = () => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="john@example.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
               <Input
                 id="phone"
                 type="tel"
-                value={user?.phone || ''}
+                value={profileData?.data?.phone || ''}
                 disabled
                 className="bg-muted"
               />
+              <p className="text-xs text-muted-foreground">
+                Phone number cannot be changed
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -158,19 +229,24 @@ const CustomerProfile = () => {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Updating...' : 'Save Profile'}
+            <Button type="submit" className="w-full" disabled={isUpdating}>
+              {isUpdating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                'Save Profile'
+              )}
             </Button>
-            {user?.name && (
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => navigate('/')}
-                className="w-full"
-              >
-                Skip for Now
-              </Button>
-            )}
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => navigate('/')}
+              className="w-full"
+            >
+              Back to Home
+            </Button>
           </CardFooter>
         </form>
       </Card>

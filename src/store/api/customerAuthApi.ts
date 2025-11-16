@@ -23,6 +23,10 @@ export const customerAuthApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    getCustomerProfile: builder.query({
+      query: () => '/customer/profile',
+      providesTags: ['Customer'],
+    }),
     updateCustomerProfile: builder.mutation({
       query: (data) => ({
         url: '/customer/profile',
@@ -44,6 +48,7 @@ export const {
   useSendOtpMutation,
   useRegisterCustomerMutation,
   useLoginCustomerMutation,
+  useGetCustomerProfileQuery,
   useUpdateCustomerProfileMutation,
   useLogoutCustomerMutation,
 } = customerAuthApi;
