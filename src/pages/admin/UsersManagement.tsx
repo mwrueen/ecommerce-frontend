@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   useGetUsersQuery, 
   useBanUserMutation, 
@@ -32,10 +33,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Ban, CheckCircle, UserCog, Shield } from 'lucide-react';
+import { Search, Ban, CheckCircle, UserCog, Shield, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function UsersManagement() {
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
@@ -125,8 +127,6 @@ export default function UsersManagement() {
               <TableHead>Role</TableHead>
               <TableHead>System Role</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Orders</TableHead>
-              <TableHead>Total Spent</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -167,14 +167,21 @@ export default function UsersManagement() {
                       <Badge variant="secondary">{user.status}</Badge>
                     )}
                   </TableCell>
-                  <TableCell>{user.orders_count || 0}</TableCell>
-                  <TableCell>${user.total_spent || '0.00'}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
+                        onClick={() => navigate(`/admin/users/${user.id}`)}
+                        title="View Details"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleOpenRoleDialog(user)}
+                        title="Assign Role"
                       >
                         <Shield className="h-4 w-4" />
                       </Button>
@@ -183,6 +190,7 @@ export default function UsersManagement() {
                         size="sm"
                         onClick={() => handleBanToggle(user.id, user.status, user.name)}
                         disabled={user.role === 'admin'}
+                        title={user.status === 'banned' ? 'Unban User' : 'Ban User'}
                       >
                         {user.status === 'banned' ? (
                           <CheckCircle className="h-4 w-4 text-primary" />

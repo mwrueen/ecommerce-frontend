@@ -26,6 +26,8 @@ import ProductDetails from "./pages/admin/ProductDetails";
 import CategoriesManagement from "./pages/admin/CategoriesManagement";
 import CategoryForm from "./pages/admin/CategoryForm";
 import UsersManagement from "./pages/admin/UsersManagement";
+import UserDetails from "./pages/admin/UserDetails";
+import Profile from "./pages/admin/Profile";
 import RolesManagement from "./pages/admin/RolesManagement";
 import RoleForm from "./pages/admin/RoleForm";
 import PermissionsManagement from "./pages/admin/PermissionsManagement";
@@ -83,6 +85,8 @@ const App = () => (
             <Route path="customers/:id" element={<CustomerDetails />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="users" element={<UsersManagement />} />
+            <Route path="users/:id" element={<UserDetails />} />
+            <Route path="profile" element={<Profile />} />
             <Route path="roles" element={<RolesManagement />} />
             <Route path="roles/create" element={<RoleForm />} />
             <Route path="roles/:id/edit" element={<RoleForm />} />
