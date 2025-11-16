@@ -47,11 +47,46 @@ export const usersApi = apiSlice.injectEndpoints({
     }),
     assignRoleToUser: builder.mutation({
       query: ({ userId, roleId }) => ({
-        url: `/users/${userId}/role`,
+        url: `/users/${userId}/assign-role`,
         method: 'POST',
         body: { role_id: roleId },
       }),
       invalidatesTags: (result, error, { userId }) => [{ type: 'User', id: userId }, 'User'],
+    }),
+    changeUserRole: builder.mutation({
+      query: ({ userId, roleId }) => ({
+        url: `/users/${userId}/change-role`,
+        method: 'PUT',
+        body: { role_id: roleId },
+      }),
+      invalidatesTags: (result, error, { userId }) => [{ type: 'User', id: userId }, 'User'],
+    }),
+    updateUserPassword: builder.mutation({
+      query: ({ userId, password, password_confirmation }) => ({
+        url: `/users/${userId}/password`,
+        method: 'PUT',
+        body: { password, password_confirmation },
+      }),
+      invalidatesTags: (result, error, { userId }) => [{ type: 'User', id: userId }],
+    }),
+    getProfile: builder.query({
+      query: () => '/profile',
+      providesTags: ['User'],
+    }),
+    updateProfile: builder.mutation({
+      query: (data) => ({
+        url: '/profile',
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['User'],
+    }),
+    updateProfilePassword: builder.mutation({
+      query: ({ current_password, password, password_confirmation }) => ({
+        url: '/profile/password',
+        method: 'PUT',
+        body: { current_password, password, password_confirmation },
+      }),
     }),
   }),
 });
@@ -65,4 +100,9 @@ export const {
   useUnbanUserMutation,
   useGetUserStatsQuery,
   useAssignRoleToUserMutation,
+  useChangeUserRoleMutation,
+  useUpdateUserPasswordMutation,
+  useGetProfileQuery,
+  useUpdateProfileMutation,
+  useUpdateProfilePasswordMutation,
 } = usersApi;
