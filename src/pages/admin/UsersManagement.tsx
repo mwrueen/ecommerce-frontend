@@ -145,9 +145,9 @@ export default function UsersManagement() {
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
-                    {user.role_model ? (
+                    {user.role_id ? (
                       <Badge variant="secondary">
-                        {user.role_model.name}
+                        {roles.find((r: any) => r.id === user.role_id)?.name || 'Unknown Role'}
                       </Badge>
                     ) : (
                       <Badge variant="outline">No Role</Badge>
