@@ -11,11 +11,11 @@ import { Clock, Tag, TrendingUp } from 'lucide-react';
 
 export default function Deals() {
   const navigate = useNavigate();
-  const [type, setType] = useState<string>('');
+  const [type, setType] = useState<string>('all');
   const [page, setPage] = useState(1);
   
   const { data, isLoading } = useGetDealsQuery({
-    type: type || undefined,
+    type: type === 'all' ? undefined : type,
     per_page: 12,
     page,
   });
@@ -48,7 +48,7 @@ export default function Deals() {
               <SelectValue placeholder="All Deals" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Deals</SelectItem>
+              <SelectItem value="all">All Deals</SelectItem>
               <SelectItem value="flash">Flash Deals</SelectItem>
               <SelectItem value="product">Product Deals</SelectItem>
               <SelectItem value="category">Category Deals</SelectItem>
