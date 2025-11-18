@@ -19,3 +19,4 @@ export * from '@/store/api/notificationsApi';
 export * from '@/store/api/rolesApi';
 export * from '@/store/api/permissionsApi';
 export * from '@/store/api/couponsApi';
+export * from '@/store/api/searchApi';

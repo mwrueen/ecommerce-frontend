@@ -15,6 +15,7 @@ import CustomerAuth from "./pages/CustomerAuth";
 import CustomerProfile from "./pages/CustomerProfile";
 import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
+import SearchResults from "./pages/SearchResults";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
 import { AdminLayout } from "./components/admin/AdminLayout";
@@ -54,6 +55,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/products" element={<Products />} />
             <Route path="/products/:identifier" element={<ProductDetail />} />
+            <Route path="/search" element={<SearchResults />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/login" element={<Login />} />
