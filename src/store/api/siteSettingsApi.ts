@@ -25,11 +25,20 @@ export const siteSettingsApi = apiSlice.injectEndpoints({
       },
       invalidatesTags: ['SiteSettings'],
     }),
+    removeSliderItems: builder.mutation({
+      query: (data) => ({
+        url: '/site-settings/slider-items',
+        method: 'DELETE',
+        body: data,
+      }),
+      invalidatesTags: ['SiteSettings'],
+    }),
   }),
 });
 
 export const { 
   useGetPublicSettingsQuery, 
   useGetSiteSettingsQuery,
-  useUpdateSiteSettingsMutation 
+  useUpdateSiteSettingsMutation,
+  useRemoveSliderItemsMutation
 } = siteSettingsApi;
