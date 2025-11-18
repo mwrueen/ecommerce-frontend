@@ -123,6 +123,10 @@ const App = () => (
             <Route path="coupons/:id/edit" element={<CouponForm />} />
             <Route path="contacts" element={<ContactsManagement />} />
             <Route path="contacts/:id" element={<ContactDetails />} />
+            <Route path="deals" element={<DealsManagement />} />
+            <Route path="deals/create" element={<DealForm />} />
+            <Route path="deals/:id" element={<DealDetails />} />
+            <Route path="deals/:id/edit" element={<DealForm />} />
             <Route path="settings" element={<Settings />} />
           </Route>
 
