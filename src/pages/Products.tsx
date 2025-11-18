@@ -4,7 +4,8 @@ import { useGetCategoriesQuery } from '@/store/api/categoriesApi';
 import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ChevronLeft, ChevronRight, Filter, DollarSign } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 const Products = () => {
@@ -12,11 +13,15 @@ const Products = () => {
   const [categoryId, setCategoryId] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<string>('created_at');
   const [sortOrder, setSortOrder] = useState<string>('desc');
+  const [minPrice, setMinPrice] = useState<string>('');
+  const [maxPrice, setMaxPrice] = useState<string>('');
   
   const { data, isLoading } = useGetProductsQuery({ 
     page, 
     per_page: 12,
     ...(categoryId && { category_id: categoryId }),
+    ...(minPrice && { min_price: minPrice }),
+    ...(maxPrice && { max_price: maxPrice }),
     sort_by: sortBy,
     sort_order: sortOrder
   });
@@ -29,6 +34,16 @@ const Products = () => {
 
   const handleCategoryClick = (id: number | null) => {
     setCategoryId(id);
+    setPage(1);
+  };
+
+  const handlePriceFilter = () => {
+    setPage(1);
+  };
+
+  const handleClearPrice = () => {
+    setMinPrice('');
+    setMaxPrice('');
     setPage(1);
   };
 
@@ -90,6 +105,52 @@ const Products = () => {
                   </div>
                 </div>
 
+                {/* Price Filter */}
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Price Range
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-muted-foreground mb-1 block">Min Price</label>
+                      <Input
+                        type="number"
+                        placeholder="0.00"
+                        value={minPrice}
+                        onChange={(e) => setMinPrice(e.target.value)}
+                        onBlur={handlePriceFilter}
+                        min="0"
+                        step="0.01"
+                        className="h-9"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground mb-1 block">Max Price</label>
+                      <Input
+                        type="number"
+                        placeholder="9999.99"
+                        value={maxPrice}
+                        onChange={(e) => setMaxPrice(e.target.value)}
+                        onBlur={handlePriceFilter}
+                        min="0"
+                        step="0.01"
+                        className="h-9"
+                      />
+                    </div>
+                    {(minPrice || maxPrice) && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleClearPrice}
+                        className="w-full"
+                      >
+                        Clear Price Filter
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
                 {/* Sort Options */}
                 <div>
                   <h3 className="text-sm font-medium mb-3">Sort By</h3>
@@ -117,12 +178,20 @@ const Products = () => {
 
           {/* Products Grid */}
           <div className="lg:col-span-3">
-            {categoryId && (
-              <div className="mb-4">
-                <Badge variant="secondary" className="gap-2">
-                  {categoriesData?.data?.find((c: any) => c.id === categoryId)?.name}
-                  <button onClick={() => handleCategoryClick(null)} className="ml-1">×</button>
-                </Badge>
+            {(categoryId || minPrice || maxPrice) && (
+              <div className="mb-4 flex flex-wrap gap-2">
+                {categoryId && (
+                  <Badge variant="secondary" className="gap-2">
+                    {categoriesData?.data?.find((c: any) => c.id === categoryId)?.name}
+                    <button onClick={() => handleCategoryClick(null)} className="ml-1">×</button>
+                  </Badge>
+                )}
+                {(minPrice || maxPrice) && (
+                  <Badge variant="secondary" className="gap-2">
+                    Price: ${minPrice || '0'} - ${maxPrice || '∞'}
+                    <button onClick={handleClearPrice} className="ml-1">×</button>
+                  </Badge>
+                )}
               </div>
             )}
 
