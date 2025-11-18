@@ -13,6 +13,13 @@ export const categoriesApi = apiSlice.injectEndpoints({
       query: () => '/categories/featured',
       providesTags: ['Category'],
     }),
+    getCategoriesWithProducts: builder.query({
+      query: (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        return `/categories/with-products${queryString ? `?${queryString}` : ''}`;
+      },
+      providesTags: ['Category'],
+    }),
     getCategory: builder.query({
       query: (identifier) => `/categories/${identifier}`,
       providesTags: (result, error, id) => [{ type: 'Category', id }],
@@ -60,6 +67,7 @@ export const categoriesApi = apiSlice.injectEndpoints({
 export const {
   useGetCategoriesQuery,
   useGetFeaturedCategoriesQuery,
+  useGetCategoriesWithProductsQuery,
   useGetCategoryQuery,
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
