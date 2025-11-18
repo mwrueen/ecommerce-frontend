@@ -48,6 +48,9 @@ import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import ReturnPolicy from "./pages/ReturnPolicy";
 import ShippingPolicy from "./pages/ShippingPolicy";
+import Contact from "./pages/Contact";
+import ContactsManagement from "./pages/admin/ContactsManagement";
+import ContactDetails from "./pages/admin/ContactDetails";
 
 const App = () => (
   <Provider store={store}>
@@ -70,6 +73,7 @@ const App = () => (
             <Route path="/customer/profile" element={<CustomerProfile />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/orders/:id" element={<OrderDetail />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/return-policy" element={<ReturnPolicy />} />
@@ -110,6 +114,8 @@ const App = () => (
             <Route path="coupons/new" element={<CouponForm />} />
             <Route path="coupons/:id" element={<CouponDetails />} />
             <Route path="coupons/:id/edit" element={<CouponForm />} />
+            <Route path="contacts" element={<ContactsManagement />} />
+            <Route path="contacts/:id" element={<ContactDetails />} />
             <Route path="settings" element={<Settings />} />
           </Route>
 
