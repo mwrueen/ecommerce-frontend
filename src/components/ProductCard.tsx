@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '@/store/slices/cartSlice';
 import { toast } from 'sonner';
+import { useGetPublicSettingsQuery } from '@/hooks/useApi';
+import { formatPrice } from '@/lib/currency';
 
 interface ProductCardProps {
   product: any;
@@ -13,6 +15,7 @@ interface ProductCardProps {
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const dispatch = useDispatch();
+  const { data: settings } = useGetPublicSettingsQuery({});
 
   // Get thumbnail or first media image
   const productImage = product.media?.find((m: any) => m.is_thumbnail)?.url || 
@@ -68,7 +71,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
           />
           <div className="mt-2 flex items-center justify-between">
             <span className="text-xl font-bold text-primary">
-              ${parseFloat(product.price).toFixed(2)}
+              {formatPrice(
+                product.price,
+                settings?.data?.currency_symbol,
+                settings?.data?.currency_position,
+                settings?.data?.formatted_currency
+              )}
             </span>
             {product.category && (
               <Badge variant="secondary" className="text-xs">
