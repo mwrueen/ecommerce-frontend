@@ -3,16 +3,59 @@ import { ArrowRight, ShoppingBag, Truck, Shield, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { useGetProductsQuery } from '@/store/api/productsApi';
 import { useGetFeaturedCategoriesQuery } from '@/store/api/categoriesApi';
+import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 import ProductCard from '@/components/ProductCard';
+import Autoplay from 'embla-carousel-autoplay';
 
 const Index = () => {
   const { data: productsData, isLoading: productsLoading } = useGetProductsQuery({ per_page: 8 });
   const { data: categoriesData } = useGetFeaturedCategoriesQuery(undefined);
+  const { data: settingsData } = useGetPublicSettingsQuery({});
+  
+  const sliderImages = settingsData?.data?.slider_images || [];
 
   return (
     <div className="min-h-screen">
+      {/* Slider Section */}
+      {sliderImages.length > 0 && (
+        <section className="w-full bg-secondary/30">
+          <div className="container mx-auto px-4 py-8">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              plugins={[
+                Autoplay({
+                  delay: 4000,
+                  stopOnInteraction: true,
+                }),
+              ]}
+              className="w-full"
+            >
+              <CarouselContent>
+                {sliderImages.map((image: string, index: number) => (
+                  <CarouselItem key={index}>
+                    <div className="relative w-full h-[300px] md:h-[400px] lg:h-[500px]">
+                      <img
+                        src={image}
+                        alt={`Slider ${index + 1}`}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="left-4" />
+              <CarouselNext className="right-4" />
+            </Carousel>
+          </div>
+        </section>
+      )}
+
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-background">
         <div className="container mx-auto px-4 py-20 md:py-32">

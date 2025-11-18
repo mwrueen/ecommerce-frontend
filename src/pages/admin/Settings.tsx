@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { useGetSiteSettingsQuery, useUpdateSiteSettingsMutation } from '@/hooks/useApi';
 import { toast } from 'sonner';
-import { Loader2, Upload, X } from 'lucide-react';
+import { Loader2, Upload, X, ChevronUp, ChevronDown } from 'lucide-react';
 
 export default function Settings() {
   const { data: settingsData, isLoading } = useGetSiteSettingsQuery({});
@@ -24,6 +24,10 @@ export default function Settings() {
   const [headerLogoPreview, setHeaderLogoPreview] = useState<string>('');
   const [footerLogoPreview, setFooterLogoPreview] = useState<string>('');
   const [faviconPreview, setFaviconPreview] = useState<string>('');
+  
+  const [sliderFiles, setSliderFiles] = useState<File[]>([]);
+  const [sliderPreviews, setSliderPreviews] = useState<string[]>([]);
+  const [existingSliders, setExistingSliders] = useState<string[]>([]);
 
   useEffect(() => {
     if (settingsData?.data) {
@@ -31,6 +35,8 @@ export default function Settings() {
       setHeaderLogoPreview(settingsData.data.header_logo || '');
       setFooterLogoPreview(settingsData.data.footer_logo || '');
       setFaviconPreview(settingsData.data.favicon || '');
+      setExistingSliders(settingsData.data.slider_images || []);
+      setSliderPreviews(settingsData.data.slider_images || []);
     }
   }, [settingsData, reset]);
 
@@ -67,6 +73,58 @@ export default function Settings() {
     }
   };
 
+  const handleSliderFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const newPreviews: string[] = [];
+      const newFiles: File[] = [];
+      
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          newPreviews.push(reader.result as string);
+          if (newPreviews.length === files.length) {
+            setSliderPreviews([...sliderPreviews, ...newPreviews]);
+            setSliderFiles([...sliderFiles, ...files]);
+          }
+        };
+        reader.readAsDataURL(file);
+        newFiles.push(file);
+      });
+    }
+  };
+
+  const removeSliderImage = (index: number) => {
+    const newPreviews = sliderPreviews.filter((_, i) => i !== index);
+    const newFiles = sliderFiles.filter((_, i) => i !== index);
+    const newExisting = existingSliders.filter((_, i) => i !== index);
+    
+    setSliderPreviews(newPreviews);
+    setSliderFiles(newFiles);
+    setExistingSliders(newExisting);
+  };
+
+  const moveSliderImage = (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= sliderPreviews.length) return;
+
+    const newPreviews = [...sliderPreviews];
+    const newFiles = [...sliderFiles];
+    const newExisting = [...existingSliders];
+
+    [newPreviews[index], newPreviews[newIndex]] = [newPreviews[newIndex], newPreviews[index]];
+    if (newFiles.length > 0) {
+      [newFiles[index], newFiles[newIndex]] = [newFiles[newIndex], newFiles[index]];
+    }
+    if (newExisting.length > 0) {
+      [newExisting[index], newExisting[newIndex]] = [newExisting[newIndex], newExisting[index]];
+    }
+
+    setSliderPreviews(newPreviews);
+    setSliderFiles(newFiles);
+    setExistingSliders(newExisting);
+  };
+
   const onSubmit = async (data: any) => {
     try {
       console.log('Form data before processing:', data);
@@ -91,7 +149,7 @@ export default function Settings() {
       console.log('Clean data after processing:', cleanData);
       
       // Check if we have files to upload
-      const hasFiles = headerLogoFile || footerLogoFile || faviconFile;
+      const hasFiles = headerLogoFile || footerLogoFile || faviconFile || sliderFiles.length > 0;
       
       if (hasFiles) {
         const formData = new FormData();
@@ -119,7 +177,10 @@ export default function Settings() {
 
         // Append all fields; skip string logo fields if files are selected to avoid duplicates
         Object.keys(cleanData).forEach((key) => {
-          if ((key === 'header_logo' && headerLogoFile) || (key === 'footer_logo' && footerLogoFile) || (key === 'favicon' && faviconFile)) {
+          if ((key === 'header_logo' && headerLogoFile) || 
+              (key === 'footer_logo' && footerLogoFile) || 
+              (key === 'favicon' && faviconFile) ||
+              (key === 'slider_images' && sliderFiles.length > 0)) {
             return;
           }
           append(formData, key, cleanData[key]);
@@ -129,6 +190,19 @@ export default function Settings() {
         if (headerLogoFile) formData.append('header_logo', headerLogoFile);
         if (footerLogoFile) formData.append('footer_logo', footerLogoFile);
         if (faviconFile) formData.append('favicon', faviconFile);
+
+        // Handle slider images
+        if (sliderFiles.length > 0) {
+          sliderFiles.forEach((file) => {
+            formData.append('slider_images[]', file);
+          });
+        } else if (existingSliders.length > 0) {
+          // Send existing slider paths to maintain order
+          existingSliders.forEach((path) => {
+            const extractedPath = path.replace(/^.*\/storage\//, '');
+            formData.append('slider_images[]', extractedPath);
+          });
+        }
 
         console.log('FormData entries:', Array.from(formData.entries()));
 
@@ -145,6 +219,13 @@ export default function Settings() {
       setHeaderLogoFile(null);
       setFooterLogoFile(null);
       setFaviconFile(null);
+      setSliderFiles([]);
+      
+      // Refetch to update existing sliders
+      if (settingsData?.data) {
+        setExistingSliders(settingsData.data.slider_images || []);
+        setSliderPreviews(settingsData.data.slider_images || []);
+      }
     } catch (error: any) {
       console.error('Settings update error:', error);
       console.error('Error details:', error?.data);
@@ -373,6 +454,80 @@ export default function Settings() {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">Max size: 1MB. Formats: ICO, PNG</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="slider_images">Slider Images</Label>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <Input
+                        id="slider_images"
+                        type="file"
+                        multiple
+                        accept="image/jpeg,image/png,image/jpg,image/gif,image/svg+xml"
+                        onChange={handleSliderFilesChange}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById('slider_images')?.click()}
+                      >
+                        <Upload className="mr-2 h-4 w-4" />
+                        Add Slider Images
+                      </Button>
+                    </div>
+                    {sliderPreviews.length > 0 && (
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {sliderPreviews.map((preview, index) => (
+                          <div key={index} className="relative group border rounded-lg p-2">
+                            <img 
+                              src={preview} 
+                              alt={`Slider ${index + 1}`} 
+                              className="w-full h-32 object-cover rounded" 
+                            />
+                            <div className="absolute top-4 right-4 flex gap-1">
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="icon"
+                                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => moveSliderImage(index, 'up')}
+                                disabled={index === 0}
+                              >
+                                <ChevronUp className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="icon"
+                                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => moveSliderImage(index, 'down')}
+                                disabled={index === sliderPreviews.length - 1}
+                              >
+                                <ChevronDown className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => removeSliderImage(index)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <p className="text-xs text-center mt-2 text-muted-foreground">
+                              Image {index + 1}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Upload multiple images for homepage slider. Max size: 2MB per image. Formats: JPEG, PNG, JPG, GIF, SVG
+                  </p>
                 </div>
 
                 <Button type="submit" disabled={isUpdating}>
