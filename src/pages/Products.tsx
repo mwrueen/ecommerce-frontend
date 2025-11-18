@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useGetProductsQuery } from '@/store/api/productsApi';
 import { useGetCategoriesQuery } from '@/store/api/categoriesApi';
 import ProductCard from '@/components/ProductCard';
@@ -20,6 +20,7 @@ const Products = () => {
   // Slider state (0-10000 range)
   const MAX_PRICE = 10000;
   const [priceRange, setPriceRange] = useState<number[]>([0, MAX_PRICE]);
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   
   // Sync slider with inputs
   useEffect(() => {
@@ -50,11 +51,29 @@ const Products = () => {
   };
 
   const handleSliderChange = (values: number[]) => {
+    // Update slider display immediately for smooth UX
     setPriceRange(values);
-    setMinPrice(values[0] > 0 ? values[0].toString() : '');
-    setMaxPrice(values[1] < MAX_PRICE ? values[1].toString() : '');
-    setPage(1);
+    
+    // Debounce the actual price state update (which triggers API call)
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+    
+    debounceTimeout.current = setTimeout(() => {
+      setMinPrice(values[0] > 0 ? values[0].toString() : '');
+      setMaxPrice(values[1] < MAX_PRICE ? values[1].toString() : '');
+      setPage(1);
+    }, 500); // Wait 500ms after user stops dragging
   };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+    };
+  }, []);
 
   const handleMinPriceChange = (value: string) => {
     setMinPrice(value);
