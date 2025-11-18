@@ -16,15 +16,15 @@ import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 export default function DealsManagement() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-  const [type, setType] = useState('');
-  const [isActive, setIsActive] = useState<string>('');
+  const [type, setType] = useState('all');
+  const [isActive, setIsActive] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const { data, isLoading } = useGetAllDealsQuery({
     search: search || undefined,
-    type: type || undefined,
-    is_active: isActive ? isActive === 'true' : undefined,
+    type: type === 'all' ? undefined : type,
+    is_active: isActive === 'all' ? undefined : isActive === 'true',
     per_page: 15,
     page,
   });
@@ -96,7 +96,7 @@ export default function DealsManagement() {
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="product">Product</SelectItem>
                   <SelectItem value="category">Category</SelectItem>
                   <SelectItem value="flash">Flash Sale</SelectItem>
@@ -109,7 +109,7 @@ export default function DealsManagement() {
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="true">Active</SelectItem>
                   <SelectItem value="false">Inactive</SelectItem>
                 </SelectContent>
