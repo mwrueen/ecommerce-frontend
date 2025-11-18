@@ -223,9 +223,10 @@ const OrderDetails = () => {
                 {order.notes && (
                   <div>
                     <div className="text-sm font-medium text-muted-foreground mb-2">Order Notes</div>
-                    <p className="text-sm leading-relaxed bg-muted/50 p-3 rounded-md">
-                      {order.notes}
-                    </p>
+                    <div 
+                      className="text-sm leading-relaxed bg-muted/50 p-3 rounded-md prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: order.notes }}
+                    />
                   </div>
                 )}
               </div>
