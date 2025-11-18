@@ -9,13 +9,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { useGetSiteSettingsQuery, useUpdateSiteSettingsMutation } from '@/hooks/useApi';
+import { useGetSiteSettingsQuery, useUpdateSiteSettingsMutation, useRemoveSliderItemsMutation } from '@/hooks/useApi';
 import { toast } from 'sonner';
 import { Loader2, Upload, X, ChevronUp, ChevronDown } from 'lucide-react';
 
 export default function Settings() {
   const { data: settingsData, isLoading } = useGetSiteSettingsQuery({});
   const [updateSettings, { isLoading: isUpdating }] = useUpdateSiteSettingsMutation();
+  const [removeSliderItems] = useRemoveSliderItemsMutation();
   const { register, handleSubmit, reset, watch, setValue } = useForm();
   
   const [headerLogoFile, setHeaderLogoFile] = useState<File | null>(null);
@@ -112,16 +113,23 @@ export default function Settings() {
     }
   };
 
-  const removeSliderImage = (index: number) => {
-    const newPreviews = sliderPreviews.filter((_, i) => i !== index);
-    const newFiles = sliderFiles.filter((_, i) => i !== index - existingSliders.length);
-    const newExisting = existingSliders.filter((_, i) => i !== index);
-    
-    setSliderPreviews(newPreviews);
-    if (index >= existingSliders.length) {
-      setSliderFiles(newFiles);
+  const removeSliderImage = async (index: number) => {
+    // If it's an existing slider (from server), use the remove API
+    if (index < existingSliders.length) {
+      try {
+        await removeSliderItems({ slider_indices: [index] }).unwrap();
+        toast.success('Slider image removed successfully');
+      } catch (error: any) {
+        toast.error(error?.data?.message || 'Failed to remove slider image');
+        return;
+      }
     } else {
-      setExistingSliders(newExisting);
+      // If it's a new file (not yet uploaded), just remove from local state
+      const newPreviews = sliderPreviews.filter((_, i) => i !== index);
+      const newFiles = sliderFiles.filter((_, i) => i !== index - existingSliders.length);
+      
+      setSliderPreviews(newPreviews);
+      setSliderFiles(newFiles);
     }
   };
 
@@ -257,6 +265,17 @@ export default function Settings() {
         await updateSettings(formData).unwrap();
       } else {
         // Use JSON for regular updates
+        // Include slider_images if only metadata was updated (no new files)
+        if (existingSliders.length > 0) {
+          const sliderData = existingSliders.map(slider => ({
+            image: slider.image.includes('/storage/') ? slider.image.split('/storage/')[1] : slider.image,
+            title: slider.title || '',
+            subtitle: slider.subtitle || '',
+            hyperlink: slider.hyperlink || ''
+          }));
+          cleanData.slider_images = sliderData;
+        }
+        
         console.log('Sending JSON payload:', cleanData);
         await updateSettings(cleanData).unwrap();
       }
