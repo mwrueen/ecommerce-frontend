@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGetProductsQuery } from '@/store/api/productsApi';
 import { useGetCategoriesQuery } from '@/store/api/categoriesApi';
 import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
 import { ChevronLeft, ChevronRight, Filter, DollarSign } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -15,6 +16,17 @@ const Products = () => {
   const [sortOrder, setSortOrder] = useState<string>('desc');
   const [minPrice, setMinPrice] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
+  
+  // Slider state (0-10000 range)
+  const MAX_PRICE = 10000;
+  const [priceRange, setPriceRange] = useState<number[]>([0, MAX_PRICE]);
+  
+  // Sync slider with inputs
+  useEffect(() => {
+    const min = minPrice ? parseFloat(minPrice) : 0;
+    const max = maxPrice ? parseFloat(maxPrice) : MAX_PRICE;
+    setPriceRange([min, max]);
+  }, [minPrice, maxPrice]);
   
   const { data, isLoading } = useGetProductsQuery({ 
     page, 
@@ -37,6 +49,29 @@ const Products = () => {
     setPage(1);
   };
 
+  const handleSliderChange = (values: number[]) => {
+    setPriceRange(values);
+    setMinPrice(values[0] > 0 ? values[0].toString() : '');
+    setMaxPrice(values[1] < MAX_PRICE ? values[1].toString() : '');
+    setPage(1);
+  };
+
+  const handleMinPriceChange = (value: string) => {
+    setMinPrice(value);
+    const numValue = value ? parseFloat(value) : 0;
+    if (!isNaN(numValue)) {
+      setPriceRange([numValue, priceRange[1]]);
+    }
+  };
+
+  const handleMaxPriceChange = (value: string) => {
+    setMaxPrice(value);
+    const numValue = value ? parseFloat(value) : MAX_PRICE;
+    if (!isNaN(numValue)) {
+      setPriceRange([priceRange[0], numValue]);
+    }
+  };
+
   const handlePriceFilter = () => {
     setPage(1);
   };
@@ -44,6 +79,7 @@ const Products = () => {
   const handleClearPrice = () => {
     setMinPrice('');
     setMaxPrice('');
+    setPriceRange([0, MAX_PRICE]);
     setPage(1);
   };
 
@@ -111,33 +147,61 @@ const Products = () => {
                     <DollarSign className="h-4 w-4" />
                     Price Range
                   </h3>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-xs text-muted-foreground mb-1 block">Min Price</label>
-                      <Input
-                        type="number"
-                        placeholder="0.00"
-                        value={minPrice}
-                        onChange={(e) => setMinPrice(e.target.value)}
-                        onBlur={handlePriceFilter}
-                        min="0"
-                        step="0.01"
-                        className="h-9"
+                  <div className="space-y-4">
+                    {/* Price Display */}
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        ${priceRange[0].toFixed(0)}
+                      </span>
+                      <span className="text-muted-foreground">
+                        ${priceRange[1] >= MAX_PRICE ? '∞' : priceRange[1].toFixed(0)}
+                      </span>
+                    </div>
+                    
+                    {/* Slider */}
+                    <div className="px-2">
+                      <Slider
+                        value={priceRange}
+                        onValueChange={handleSliderChange}
+                        min={0}
+                        max={MAX_PRICE}
+                        step={50}
+                        className="w-full"
                       />
                     </div>
-                    <div>
-                      <label className="text-xs text-muted-foreground mb-1 block">Max Price</label>
-                      <Input
-                        type="number"
-                        placeholder="9999.99"
-                        value={maxPrice}
-                        onChange={(e) => setMaxPrice(e.target.value)}
-                        onBlur={handlePriceFilter}
-                        min="0"
-                        step="0.01"
-                        className="h-9"
-                      />
+
+                    {/* Input Fields */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Min</label>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          value={minPrice}
+                          onChange={(e) => handleMinPriceChange(e.target.value)}
+                          onBlur={handlePriceFilter}
+                          min="0"
+                          max={MAX_PRICE}
+                          step="1"
+                          className="h-9"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Max</label>
+                        <Input
+                          type="number"
+                          placeholder={MAX_PRICE.toString()}
+                          value={maxPrice}
+                          onChange={(e) => handleMaxPriceChange(e.target.value)}
+                          onBlur={handlePriceFilter}
+                          min="0"
+                          max={MAX_PRICE}
+                          step="1"
+                          className="h-9"
+                        />
+                      </div>
                     </div>
+
                     {(minPrice || maxPrice) && (
                       <Button
                         variant="outline"
