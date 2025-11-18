@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Package, MapPin, Calendar, User } from 'lucide-react';
 import { format } from 'date-fns';
+import { useGetPublicSettingsQuery } from '@/hooks/useApi';
+import { formatPrice } from '@/lib/currency';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
@@ -22,6 +24,7 @@ const OrderDetail = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const { data: orderData, isLoading } = useGetOrderQuery(id);
+  const { data: settings } = useGetPublicSettingsQuery({});
 
   const order = orderData?.order;
 
@@ -97,11 +100,25 @@ const OrderDetail = () => {
                     <p className="text-sm text-muted-foreground">SKU: {item.product?.sku}</p>
                     <div className="flex items-center gap-4 mt-2">
                       <span className="text-sm">Quantity: {item.quantity}</span>
-                      <span className="text-sm">Price: ${parseFloat(item.price).toFixed(2)}</span>
+                      <span className="text-sm">
+                        Price: {formatPrice(
+                          item.price,
+                          settings?.data?.currency_symbol,
+                          settings?.data?.currency_position,
+                          settings?.data?.formatted_currency
+                        )}
+                      </span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-semibold">${parseFloat(item.total).toFixed(2)}</div>
+                    <div className="font-semibold">
+                      {formatPrice(
+                        item.total,
+                        settings?.data?.currency_symbol,
+                        settings?.data?.currency_position,
+                        settings?.data?.formatted_currency
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -111,7 +128,14 @@ const OrderDetail = () => {
               <div className="space-y-2">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span className="text-primary">${parseFloat(order.total_amount).toFixed(2)}</span>
+                  <span className="text-primary">
+                    {formatPrice(
+                      order.total_amount,
+                      settings?.data?.currency_symbol,
+                      settings?.data?.currency_position,
+                      settings?.data?.formatted_currency
+                    )}
+                  </span>
                 </div>
               </div>
             </CardContent>

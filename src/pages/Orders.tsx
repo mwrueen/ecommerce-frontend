@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Package, ShoppingBag } from 'lucide-react';
 import { format } from 'date-fns';
+import { useGetPublicSettingsQuery } from '@/hooks/useApi';
+import { formatPrice } from '@/lib/currency';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
@@ -23,6 +25,7 @@ const Orders = () => {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<string>('');
+  const { data: settings } = useGetPublicSettingsQuery({});
 
   const { data: ordersData, isLoading } = useGetOrdersQuery({
     page,
@@ -108,7 +111,14 @@ const Orders = () => {
                       </div>
                       <div className="space-y-1 text-sm text-muted-foreground">
                         <p>Ordered on {format(new Date(order.created_at), 'PPP')}</p>
-                        <p>{order.order_items?.length || 0} items • ${parseFloat(order.total_amount).toFixed(2)}</p>
+                        <p>
+                          {order.order_items?.length || 0} items • {formatPrice(
+                            order.total_amount,
+                            settings?.data?.currency_symbol,
+                            settings?.data?.currency_position,
+                            settings?.data?.formatted_currency
+                          )}
+                        </p>
                       </div>
                     </div>
                     <div className="flex flex-col gap-2">

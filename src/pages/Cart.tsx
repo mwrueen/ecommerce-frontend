@@ -6,10 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
+import { useGetPublicSettingsQuery } from '@/hooks/useApi';
+import { formatPrice } from '@/lib/currency';
 
 const Cart = () => {
   const dispatch = useDispatch();
   const { items, total } = useSelector((state: RootState) => state.cart);
+  const { data: settings } = useGetPublicSettingsQuery({});
 
   if (items.length === 0) {
     return (
@@ -58,7 +61,12 @@ const Cart = () => {
                         </h3>
                       </Link>
                       <p className="text-lg font-bold text-primary mt-1">
-                        ${parseFloat(item.price).toFixed(2)}
+                        {formatPrice(
+                          item.price,
+                          settings?.data?.currency_symbol,
+                          settings?.data?.currency_position,
+                          settings?.data?.formatted_currency
+                        )}
                       </p>
 
                       <div className="flex items-center gap-4 mt-4">
@@ -100,7 +108,12 @@ const Cart = () => {
 
                     <div className="text-right">
                       <p className="font-bold">
-                        ${(parseFloat(item.price) * item.quantity).toFixed(2)}
+                        {formatPrice(
+                          parseFloat(item.price) * item.quantity,
+                          settings?.data?.currency_symbol,
+                          settings?.data?.currency_position,
+                          settings?.data?.formatted_currency
+                        )}
                       </p>
                     </div>
                   </div>
@@ -118,7 +131,14 @@ const Cart = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Subtotal</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>
+                      {formatPrice(
+                        total,
+                        settings?.data?.currency_symbol,
+                        settings?.data?.currency_position,
+                        settings?.data?.formatted_currency
+                      )}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Shipping</span>
@@ -126,7 +146,14 @@ const Cart = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Tax</span>
-                    <span>${(total * 0.08).toFixed(2)}</span>
+                    <span>
+                      {formatPrice(
+                        total * 0.08,
+                        settings?.data?.currency_symbol,
+                        settings?.data?.currency_position,
+                        settings?.data?.formatted_currency
+                      )}
+                    </span>
                   </div>
                 </div>
 
@@ -134,7 +161,14 @@ const Cart = () => {
 
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span className="text-primary">${(total * 1.08).toFixed(2)}</span>
+                  <span className="text-primary">
+                    {formatPrice(
+                      total * 1.08,
+                      settings?.data?.currency_symbol,
+                      settings?.data?.currency_position,
+                      settings?.data?.formatted_currency
+                    )}
+                  </span>
                 </div>
 
                 <Link to="/checkout" className="block">
