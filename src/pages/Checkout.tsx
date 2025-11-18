@@ -12,6 +12,8 @@ import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
+import { useGetPublicSettingsQuery } from '@/hooks/useApi';
+import { formatPrice } from '@/lib/currency';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -19,6 +21,7 @@ const Checkout = () => {
   const { items, total } = useSelector((state: RootState) => state.cart);
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [createOrder, { isLoading }] = useCreateOrderMutation();
+  const { data: settings } = useGetPublicSettingsQuery({});
 
   const [formData, setFormData] = useState({
     shipping_address: user?.address || '',
@@ -134,7 +137,14 @@ const Checkout = () => {
                   {items.map((item) => (
                     <div key={item.id} className="flex justify-between text-sm">
                       <span>{item.name} x {item.quantity}</span>
-                      <span>${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
+                      <span>
+                        {formatPrice(
+                          parseFloat(item.price) * item.quantity,
+                          settings?.data?.currency_symbol,
+                          settings?.data?.currency_position,
+                          settings?.data?.formatted_currency
+                        )}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -144,7 +154,14 @@ const Checkout = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Subtotal</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>
+                      {formatPrice(
+                        total,
+                        settings?.data?.currency_symbol,
+                        settings?.data?.currency_position,
+                        settings?.data?.formatted_currency
+                      )}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Shipping</span>
@@ -152,7 +169,14 @@ const Checkout = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Tax (8%)</span>
-                    <span>${(total * 0.08).toFixed(2)}</span>
+                    <span>
+                      {formatPrice(
+                        total * 0.08,
+                        settings?.data?.currency_symbol,
+                        settings?.data?.currency_position,
+                        settings?.data?.formatted_currency
+                      )}
+                    </span>
                   </div>
                 </div>
 
@@ -160,7 +184,14 @@ const Checkout = () => {
 
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span className="text-primary">${(total * 1.08).toFixed(2)}</span>
+                  <span className="text-primary">
+                    {formatPrice(
+                      total * 1.08,
+                      settings?.data?.currency_symbol,
+                      settings?.data?.currency_position,
+                      settings?.data?.formatted_currency
+                    )}
+                  </span>
                 </div>
 
                 <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
