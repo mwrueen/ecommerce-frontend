@@ -1,9 +1,10 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { ShoppingCart, User, Search, Menu, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +22,9 @@ import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { toast } from 'sonner';
 
 const Header = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [searchQuery, setSearchQuery] = useState('');
   const [logoutMutation] = useLogoutMutation();
   const [logoutCustomerMutation] = useLogoutCustomerMutation();
   const { data: settingsData } = useGetPublicSettingsQuery({});
@@ -44,6 +47,14 @@ const Header = () => {
       toast.success('Logged out successfully');
     } catch (error) {
       dispatch(logout());
+    }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
     }
   };
 
@@ -74,14 +85,16 @@ const Header = () => {
         </div>
 
         <div className="hidden md:flex flex-1 max-w-md mx-6">
-          <div className="relative w-full">
+          <form onSubmit={handleSearch} className="relative w-full">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search products..."
               className="w-full pl-10 bg-secondary/50 border-0 focus-visible:ring-primary"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-          </div>
+          </form>
         </div>
 
         <div className="flex items-center gap-2">
