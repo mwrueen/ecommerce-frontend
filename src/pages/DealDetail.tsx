@@ -1,5 +1,4 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import Layout from '@/components/Layout';
 import { useGetDealQuery } from '@/hooks/useApi';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,46 +26,41 @@ export default function DealDetail() {
 
   if (isLoading) {
     return (
-      <Layout>
-        <div className="container mx-auto px-4 py-8">
-          <Skeleton className="h-8 w-32 mb-6" />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <Skeleton className="h-96 w-full" />
-            <div className="space-y-4">
-              <Skeleton className="h-10 w-3/4" />
-              <Skeleton className="h-6 w-1/2" />
-              <Skeleton className="h-32 w-full" />
-            </div>
+      <div className="container mx-auto px-4 py-8">
+        <Skeleton className="h-8 w-32 mb-6" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <Skeleton className="h-96 w-full" />
+          <div className="space-y-4">
+            <Skeleton className="h-10 w-3/4" />
+            <Skeleton className="h-6 w-1/2" />
+            <Skeleton className="h-32 w-full" />
           </div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   if (!deal) {
     return (
-      <Layout>
-        <div className="container mx-auto px-4 py-8 text-center">
-          <Tag className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-bold mb-2">Deal not found</h2>
-          <p className="text-muted-foreground mb-4">This deal may have expired or been removed</p>
-          <Button onClick={() => navigate('/deals')}>Browse All Deals</Button>
-        </div>
-      </Layout>
+      <div className="container mx-auto px-4 py-8 text-center">
+        <Tag className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+        <h2 className="text-2xl font-bold mb-2">Deal not found</h2>
+        <p className="text-muted-foreground mb-4">This deal may have expired or been removed</p>
+        <Button onClick={() => navigate('/deals')}>Browse All Deals</Button>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <Button 
-          variant="ghost" 
-          className="mb-6"
-          onClick={() => navigate('/deals')}
-        >
-          <ChevronLeft className="h-4 w-4 mr-2" />
-          Back to Deals
-        </Button>
+    <div className="container mx-auto px-4 py-8">
+      <Button 
+        variant="ghost" 
+        className="mb-6"
+        onClick={() => navigate('/deals')}
+      >
+        <ChevronLeft className="h-4 w-4 mr-2" />
+        Back to Deals
+      </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {deal.banner_image_url || deal.image_url ? (
@@ -186,10 +180,9 @@ export default function DealDetail() {
             >
               <Package className="h-5 w-5 mr-2" />
               Shop Now
-            </Button>
-          </div>
+          </Button>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 }

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '@/components/Layout';
 import { useGetDealsQuery } from '@/hooks/useApi';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -35,12 +34,11 @@ export default function Deals() {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Deals & Offers</h1>
-          <p className="text-muted-foreground">Save big with our exclusive deals and promotions</p>
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold mb-2">Deals & Offers</h1>
+        <p className="text-muted-foreground">Save big with our exclusive deals and promotions</p>
+      </div>
 
         <div className="mb-6">
           <Select value={type} onValueChange={setType}>
@@ -160,7 +158,6 @@ export default function Deals() {
             )}
           </>
         )}
-      </div>
-    </Layout>
+    </div>
   );
 }
