@@ -44,6 +44,10 @@ import Notifications from "./pages/admin/Notifications";
 import CouponsManagement from "./pages/admin/CouponsManagement";
 import CouponForm from "./pages/admin/CouponForm";
 import CouponDetails from "./pages/admin/CouponDetails";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import ReturnPolicy from "./pages/ReturnPolicy";
+import ShippingPolicy from "./pages/ShippingPolicy";
 
 const App = () => (
   <Provider store={store}>
@@ -66,6 +70,10 @@ const App = () => (
             <Route path="/customer/profile" element={<CustomerProfile />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/orders/:id" element={<OrderDetail />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/return-policy" element={<ReturnPolicy />} />
+            <Route path="/shipping-policy" element={<ShippingPolicy />} />
           </Route>
           
           <Route
