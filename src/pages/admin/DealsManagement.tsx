@@ -72,7 +72,7 @@ export default function DealsManagement() {
           <h1 className="text-3xl font-bold">Deals Management</h1>
           <p className="text-muted-foreground">Manage promotional deals and offers</p>
         </div>
-        <Button onClick={() => navigate('/admin/deals/new')}>
+        <Button onClick={() => navigate('/admin/deals/create')}>
           <Plus className="h-4 w-4 mr-2" />
           Add Deal
         </Button>
