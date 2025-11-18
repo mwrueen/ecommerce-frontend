@@ -26,7 +26,7 @@ export const AdminLayout = () => {
   return (
     <>
       <Helmet>
-        <title>{settings?.meta_title || settings?.title || 'ShopHub'} - Admin</title>
+        <title>{settings?.meta_title || settings?.title || ''} - Admin</title>
       </Helmet>
       <SidebarProvider>
         <div className="min-h-screen flex w-full bg-admin-content">
