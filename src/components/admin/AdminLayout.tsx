@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
@@ -23,17 +24,22 @@ export const AdminLayout = () => {
   }, [settings?.favicon]);
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-admin-content">
-        <AdminSidebar />
-        <div className="flex-1 flex flex-col">
-          <AdminHeader />
-          <main className="flex-1 p-6">
-            <Outlet />
-          </main>
-          <AdminFooter />
+    <>
+      <Helmet>
+        <title>{settings?.meta_title || settings?.title || 'ShopHub'} - Admin</title>
+      </Helmet>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-admin-content">
+          <AdminSidebar />
+          <div className="flex-1 flex flex-col">
+            <AdminHeader />
+            <main className="flex-1 p-6">
+              <Outlet />
+            </main>
+            <AdminFooter />
+          </div>
         </div>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </>
   );
 };
