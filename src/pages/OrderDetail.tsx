@@ -189,7 +189,10 @@ const OrderDetail = () => {
                   <CardTitle>Order Notes</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm">{order.notes}</p>
+                  <div 
+                    className="text-sm prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: order.notes }}
+                  />
                 </CardContent>
               </Card>
             )}
