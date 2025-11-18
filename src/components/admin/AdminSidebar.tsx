@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, FolderTree, Users, Settings, Warehouse, ShoppingCart, ShoppingBag, LogOut, UserCog, Shield, Ticket, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Package, FolderTree, Users, Settings, Warehouse, ShoppingCart, ShoppingBag, LogOut, UserCog, Shield, Ticket, MessageSquare, Tag } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -26,6 +26,7 @@ const menuItems = [
   { title: 'Purchases', url: '/admin/purchases', icon: ShoppingBag },
   { title: 'Orders', url: '/admin/orders', icon: ShoppingCart },
   { title: 'Coupons', url: '/admin/coupons', icon: Ticket },
+  { title: 'Deals', url: '/admin/deals', icon: Tag },
   { title: 'Customers', url: '/admin/customers', icon: UserCog },
   { title: 'Contacts', url: '/admin/contacts', icon: MessageSquare },
   { title: 'Users', url: '/admin/users', icon: Users },
