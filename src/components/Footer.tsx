@@ -22,9 +22,12 @@ const Footer = () => {
               )}
               <span className="text-xl font-bold">{settings?.title || 'ShopHub'}</span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              {settings?.description || 'Your one-stop destination for quality products at the best prices.'}
-            </p>
+            <div 
+              className="text-sm text-muted-foreground prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ 
+                __html: settings?.description || 'Your one-stop destination for quality products at the best prices.' 
+              }}
+            />
             <div className="flex gap-2">
               {socialLinks.facebook && (
                 <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer">

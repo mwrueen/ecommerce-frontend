@@ -137,9 +137,15 @@ const ProductDetail = () => {
 
             <div>
               <h3 className="font-semibold mb-2">Description</h3>
-              <p className="text-muted-foreground">{product.description}</p>
+              <div 
+                className="text-muted-foreground prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: product.description }}
+              />
               {product.long_description && (
-                <p className="text-muted-foreground mt-2">{product.long_description}</p>
+                <div 
+                  className="text-muted-foreground mt-4 prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: product.long_description }}
+                />
               )}
             </div>
 
