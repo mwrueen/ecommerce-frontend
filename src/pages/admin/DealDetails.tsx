@@ -292,6 +292,5 @@ export default function DealDetails() {
           </Card>
         )}
       </div>
-    </div>
   );
 }
