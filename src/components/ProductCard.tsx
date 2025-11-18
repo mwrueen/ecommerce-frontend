@@ -62,9 +62,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <h3 className="font-semibold line-clamp-1 group-hover:text-primary transition-colors">
             {product.name}
           </h3>
-          <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-            {product.description}
-          </p>
+          <div 
+            className="text-sm text-muted-foreground line-clamp-2 mt-1 prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: product.description }}
+          />
           <div className="mt-2 flex items-center justify-between">
             <span className="text-xl font-bold text-primary">
               ${parseFloat(product.price).toFixed(2)}
