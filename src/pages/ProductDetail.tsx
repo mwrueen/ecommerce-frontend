@@ -9,11 +9,14 @@ import { ShoppingCart, Minus, Plus, ArrowLeft, Package, Truck, Shield } from 'lu
 import { useDispatch } from 'react-redux';
 import { addToCart } from '@/store/slices/cartSlice';
 import { toast } from 'sonner';
+import { useGetPublicSettingsQuery } from '@/hooks/useApi';
+import { formatPrice } from '@/lib/currency';
 
 const ProductDetail = () => {
   const { identifier } = useParams();
   const dispatch = useDispatch();
   const { data: product, isLoading } = useGetProductQuery(identifier!);
+  const { data: settings } = useGetPublicSettingsQuery({});
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -122,7 +125,12 @@ const ProductDetail = () => {
 
             <div className="flex items-baseline gap-4">
               <span className="text-4xl font-bold text-primary">
-                ${parseFloat(product.price).toFixed(2)}
+                {formatPrice(
+                  product.price,
+                  settings?.data?.currency_symbol,
+                  settings?.data?.currency_position,
+                  settings?.data?.formatted_currency
+                )}
               </span>
               {product.stock_quantity > 0 ? (
                 <Badge variant="outline" className="text-green-600 border-green-600">
