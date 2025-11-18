@@ -1,10 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { ShoppingCart, User, Search, Menu, LogOut } from 'lucide-react';
+import { ShoppingCart, User, Search, Menu, LogOut, Package, FolderOpen, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,15 +18,18 @@ import { RootState } from '@/store';
 import { logout } from '@/store/slices/authSlice';
 import { useLogoutMutation } from '@/store/api/authApi';
 import { useLogoutCustomerMutation } from '@/store/api/customerAuthApi';
-import { useGetPublicSettingsQuery } from '@/hooks/useApi';
+import { useGetPublicSettingsQuery, useLazySearchQuery } from '@/hooks/useApi';
 import { toast } from 'sonner';
 
 const Header = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
   const [logoutMutation] = useLogoutMutation();
   const [logoutCustomerMutation] = useLogoutCustomerMutation();
+  const [triggerSearch, { data: searchResults, isFetching }] = useLazySearchQuery();
+  const searchRef = useRef<HTMLDivElement>(null);
   const { data: settingsData } = useGetPublicSettingsQuery({});
   const { items } = useSelector((state: RootState) => state.cart);
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -50,13 +53,54 @@ const Header = () => {
     }
   };
 
+  // Debounced search on input change
+  useEffect(() => {
+    if (searchQuery.trim().length > 0) {
+      const timeoutId = setTimeout(() => {
+        triggerSearch({
+          query: searchQuery.trim(),
+          type: 'all',
+          per_page: 5,
+        });
+        setShowDropdown(true);
+      }, 300);
+
+      return () => clearTimeout(timeoutId);
+    } else {
+      setShowDropdown(false);
+    }
+  }, [searchQuery, triggerSearch]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
+      setShowDropdown(false);
     }
   };
+
+  const handleResultClick = (url: string) => {
+    navigate(url);
+    setSearchQuery('');
+    setShowDropdown(false);
+  };
+
+  const products = searchResults?.data?.products?.data || [];
+  const categories = searchResults?.data?.categories?.data || [];
+  const hasResults = products.length > 0 || categories.length > 0;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -84,7 +128,7 @@ const Header = () => {
           </nav>
         </div>
 
-        <div className="hidden md:flex flex-1 max-w-md mx-6">
+        <div className="hidden md:flex flex-1 max-w-md mx-6" ref={searchRef}>
           <form onSubmit={handleSearch} className="relative w-full">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -93,7 +137,100 @@ const Header = () => {
               className="w-full pl-10 bg-secondary/50 border-0 focus-visible:ring-primary"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              autoComplete="off"
             />
+            
+            {/* Search Dropdown */}
+            {showDropdown && searchQuery.trim() && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-background border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+                {isFetching ? (
+                  <div className="p-4 flex items-center justify-center">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    <span className="ml-2 text-sm text-muted-foreground">Searching...</span>
+                  </div>
+                ) : hasResults ? (
+                  <div className="py-2">
+                    {/* Products */}
+                    {products.length > 0 && (
+                      <div>
+                        <div className="px-4 py-2 flex items-center gap-2 text-xs font-semibold text-muted-foreground border-b">
+                          <Package className="h-3 w-3" />
+                          PRODUCTS
+                        </div>
+                        {products.map((product: any) => (
+                          <button
+                            key={product.id}
+                            onClick={() => handleResultClick(`/products/${product.slug}`)}
+                            className="w-full px-4 py-3 flex items-center gap-3 hover:bg-accent transition-colors text-left"
+                          >
+                            {product.media?.[0]?.full_url ? (
+                              <img
+                                src={product.media[0].full_url}
+                                alt={product.name}
+                                className="w-10 h-10 object-cover rounded"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 bg-secondary rounded flex items-center justify-center">
+                                <Package className="h-5 w-5 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm truncate">{product.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {settings?.currency_symbol || '$'}{product.price}
+                              </p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Categories */}
+                    {categories.length > 0 && (
+                      <div className={products.length > 0 ? 'border-t' : ''}>
+                        <div className="px-4 py-2 flex items-center gap-2 text-xs font-semibold text-muted-foreground border-b">
+                          <FolderOpen className="h-3 w-3" />
+                          CATEGORIES
+                        </div>
+                        {categories.map((category: any) => (
+                          <button
+                            key={category.id}
+                            onClick={() => handleResultClick(`/categories/${category.slug}`)}
+                            className="w-full px-4 py-3 flex items-center gap-3 hover:bg-accent transition-colors text-left"
+                          >
+                            <div className="w-10 h-10 bg-secondary rounded flex items-center justify-center">
+                              <FolderOpen className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm truncate">{category.name}</p>
+                              {category.description && (
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {category.description}
+                                </p>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* View All Results */}
+                    <button
+                      onClick={() => handleResultClick(`/search?query=${encodeURIComponent(searchQuery)}`)}
+                      className="w-full px-4 py-3 text-sm text-primary font-medium hover:bg-accent transition-colors border-t"
+                    >
+                      View all results for "{searchQuery}"
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-8 text-center">
+                    <Search className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">No results found</p>
+                    <p className="text-xs text-muted-foreground mt-1">Try different keywords</p>
+                  </div>
+                )}
+              </div>
+            )}
           </form>
         </div>
 
