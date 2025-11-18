@@ -30,8 +30,6 @@ export default function DealDetail() {
       <Layout>
         <div className="container mx-auto px-4 py-8">
           <Skeleton className="h-8 w-32 mb-6" />
-        <div className="container mx-auto px-4 py-8">
-          <Skeleton className="h-8 w-32 mb-6" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <Skeleton className="h-96 w-full" />
             <div className="space-y-4">
@@ -40,8 +38,8 @@ export default function DealDetail() {
               <Skeleton className="h-32 w-full" />
             </div>
           </div>
-          </div>
-        </Layout>
+        </div>
+      </Layout>
     );
   }
 
@@ -50,20 +48,16 @@ export default function DealDetail() {
       <Layout>
         <div className="container mx-auto px-4 py-8 text-center">
           <Tag className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-        <div className="container mx-auto px-4 py-8 text-center">
-          <Tag className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
           <h2 className="text-2xl font-bold mb-2">Deal not found</h2>
           <p className="text-muted-foreground mb-4">This deal may have expired or been removed</p>
           <Button onClick={() => navigate('/deals')}>Browse All Deals</Button>
-          </div>
-        </Layout>
+        </div>
+      </Layout>
     );
   }
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <Button
       <div className="container mx-auto px-4 py-8">
         <Button 
           variant="ghost" 
@@ -195,7 +189,7 @@ export default function DealDetail() {
             </Button>
           </div>
         </div>
-        </div>
-      </Layout>
+      </div>
+    </Layout>
   );
 }

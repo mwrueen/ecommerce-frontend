@@ -5,7 +5,7 @@ import Header from './Header';
 import Footer from './Footer';
 import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 
-const Layout = () => {
+const Layout = ({ children }: { children?: React.ReactNode }) => {
   const { data: settingsData } = useGetPublicSettingsQuery({});
   const settings = settingsData?.data;
 
@@ -60,7 +60,7 @@ const Layout = () => {
       <div className="flex min-h-screen flex-col">
         <Header />
         <main className="flex-1">
-          <Outlet />
+          {children || <Outlet />}
         </main>
         <Footer />
       </div>
