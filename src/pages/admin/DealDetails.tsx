@@ -1,5 +1,4 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useGetDealQuery, useGetDealStatsQuery } from '@/hooks/useApi';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,40 +18,35 @@ export default function DealDetails() {
 
   if (dealLoading) {
     return (
-      <AdminLayout>
-        <div className="space-y-6">
-          <Skeleton className="h-10 w-64" />
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {[...Array(4)].map((_, i) => (
-              <Card key={i}>
-                <CardHeader>
-                  <Skeleton className="h-4 w-24" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-8 w-32" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-4 w-24" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-32" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </AdminLayout>
+      </div>
     );
   }
 
   if (!deal) {
     return (
-      <AdminLayout>
-        <div className="text-center py-12">
-          <h2 className="text-2xl font-bold mb-2">Deal not found</h2>
-          <Button onClick={() => navigate('/admin/deals')}>Back to Deals</Button>
-        </div>
-      </AdminLayout>
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-bold mb-2">Deal not found</h2>
+        <Button onClick={() => navigate('/admin/deals')}>Back to Deals</Button>
+      </div>
     );
   }
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => navigate('/admin/deals')}>
@@ -298,6 +292,6 @@ export default function DealDetails() {
           </Card>
         )}
       </div>
-    </AdminLayout>
+    </div>
   );
 }

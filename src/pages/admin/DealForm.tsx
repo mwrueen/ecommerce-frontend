@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useGetDealQuery, useCreateDealMutation, useUpdateDealMutation, useGetProductsQuery, useGetCategoriesQuery } from '@/hooks/useApi';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -132,17 +131,16 @@ export default function DealForm() {
   };
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/admin/deals')}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">{isEdit ? 'Edit Deal' : 'Create Deal'}</h1>
-            <p className="text-muted-foreground">
-              {isEdit ? 'Update deal information' : 'Add a new promotional deal'}
-            </p>
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/deals')}>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold">{isEdit ? 'Edit Deal' : 'Create Deal'}</h1>
+          <p className="text-muted-foreground">
+            {isEdit ? 'Update deal information' : 'Add a new promotional deal'}
+          </p>
           </div>
         </div>
 
@@ -567,6 +565,5 @@ export default function DealForm() {
           </form>
         </Form>
       </div>
-    </AdminLayout>
   );
 }
