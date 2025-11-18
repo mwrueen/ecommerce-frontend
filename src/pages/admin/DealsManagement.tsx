@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useGetAllDealsQuery, useDeleteDealMutation, useToggleDealActiveMutation, useToggleDealFeaturedMutation } from '@/hooks/useApi';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,15 +15,15 @@ import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 export default function DealsManagement() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-  const [type, setType] = useState('');
-  const [isActive, setIsActive] = useState<string>('');
+  const [type, setType] = useState('all');
+  const [isActive, setIsActive] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const { data, isLoading } = useGetAllDealsQuery({
     search: search || undefined,
-    type: type || undefined,
-    is_active: isActive ? isActive === 'true' : undefined,
+    type: type === 'all' ? undefined : type,
+    is_active: isActive === 'all' ? undefined : isActive === 'true',
     per_page: 15,
     page,
   });
@@ -67,24 +66,23 @@ export default function DealsManagement() {
   };
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Deals Management</h1>
-            <p className="text-muted-foreground">Manage promotional deals and offers</p>
-          </div>
-          <Button onClick={() => navigate('/admin/deals/new')}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Deal
-          </Button>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Deals Management</h1>
+          <p className="text-muted-foreground">Manage promotional deals and offers</p>
         </div>
+        <Button onClick={() => navigate('/admin/deals/create')}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Deal
+        </Button>
+      </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Filters</CardTitle>
-          </CardHeader>
-          <CardContent>
+      <Card>
+        <CardHeader>
+          <CardTitle>Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Input
                 placeholder="Search deals..."
@@ -96,7 +94,7 @@ export default function DealsManagement() {
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="product">Product</SelectItem>
                   <SelectItem value="category">Category</SelectItem>
                   <SelectItem value="flash">Flash Sale</SelectItem>
@@ -109,7 +107,7 @@ export default function DealsManagement() {
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="true">Active</SelectItem>
                   <SelectItem value="false">Inactive</SelectItem>
                 </SelectContent>
@@ -250,7 +248,6 @@ export default function DealsManagement() {
             )}
           </CardContent>
         </Card>
-      </div>
 
       <ConfirmDialog
         open={deleteId !== null}
@@ -259,6 +256,6 @@ export default function DealsManagement() {
         title="Delete Deal"
         description="Are you sure you want to delete this deal? This action cannot be undone."
       />
-    </AdminLayout>
+    </div>
   );
 }
