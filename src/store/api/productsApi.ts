@@ -3,9 +3,20 @@ import { apiSlice } from './apiSlice';
 export const productsApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getProducts: builder.query({
-      query: (params: { page?: number; per_page?: number } = {}) => {
-        const { page = 1, per_page = 12 } = params;
-        return `/products?page=${page}&per_page=${per_page}`;
+      query: (params: { 
+        page?: number; 
+        per_page?: number;
+        category_id?: number;
+        sort_by?: string;
+        sort_order?: string;
+      } = {}) => {
+        const queryString = new URLSearchParams();
+        if (params.page) queryString.append('page', params.page.toString());
+        if (params.per_page) queryString.append('per_page', params.per_page.toString());
+        if (params.category_id) queryString.append('category_id', params.category_id.toString());
+        if (params.sort_by) queryString.append('sort_by', params.sort_by);
+        if (params.sort_order) queryString.append('sort_order', params.sort_order);
+        return `/products?${queryString.toString()}`;
       },
       providesTags: ['Product'],
     }),
