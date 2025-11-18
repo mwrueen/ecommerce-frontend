@@ -26,8 +26,8 @@ export default function Settings() {
   const [faviconPreview, setFaviconPreview] = useState<string>('');
   
   const [sliderFiles, setSliderFiles] = useState<File[]>([]);
-  const [sliderPreviews, setSliderPreviews] = useState<string[]>([]);
-  const [existingSliders, setExistingSliders] = useState<string[]>([]);
+  const [sliderPreviews, setSliderPreviews] = useState<Array<{image: string, title: string, subtitle: string, hyperlink: string}>>([]);
+  const [existingSliders, setExistingSliders] = useState<Array<{image: string, title: string, subtitle: string, hyperlink: string}>>([]);
 
   useEffect(() => {
     if (settingsData?.data) {
@@ -35,8 +35,23 @@ export default function Settings() {
       setHeaderLogoPreview(settingsData.data.header_logo || '');
       setFooterLogoPreview(settingsData.data.footer_logo || '');
       setFaviconPreview(settingsData.data.favicon || '');
-      setExistingSliders(settingsData.data.slider_images || []);
-      setSliderPreviews(settingsData.data.slider_images || []);
+      
+      // Handle slider images - can be array of strings or array of objects
+      const sliders = settingsData.data.slider_images || [];
+      const formattedSliders = sliders.map((slider: any) => {
+        if (typeof slider === 'string') {
+          return { image: slider, title: '', subtitle: '', hyperlink: '' };
+        }
+        return {
+          image: slider.image || '',
+          title: slider.title || '',
+          subtitle: slider.subtitle || '',
+          hyperlink: slider.hyperlink || ''
+        };
+      });
+      
+      setExistingSliders(formattedSliders);
+      setSliderPreviews(formattedSliders);
     }
   }, [settingsData, reset]);
 
@@ -76,53 +91,75 @@ export default function Settings() {
   const handleSliderFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length > 0) {
-      const newPreviews: string[] = [];
-      const newFiles: File[] = [];
+      const newPreviews: Array<{image: string, title: string, subtitle: string, hyperlink: string}> = [];
       
       files.forEach(file => {
         const reader = new FileReader();
         reader.onloadend = () => {
-          newPreviews.push(reader.result as string);
+          newPreviews.push({
+            image: reader.result as string,
+            title: '',
+            subtitle: '',
+            hyperlink: ''
+          });
           if (newPreviews.length === files.length) {
             setSliderPreviews([...sliderPreviews, ...newPreviews]);
             setSliderFiles([...sliderFiles, ...files]);
           }
         };
         reader.readAsDataURL(file);
-        newFiles.push(file);
       });
     }
   };
 
   const removeSliderImage = (index: number) => {
     const newPreviews = sliderPreviews.filter((_, i) => i !== index);
-    const newFiles = sliderFiles.filter((_, i) => i !== index);
+    const newFiles = sliderFiles.filter((_, i) => i !== index - existingSliders.length);
     const newExisting = existingSliders.filter((_, i) => i !== index);
     
     setSliderPreviews(newPreviews);
-    setSliderFiles(newFiles);
-    setExistingSliders(newExisting);
+    if (index >= existingSliders.length) {
+      setSliderFiles(newFiles);
+    } else {
+      setExistingSliders(newExisting);
+    }
   };
 
   const moveSliderImage = (index: number, direction: 'up' | 'down') => {
+    if ((direction === 'up' && index === 0) || (direction === 'down' && index === sliderPreviews.length - 1)) {
+      return;
+    }
+
     const newIndex = direction === 'up' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= sliderPreviews.length) return;
-
     const newPreviews = [...sliderPreviews];
-    const newFiles = [...sliderFiles];
-    const newExisting = [...existingSliders];
-
     [newPreviews[index], newPreviews[newIndex]] = [newPreviews[newIndex], newPreviews[index]];
-    if (newFiles.length > 0) {
-      [newFiles[index], newFiles[newIndex]] = [newFiles[newIndex], newFiles[index]];
-    }
-    if (newExisting.length > 0) {
-      [newExisting[index], newExisting[newIndex]] = [newExisting[newIndex], newExisting[index]];
-    }
-
+    
     setSliderPreviews(newPreviews);
-    setSliderFiles(newFiles);
-    setExistingSliders(newExisting);
+    
+    // Update files and existing accordingly
+    if (index < existingSliders.length && newIndex < existingSliders.length) {
+      const newExisting = [...existingSliders];
+      [newExisting[index], newExisting[newIndex]] = [newExisting[newIndex], newExisting[index]];
+      setExistingSliders(newExisting);
+    } else if (index >= existingSliders.length && newIndex >= existingSliders.length) {
+      const fileIndex = index - existingSliders.length;
+      const fileNewIndex = newIndex - existingSliders.length;
+      const newFiles = [...sliderFiles];
+      [newFiles[fileIndex], newFiles[fileNewIndex]] = [newFiles[fileNewIndex], newFiles[fileIndex]];
+      setSliderFiles(newFiles);
+    }
+  };
+
+  const updateSliderField = (index: number, field: 'title' | 'subtitle' | 'hyperlink', value: string) => {
+    const newPreviews = [...sliderPreviews];
+    newPreviews[index] = { ...newPreviews[index], [field]: value };
+    setSliderPreviews(newPreviews);
+    
+    if (index < existingSliders.length) {
+      const newExisting = [...existingSliders];
+      newExisting[index] = { ...newExisting[index], [field]: value };
+      setExistingSliders(newExisting);
+    }
   };
 
   const onSubmit = async (data: any) => {
@@ -191,17 +228,28 @@ export default function Settings() {
         if (footerLogoFile) formData.append('footer_logo', footerLogoFile);
         if (faviconFile) formData.append('favicon', faviconFile);
 
-        // Handle slider images
+        // Handle slider images with metadata
         if (sliderFiles.length > 0) {
-          sliderFiles.forEach((file) => {
+          // Upload new files
+          sliderFiles.forEach((file, index) => {
             formData.append('slider_images[]', file);
+            const sliderIndex = existingSliders.length + index;
+            formData.append('slider_titles[]', sliderPreviews[sliderIndex]?.title || '');
+            formData.append('slider_subtitles[]', sliderPreviews[sliderIndex]?.subtitle || '');
+            formData.append('slider_hyperlinks[]', sliderPreviews[sliderIndex]?.hyperlink || '');
           });
         } else if (existingSliders.length > 0) {
-          // Send existing slider paths to maintain order
-          existingSliders.forEach((path) => {
-            const extractedPath = path.replace(/^.*\/storage\//, '');
-            formData.append('slider_images[]', extractedPath);
-          });
+          // Update existing sliders (reorder or update metadata)
+          const sliderData = existingSliders.map(slider => ({
+            image: slider.image.includes('/storage/') ? slider.image.split('/storage/')[1] : slider.image,
+            title: slider.title || '',
+            subtitle: slider.subtitle || '',
+            hyperlink: slider.hyperlink || ''
+          }));
+          formData.append('slider_images', JSON.stringify(sliderData));
+        } else {
+          // Empty array to clear all sliders
+          formData.append('slider_images', JSON.stringify([]));
         }
 
         console.log('FormData entries:', Array.from(formData.entries()));
@@ -221,11 +269,8 @@ export default function Settings() {
       setFaviconFile(null);
       setSliderFiles([]);
       
-      // Refetch to update existing sliders
-      if (settingsData?.data) {
-        setExistingSliders(settingsData.data.slider_images || []);
-        setSliderPreviews(settingsData.data.slider_images || []);
-      }
+      // Update existing sliders from response - we need to refetch
+      // The existing sliders will be updated through the useEffect when data changes
     } catch (error: any) {
       console.error('Settings update error:', error);
       console.error('Error details:', error?.data);
@@ -478,49 +523,94 @@ export default function Settings() {
                       </Button>
                     </div>
                     {sliderPreviews.length > 0 && (
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      <div className="space-y-4">
                         {sliderPreviews.map((preview, index) => (
-                          <div key={index} className="relative group border rounded-lg p-2">
-                            <img 
-                              src={preview} 
-                              alt={`Slider ${index + 1}`} 
-                              className="w-full h-32 object-cover rounded" 
-                            />
-                            <div className="absolute top-4 right-4 flex gap-1">
-                              <Button
-                                type="button"
-                                variant="secondary"
-                                size="icon"
-                                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => moveSliderImage(index, 'up')}
-                                disabled={index === 0}
-                              >
-                                <ChevronUp className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="secondary"
-                                size="icon"
-                                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => moveSliderImage(index, 'down')}
-                                disabled={index === sliderPreviews.length - 1}
-                              >
-                                <ChevronDown className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => removeSliderImage(index)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            <p className="text-xs text-center mt-2 text-muted-foreground">
-                              Image {index + 1}
-                            </p>
-                          </div>
+                          <Card key={index} className="relative group">
+                            <CardContent className="p-4">
+                              <div className="flex gap-4">
+                                <div className="relative flex-shrink-0">
+                                  <img
+                                    src={preview.image}
+                                    alt={`Slider ${index + 1}`}
+                                    className="w-32 h-32 object-cover rounded-lg border"
+                                  />
+                                  <div className="absolute top-2 right-2 flex gap-1">
+                                    <Button
+                                      type="button"
+                                      variant="secondary"
+                                      size="icon"
+                                      className="h-7 w-7"
+                                      onClick={() => moveSliderImage(index, 'up')}
+                                      disabled={index === 0}
+                                    >
+                                      <ChevronUp className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="secondary"
+                                      size="icon"
+                                      className="h-7 w-7"
+                                      onClick={() => moveSliderImage(index, 'down')}
+                                      disabled={index === sliderPreviews.length - 1}
+                                    >
+                                      <ChevronDown className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                                
+                                <div className="flex-1 space-y-3">
+                                  <div>
+                                    <Label htmlFor={`slider-title-${index}`} className="text-sm">Title (optional)</Label>
+                                    <Input
+                                      id={`slider-title-${index}`}
+                                      value={preview.title}
+                                      onChange={(e) => updateSliderField(index, 'title', e.target.value)}
+                                      placeholder="Enter slider title"
+                                      maxLength={255}
+                                      className="mt-1"
+                                    />
+                                  </div>
+                                  
+                                  <div>
+                                    <Label htmlFor={`slider-subtitle-${index}`} className="text-sm">Subtitle (optional)</Label>
+                                    <Textarea
+                                      id={`slider-subtitle-${index}`}
+                                      value={preview.subtitle}
+                                      onChange={(e) => updateSliderField(index, 'subtitle', e.target.value)}
+                                      placeholder="Enter slider subtitle"
+                                      maxLength={500}
+                                      rows={2}
+                                      className="mt-1"
+                                    />
+                                  </div>
+                                  
+                                  <div>
+                                    <Label htmlFor={`slider-hyperlink-${index}`} className="text-sm">Link (optional)</Label>
+                                    <Input
+                                      id={`slider-hyperlink-${index}`}
+                                      value={preview.hyperlink}
+                                      onChange={(e) => updateSliderField(index, 'hyperlink', e.target.value)}
+                                      placeholder="https://example.com"
+                                      maxLength={500}
+                                      className="mt-1"
+                                    />
+                                  </div>
+                                </div>
+                                
+                                <div className="flex-shrink-0">
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => removeSliderImage(index)}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
                         ))}
                       </div>
                     )}

@@ -16,11 +16,24 @@ const Index = () => {
   const { data: settingsData } = useGetPublicSettingsQuery({});
   
   const sliderImages = settingsData?.data?.slider_images || [];
+  
+  // Format slider images to handle both string and object formats
+  const formattedSliders = sliderImages.map((slider: any) => {
+    if (typeof slider === 'string') {
+      return { image: slider, title: '', subtitle: '', hyperlink: '' };
+    }
+    return {
+      image: slider.image || slider,
+      title: slider.title || '',
+      subtitle: slider.subtitle || '',
+      hyperlink: slider.hyperlink || ''
+    };
+  });
 
   return (
     <div className="min-h-screen">
       {/* Slider Section */}
-      {sliderImages.length > 0 && (
+      {formattedSliders.length > 0 && (
         <section className="w-full bg-secondary/30">
           <div className="container mx-auto px-4 py-8">
             <Carousel
@@ -37,14 +50,58 @@ const Index = () => {
               className="w-full"
             >
               <CarouselContent>
-                {sliderImages.map((image: string, index: number) => (
+                {formattedSliders.map((slider: any, index: number) => (
                   <CarouselItem key={index}>
-                    <div className="relative w-full h-[300px] md:h-[400px] lg:h-[500px]">
-                      <img
-                        src={image}
-                        alt={`Slider ${index + 1}`}
-                        className="w-full h-full object-cover rounded-lg"
-                      />
+                    <div className="relative w-full h-[300px] md:h-[400px] lg:h-[500px] group">
+                      {slider.hyperlink ? (
+                        <a href={slider.hyperlink} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+                          <img
+                            src={slider.image}
+                            alt={slider.title || `Slider ${index + 1}`}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                          {(slider.title || slider.subtitle) && (
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-lg flex items-end">
+                              <div className="p-8 w-full">
+                                {slider.title && (
+                                  <h2 className="text-white text-3xl md:text-4xl lg:text-5xl font-bold mb-2 drop-shadow-lg">
+                                    {slider.title}
+                                  </h2>
+                                )}
+                                {slider.subtitle && (
+                                  <p className="text-white/90 text-lg md:text-xl lg:text-2xl drop-shadow-lg">
+                                    {slider.subtitle}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </a>
+                      ) : (
+                        <>
+                          <img
+                            src={slider.image}
+                            alt={slider.title || `Slider ${index + 1}`}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                          {(slider.title || slider.subtitle) && (
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-lg flex items-end">
+                              <div className="p-8 w-full">
+                                {slider.title && (
+                                  <h2 className="text-white text-3xl md:text-4xl lg:text-5xl font-bold mb-2 drop-shadow-lg">
+                                    {slider.title}
+                                  </h2>
+                                )}
+                                {slider.subtitle && (
+                                  <p className="text-white/90 text-lg md:text-xl lg:text-2xl drop-shadow-lg">
+                                    {slider.subtitle}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
                     </div>
                   </CarouselItem>
                 ))}
