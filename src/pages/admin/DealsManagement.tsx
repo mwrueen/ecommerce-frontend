@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useGetAllDealsQuery, useDeleteDealMutation, useToggleDealActiveMutation, useToggleDealFeaturedMutation } from '@/hooks/useApi';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -67,24 +66,23 @@ export default function DealsManagement() {
   };
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Deals Management</h1>
-            <p className="text-muted-foreground">Manage promotional deals and offers</p>
-          </div>
-          <Button onClick={() => navigate('/admin/deals/new')}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Deal
-          </Button>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Deals Management</h1>
+          <p className="text-muted-foreground">Manage promotional deals and offers</p>
         </div>
+        <Button onClick={() => navigate('/admin/deals/new')}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Deal
+        </Button>
+      </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Filters</CardTitle>
-          </CardHeader>
-          <CardContent>
+      <Card>
+        <CardHeader>
+          <CardTitle>Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Input
                 placeholder="Search deals..."
@@ -250,7 +248,6 @@ export default function DealsManagement() {
             )}
           </CardContent>
         </Card>
-      </div>
 
       <ConfirmDialog
         open={deleteId !== null}
@@ -259,6 +256,6 @@ export default function DealsManagement() {
         title="Delete Deal"
         description="Are you sure you want to delete this deal? This action cannot be undone."
       />
-    </AdminLayout>
+    </div>
   );
 }
