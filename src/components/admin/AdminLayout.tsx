@@ -7,7 +7,7 @@ import { AdminHeader } from './AdminHeader';
 import { AdminFooter } from './AdminFooter';
 import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 
-export const AdminLayout = () => {
+export const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
   const { data: settingsData } = useGetPublicSettingsQuery({});
   const settings = settingsData?.data;
 
@@ -34,7 +34,7 @@ export const AdminLayout = () => {
           <div className="flex-1 flex flex-col">
             <AdminHeader />
             <main className="flex-1 p-6">
-              <Outlet />
+              {children || <Outlet />}
             </main>
             <AdminFooter />
           </div>
