@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { useGetProductsQuery, useDeleteProductMutation, useGetPublicSettingsQuery } from '@/hooks/useApi';
+import { useGetProductsQuery, useDeleteProductMutation, useGetPublicSettingsQuery, useExportProductsMutation } from '@/hooks/useApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Trash2, Search, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Eye, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 import { formatPrice } from '@/lib/currency';
+import { toast as sonnerToast } from 'sonner';
 
 export default function ProductsManagement() {
   const [page, setPage] = useState(1);
@@ -19,6 +20,7 @@ export default function ProductsManagement() {
   
   const { data, isLoading } = useGetProductsQuery({ page, per_page: 10 });
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
+  const [exportProducts, { isLoading: isExporting }] = useExportProductsMutation();
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -36,6 +38,15 @@ export default function ProductsManagement() {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      await exportProducts({}).unwrap();
+      sonnerToast.success('Products exported successfully');
+    } catch (error) {
+      sonnerToast.error('Failed to export products');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -43,10 +54,16 @@ export default function ProductsManagement() {
           <h2 className="text-3xl font-bold text-foreground">Products</h2>
           <p className="text-muted-foreground">Manage your product catalog</p>
         </div>
-        <Button onClick={() => navigate('/admin/products/create')}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Product
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleExport} disabled={isExporting}>
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+          <Button onClick={() => navigate('/admin/products/create')}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Product
+          </Button>
+        </div>
       </div>
 
       <div className="flex gap-4">

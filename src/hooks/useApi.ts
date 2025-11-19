@@ -24,3 +24,5 @@ export * from '@/store/api/policiesApi';
 export * from '@/store/api/contactApi';
 export * from '@/store/api/dealsApi';
 export * from '@/store/api/supportTicketsApi';
+export * from '@/store/api/dashboardApi';
+export * from '@/store/api/exportsApi';

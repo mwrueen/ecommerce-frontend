@@ -7,10 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Eye, Search, DollarSign, ShoppingCart, Package, TrendingUp, AlertCircle } from 'lucide-react';
+import { Eye, Search, DollarSign, ShoppingCart, Package, TrendingUp, AlertCircle, Download } from 'lucide-react';
 import { format } from 'date-fns';
-import { useGetPublicSettingsQuery } from '@/hooks/useApi';
+import { useGetPublicSettingsQuery, useExportOrdersMutation } from '@/hooks/useApi';
 import { formatPrice } from '@/lib/currency';
+import { toast } from 'sonner';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
@@ -37,6 +38,7 @@ const OrdersManagement = () => {
   });
 
   const { data: statsData } = useGetOrderStatsQuery({});
+  const [exportOrders, { isLoading: isExporting }] = useExportOrdersMutation();
 
   const handleSearch = () => {
     setSearch(searchInput);
@@ -48,6 +50,15 @@ const OrdersManagement = () => {
     setPage(1);
   };
 
+  const handleExport = async () => {
+    try {
+      await exportOrders({ status: status || undefined }).unwrap();
+      toast.success('Orders exported successfully');
+    } catch (error) {
+      toast.error('Failed to export orders');
+    }
+  };
+
   const stats = statsData?.stats || {};
 
   return (
@@ -57,6 +68,10 @@ const OrdersManagement = () => {
           <h1 className="text-3xl font-bold text-foreground">Orders</h1>
           <p className="text-muted-foreground">Manage and track customer orders</p>
         </div>
+        <Button onClick={handleExport} disabled={isExporting}>
+          <Download className="h-4 w-4 mr-2" />
+          Export Orders
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
