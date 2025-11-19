@@ -54,7 +54,10 @@ export const SupportTicketDropdown = () => {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[400px]">
+      <DropdownMenuContent 
+        align="end" 
+        className="w-[400px] bg-background border shadow-lg z-50"
+      >
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-semibold">Support Tickets</h3>
           {count > 0 && (
