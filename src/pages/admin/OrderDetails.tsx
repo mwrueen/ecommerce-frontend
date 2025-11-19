@@ -13,6 +13,8 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 import { CancelOrderDialog } from '@/components/CancelOrderDialog';
+import { useGetPublicSettingsQuery } from '@/hooks/useApi';
+import { formatPrice } from '@/lib/currency';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
@@ -26,6 +28,7 @@ const OrderDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: orderData, isLoading } = useGetOrderQuery(id);
+  const { data: settings } = useGetPublicSettingsQuery({});
   const [updateStatus, { isLoading: isUpdating }] = useUpdateOrderStatusMutation();
   const [deleteOrder, { isLoading: isDeleting }] = useDeleteOrderMutation();
   const [cancelOrder] = useCancelOrderMutation();
@@ -248,10 +251,20 @@ const OrderDetails = () => {
                           </span>
                         </TableCell>
                         <TableCell className="text-right text-muted-foreground">
-                          ${parseFloat(item.price).toFixed(2)}
+                          {formatPrice(
+                            item.price,
+                            settings?.data?.currency_symbol,
+                            settings?.data?.currency_position,
+                            settings?.data?.formatted_currency
+                          )}
                         </TableCell>
                         <TableCell className="text-right font-semibold text-foreground">
-                          ${parseFloat(item.total).toFixed(2)}
+                          {formatPrice(
+                            item.total,
+                            settings?.data?.currency_symbol,
+                            settings?.data?.currency_position,
+                            settings?.data?.formatted_currency
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -263,28 +276,53 @@ const OrderDetails = () => {
                 <div className="space-y-2.5">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-medium">${parseFloat(order.subtotal || order.total_amount).toFixed(2)}</span>
+                    <span className="font-medium">{formatPrice(
+                      order.subtotal || order.total_amount,
+                      settings?.data?.currency_symbol,
+                      settings?.data?.currency_position,
+                      settings?.data?.formatted_currency
+                    )}</span>
                   </div>
                   {order.discount_amount && parseFloat(order.discount_amount) > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Discount</span>
-                      <span className="font-medium text-green-600">-${parseFloat(order.discount_amount).toFixed(2)}</span>
+                      <span className="font-medium text-green-600">-{formatPrice(
+                        order.discount_amount,
+                        settings?.data?.currency_symbol,
+                        settings?.data?.currency_position,
+                        settings?.data?.formatted_currency
+                      )}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Shipping</span>
-                    <span className="font-medium">${parseFloat(order.shipping_cost || 0).toFixed(2)}</span>
+                    <span className="font-medium">{formatPrice(
+                      order.shipping_cost || 0,
+                      settings?.data?.currency_symbol,
+                      settings?.data?.currency_position,
+                      settings?.data?.formatted_currency
+                    )}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">
                       Tax ({parseFloat(order.tax_rate || 0).toFixed(2)}%)
                     </span>
-                    <span className="font-medium">${parseFloat(order.tax_amount || 0).toFixed(2)}</span>
+                    <span className="font-medium">{formatPrice(
+                      order.tax_amount || 0,
+                      settings?.data?.currency_symbol,
+                      settings?.data?.currency_position,
+                      settings?.data?.formatted_currency
+                    )}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span className="text-primary">${parseFloat(order.total_amount).toFixed(2)}</span>
+                    <span className="text-primary">{formatPrice(
+                      order.total_amount,
+                      settings?.data?.currency_symbol,
+                      settings?.data?.currency_position,
+                      settings?.data?.formatted_currency
+                    )}</span>
                   </div>
                 </div>
               </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useGetProductsQuery, useDeleteProductMutation } from '@/hooks/useApi';
+import { useGetProductsQuery, useDeleteProductMutation, useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -7,6 +7,7 @@ import { Plus, Edit, Trash2, Search, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
+import { formatPrice } from '@/lib/currency';
 
 export default function ProductsManagement() {
   const [page, setPage] = useState(1);
@@ -14,6 +15,7 @@ export default function ProductsManagement() {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { data: settings } = useGetPublicSettingsQuery({});
   
   const { data, isLoading } = useGetProductsQuery({ page, per_page: 10 });
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
@@ -94,7 +96,12 @@ export default function ProductsManagement() {
                   </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>{product.sku}</TableCell>
-                  <TableCell>${product.price}</TableCell>
+                  <TableCell>{formatPrice(
+                    product.price,
+                    settings?.data?.currency_symbol,
+                    settings?.data?.currency_position,
+                    settings?.data?.formatted_currency
+                  )}</TableCell>
                   <TableCell>{product.stock_quantity}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded text-xs ${product.is_active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>

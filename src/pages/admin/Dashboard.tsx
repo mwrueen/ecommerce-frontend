@@ -1,9 +1,11 @@
-import { useGetUserStatsQuery } from '@/hooks/useApi';
+import { useGetUserStatsQuery, useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, Users, ShoppingCart, DollarSign } from 'lucide-react';
+import { formatPrice } from '@/lib/currency';
 
 export default function Dashboard() {
   const { data: stats, isLoading } = useGetUserStatsQuery({});
+  const { data: settings } = useGetPublicSettingsQuery({});
 
   const metrics = [
     {
@@ -26,7 +28,12 @@ export default function Dashboard() {
     },
     {
       title: 'Total Revenue',
-      value: `$${stats?.data?.total_revenue || 0}`,
+      value: formatPrice(
+        stats?.data?.total_revenue || 0,
+        settings?.data?.currency_symbol,
+        settings?.data?.currency_position,
+        settings?.data?.formatted_currency
+      ),
       icon: DollarSign,
       color: 'text-primary',
     },

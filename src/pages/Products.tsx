@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { ChevronLeft, ChevronRight, Filter, DollarSign } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useGetPublicSettingsQuery } from '@/hooks/useApi';
+import { formatPrice } from '@/lib/currency';
 
 const Products = () => {
   const [page, setPage] = useState(1);
@@ -16,6 +18,7 @@ const Products = () => {
   const [sortOrder, setSortOrder] = useState<string>('desc');
   const [minPrice, setMinPrice] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
+  const { data: settings } = useGetPublicSettingsQuery({});
   
   // Slider state (0-10000 range)
   const MAX_PRICE = 10000;
@@ -170,10 +173,20 @@ const Products = () => {
                     {/* Price Display */}
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">
-                        ${priceRange[0].toFixed(0)}
+                        {formatPrice(
+                          priceRange[0],
+                          settings?.data?.currency_symbol,
+                          settings?.data?.currency_position,
+                          settings?.data?.formatted_currency
+                        )}
                       </span>
                       <span className="text-muted-foreground">
-                        ${priceRange[1] >= MAX_PRICE ? '∞' : priceRange[1].toFixed(0)}
+                        {priceRange[1] >= MAX_PRICE ? '∞' : formatPrice(
+                          priceRange[1],
+                          settings?.data?.currency_symbol,
+                          settings?.data?.currency_position,
+                          settings?.data?.formatted_currency
+                        )}
                       </span>
                     </div>
                     
@@ -271,7 +284,17 @@ const Products = () => {
                 )}
                 {(minPrice || maxPrice) && (
                   <Badge variant="secondary" className="gap-2">
-                    Price: ${minPrice || '0'} - ${maxPrice || '∞'}
+                    Price: {formatPrice(
+                      minPrice || '0',
+                      settings?.data?.currency_symbol,
+                      settings?.data?.currency_position,
+                      settings?.data?.formatted_currency
+                    )} - {maxPrice ? formatPrice(
+                      maxPrice,
+                      settings?.data?.currency_symbol,
+                      settings?.data?.currency_position,
+                      settings?.data?.formatted_currency
+                    ) : '∞'}
                     <button onClick={handleClearPrice} className="ml-1">×</button>
                   </Badge>
                 )}

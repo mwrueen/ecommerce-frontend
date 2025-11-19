@@ -1,14 +1,16 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useGetDealQuery, useGetDealStatsQuery } from '@/hooks/useApi';
+import { useGetDealQuery, useGetDealStatsQuery, useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronLeft, Edit, TrendingUp, Users, DollarSign, ShoppingCart } from 'lucide-react';
+import { formatPrice } from '@/lib/currency';
 
 export default function DealDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { data: settings } = useGetPublicSettingsQuery({});
 
   const { data: dealData, isLoading: dealLoading } = useGetDealQuery(id!);
   const { data: statsData, isLoading: statsLoading } = useGetDealStatsQuery({ deal_id: parseInt(id!) });
@@ -92,7 +94,17 @@ export default function DealDetails() {
             </CardHeader>
               <CardContent>
               <div className="text-2xl font-bold">
-                {stats?.total_discount_given ? `$${parseFloat(stats.total_discount_given).toFixed(2)}` : '$0.00'}
+                {stats?.total_discount_given ? formatPrice(
+                  stats.total_discount_given,
+                  settings?.data?.currency_symbol,
+                  settings?.data?.currency_position,
+                  settings?.data?.formatted_currency
+                ) : formatPrice(
+                  0,
+                  settings?.data?.currency_symbol,
+                  settings?.data?.currency_position,
+                  settings?.data?.formatted_currency
+                )}
               </div>
             </CardContent>
           </Card>
@@ -142,21 +154,36 @@ export default function DealDetails() {
                 <div className="font-medium">
                   {deal.discount_type === 'percentage' 
                     ? `${deal.discount_value}%` 
-                    : `$${parseFloat(deal.discount_value).toFixed(2)}`}
+                    : formatPrice(
+                        deal.discount_value,
+                        settings?.data?.currency_symbol,
+                        settings?.data?.currency_position,
+                        settings?.data?.formatted_currency
+                      )}
                 </div>
               </div>
 
               {deal.maximum_discount && (
                 <div>
                   <div className="text-sm text-muted-foreground mb-1">Maximum Discount</div>
-                  <div className="font-medium">${parseFloat(deal.maximum_discount).toFixed(2)}</div>
+                  <div className="font-medium">{formatPrice(
+                    deal.maximum_discount,
+                    settings?.data?.currency_symbol,
+                    settings?.data?.currency_position,
+                    settings?.data?.formatted_currency
+                  )}</div>
                 </div>
               )}
 
               {deal.minimum_purchase_amount && (
                 <div>
                   <div className="text-sm text-muted-foreground mb-1">Minimum Purchase</div>
-                  <div className="font-medium">${parseFloat(deal.minimum_purchase_amount).toFixed(2)}</div>
+                  <div className="font-medium">{formatPrice(
+                    deal.minimum_purchase_amount,
+                    settings?.data?.currency_symbol,
+                    settings?.data?.currency_position,
+                    settings?.data?.formatted_currency
+                  )}</div>
                 </div>
               )}
 

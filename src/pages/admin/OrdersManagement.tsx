@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Eye, Search, DollarSign, ShoppingCart, Package, TrendingUp, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { useGetPublicSettingsQuery } from '@/hooks/useApi';
+import { formatPrice } from '@/lib/currency';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
@@ -20,6 +22,7 @@ const statusColors: Record<string, string> = {
 
 const OrdersManagement = () => {
   const navigate = useNavigate();
+  const { data: settings } = useGetPublicSettingsQuery({});
   const [page, setPage] = useState(1);
   const [perPage] = useState(15);
   const [status, setStatus] = useState<string>('');
@@ -73,7 +76,12 @@ const OrdersManagement = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${(stats.total_revenue || 0).toFixed(2)}</div>
+            <div className="text-2xl font-bold">{formatPrice(
+              stats.total_revenue || 0,
+              settings?.data?.currency_symbol,
+              settings?.data?.currency_position,
+              settings?.data?.formatted_currency
+            )}</div>
           </CardContent>
         </Card>
 
@@ -165,7 +173,12 @@ const OrdersManagement = () => {
                           </div>
                         </TableCell>
                         <TableCell>{order.order_items?.length || 0} items</TableCell>
-                        <TableCell className="font-semibold">${parseFloat(order.total_amount).toFixed(2)}</TableCell>
+                        <TableCell className="font-semibold">{formatPrice(
+                          order.total_amount,
+                          settings?.data?.currency_symbol,
+                          settings?.data?.currency_position,
+                          settings?.data?.formatted_currency
+                        )}</TableCell>
                         <TableCell>
                           <Badge className={statusColors[order.status]}>
                             {order.status.charAt(0).toUpperCase() + order.status.slice(1)}

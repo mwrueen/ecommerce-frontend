@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, Phone, MapPin, Calendar, ShoppingBag, Ban, UserCheck, ShieldAlert, AlertCircle } from 'lucide-react';
-import { useGetCustomerQuery, useGetCustomerOrdersQuery, useBanCustomerMutation, useUnbanCustomerMutation, useSuspendCustomerMutation, useUnsuspendCustomerMutation } from '@/hooks/useApi';
+import { useGetCustomerQuery, useGetCustomerOrdersQuery, useBanCustomerMutation, useUnbanCustomerMutation, useSuspendCustomerMutation, useUnsuspendCustomerMutation, useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,10 +12,12 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
+import { formatPrice } from '@/lib/currency';
 
 export default function CustomerDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { data: settings } = useGetPublicSettingsQuery({});
   const [actionDialog, setActionDialog] = useState<{ open: boolean; type: 'ban' | 'suspend' | null }>({
     open: false,
     type: null,
@@ -271,7 +273,12 @@ export default function CustomerDetails() {
                         <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
                         <TableCell>{getOrderStatusBadge(order.status)}</TableCell>
                         <TableCell>{order.order_items?.length || 0}</TableCell>
-                        <TableCell className="text-right font-semibold">${parseFloat(order.total_amount).toFixed(2)}</TableCell>
+                        <TableCell className="text-right font-semibold">{formatPrice(
+                          order.total_amount,
+                          settings?.data?.currency_symbol,
+                          settings?.data?.currency_position,
+                          settings?.data?.formatted_currency
+                        )}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

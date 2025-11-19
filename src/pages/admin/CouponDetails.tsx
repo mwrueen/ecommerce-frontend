@@ -11,11 +11,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useGetCouponQuery, useGetCouponStatsQuery } from '@/hooks/useApi';
+import { useGetCouponQuery, useGetCouponStatsQuery, useGetPublicSettingsQuery } from '@/hooks/useApi';
+import { formatPrice } from '@/lib/currency';
 
 export default function CouponDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { data: settings } = useGetPublicSettingsQuery({});
 
   const { data: couponData, isLoading } = useGetCouponQuery(id);
   const { data: statsData } = useGetCouponStatsQuery({ coupon_id: parseInt(id!) });
@@ -88,7 +90,12 @@ export default function CouponDetails() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${parseFloat(stats?.total_discount_given || '0').toFixed(2)}
+              {formatPrice(
+                stats?.total_discount_given || '0',
+                settings?.data?.currency_symbol,
+                settings?.data?.currency_position,
+                settings?.data?.formatted_currency
+              )}
             </div>
           </CardContent>
         </Card>
@@ -215,12 +222,27 @@ export default function CouponDetails() {
                       </Link>
                     </TableCell>
                     <TableCell>{usage.customer?.name || usage.customer?.email}</TableCell>
-                    <TableCell>${parseFloat(usage.order_total_before_discount).toFixed(2)}</TableCell>
+                    <TableCell>{formatPrice(
+                      usage.order_total_before_discount,
+                      settings?.data?.currency_symbol,
+                      settings?.data?.currency_position,
+                      settings?.data?.formatted_currency
+                    )}</TableCell>
                     <TableCell className="text-green-600">
-                      -${parseFloat(usage.discount_amount).toFixed(2)}
+                      -{formatPrice(
+                        usage.discount_amount,
+                        settings?.data?.currency_symbol,
+                        settings?.data?.currency_position,
+                        settings?.data?.formatted_currency
+                      )}
                     </TableCell>
                     <TableCell className="font-semibold">
-                      ${parseFloat(usage.order_total_after_discount).toFixed(2)}
+                      {formatPrice(
+                        usage.order_total_after_discount,
+                        settings?.data?.currency_symbol,
+                        settings?.data?.currency_position,
+                        settings?.data?.formatted_currency
+                      )}
                     </TableCell>
                     <TableCell>
                       {new Date(usage.created_at).toLocaleDateString()}
