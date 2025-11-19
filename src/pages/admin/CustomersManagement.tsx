@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, UserX, UserCheck, Ban, ShieldAlert, Eye } from 'lucide-react';
-import { useGetCustomersQuery, useBanCustomerMutation, useUnbanCustomerMutation, useSuspendCustomerMutation, useUnsuspendCustomerMutation } from '@/hooks/useApi';
+import { Search, Filter, UserX, UserCheck, Ban, ShieldAlert, Eye, Download } from 'lucide-react';
+import { useGetCustomersQuery, useBanCustomerMutation, useUnbanCustomerMutation, useSuspendCustomerMutation, useUnsuspendCustomerMutation, useExportCustomersMutation } from '@/hooks/useApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 
 export default function CustomersManagement() {
   const navigate = useNavigate();
@@ -44,6 +45,7 @@ export default function CustomersManagement() {
   const [unbanCustomer, { isLoading: isUnbanning }] = useUnbanCustomerMutation();
   const [suspendCustomer, { isLoading: isSuspending }] = useSuspendCustomerMutation();
   const [unsuspendCustomer, { isLoading: isUnsuspending }] = useUnsuspendCustomerMutation();
+  const [exportCustomers, { isLoading: isExporting }] = useExportCustomersMutation();
 
   const customers = customersData?.data || [];
   const pagination = customersData?.pagination || { current_page: 1, last_page: 1, total: 0 };
@@ -128,6 +130,15 @@ export default function CustomersManagement() {
     return <Badge variant="outline" className="gap-1"><UserCheck className="h-3 w-3" />Active</Badge>;
   };
 
+  const handleExport = async () => {
+    try {
+      await exportCustomers({}).unwrap();
+      sonnerToast.success('Customers exported successfully');
+    } catch (error) {
+      sonnerToast.error('Failed to export customers');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -135,6 +146,10 @@ export default function CustomersManagement() {
           <h1 className="text-3xl font-bold text-foreground">Customer Management</h1>
           <p className="text-muted-foreground mt-1">Manage and monitor customer accounts</p>
         </div>
+        <Button onClick={handleExport} disabled={isExporting}>
+          <Download className="h-4 w-4 mr-2" />
+          Export Customers
+        </Button>
       </div>
 
       <Card>
