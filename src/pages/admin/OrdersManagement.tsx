@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Eye, Search, DollarSign, ShoppingCart, Package, TrendingUp } from 'lucide-react';
+import { Eye, Search, DollarSign, ShoppingCart, Package, TrendingUp, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 
 const statusColors: Record<string, string> = {
@@ -147,6 +147,7 @@ const OrdersManagement = () => {
                       <TableHead>Items</TableHead>
                       <TableHead>Total</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Cancellation</TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -169,6 +170,20 @@ const OrdersManagement = () => {
                           <Badge className={statusColors[order.status]}>
                             {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                           </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {order.cancellation_requested_at && !order.cancelled_at ? (
+                            <Badge variant="outline" className="bg-orange-500/10 text-orange-500 border-orange-500/20">
+                              <AlertCircle className="w-3 h-3 mr-1" />
+                              Requested
+                            </Badge>
+                          ) : order.cancelled_at ? (
+                            <span className="text-xs text-muted-foreground">
+                              Cancelled by {order.cancelled_by}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">-</span>
+                          )}
                         </TableCell>
                         <TableCell>{format(new Date(order.created_at), 'MMM dd, yyyy')}</TableCell>
                         <TableCell className="text-right">
