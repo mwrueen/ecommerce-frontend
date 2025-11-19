@@ -126,6 +126,60 @@ const OrderDetail = () => {
               <Separator />
 
               <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span>
+                    {formatPrice(
+                      order.subtotal,
+                      settings?.data?.currency_symbol,
+                      settings?.data?.currency_position,
+                      settings?.data?.formatted_currency
+                    )}
+                  </span>
+                </div>
+
+                {parseFloat(order.discount_amount) > 0 && (
+                  <div className="flex justify-between text-sm text-green-600">
+                    <span>Discount</span>
+                    <span>
+                      -{formatPrice(
+                        order.discount_amount,
+                        settings?.data?.currency_symbol,
+                        settings?.data?.currency_position,
+                        settings?.data?.formatted_currency
+                      )}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Shipping</span>
+                  <span>
+                    {formatPrice(
+                      order.shipping_cost,
+                      settings?.data?.currency_symbol,
+                      settings?.data?.currency_position,
+                      settings?.data?.formatted_currency
+                    )}
+                  </span>
+                </div>
+
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    Tax ({order.tax_rate}% {order.tax_inclusive ? 'inclusive' : 'exclusive'})
+                  </span>
+                  <span>
+                    {formatPrice(
+                      order.tax_amount,
+                      settings?.data?.currency_symbol,
+                      settings?.data?.currency_position,
+                      settings?.data?.formatted_currency
+                    )}
+                  </span>
+                </div>
+
+                <Separator />
+
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
                   <span className="text-primary">
