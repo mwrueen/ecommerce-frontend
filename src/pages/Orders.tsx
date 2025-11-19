@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Package, ShoppingBag } from 'lucide-react';
+import { Package, ShoppingBag, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { formatPrice } from '@/lib/currency';
@@ -115,6 +115,12 @@ const Orders = () => {
                         <Badge className={statusColors[order.status]}>
                           {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                         </Badge>
+                        {order.cancellation_requested_at && !order.cancelled_at && (
+                          <Badge variant="outline" className="bg-orange-500/10 text-orange-500 border-orange-500/20">
+                            <AlertCircle className="w-3 h-3 mr-1" />
+                            Cancellation Requested
+                          </Badge>
+                        )}
                       </div>
                       <div className="space-y-1 text-sm text-muted-foreground">
                         <p>Ordered on {format(new Date(order.created_at), 'PPP')}</p>
