@@ -319,42 +319,46 @@ export default function SupportTicketDetails() {
 
         {/* Messages */}
         <Card>
-          <CardHeader>
+          <CardHeader className="border-b">
             <CardTitle>Conversation</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-4 max-h-[500px] overflow-y-auto pr-4">
+          <CardContent className="p-0">
+            <div className="max-h-[600px] overflow-y-auto p-6 space-y-6">
               {ticket.messages?.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex gap-3 ${msg.sender_type === 'admin' ? 'flex-row-reverse' : ''}`}
+                  className={`flex gap-3 ${msg.sender_type === 'admin' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                    msg.sender_type === 'admin'
-                      ? 'bg-primary/10 text-primary'
-                      : 'bg-secondary/10 text-secondary'
-                  }`}>
-                    {msg.sender_type === 'admin' ? <UserCog className="w-5 h-5" /> : <User className="w-5 h-5" />}
-                  </div>
+                  {msg.sender_type !== 'admin' && (
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center ring-2 ring-background">
+                      <User className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                  )}
 
-                  <div className={`flex-1 ${msg.sender_type === 'admin' ? 'text-right' : ''}`}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-sm">
+                  <div className={`flex flex-col max-w-[70%] ${msg.sender_type === 'admin' ? 'items-end' : 'items-start'}`}>
+                    <div className={`flex items-center gap-2 mb-1.5 ${msg.sender_type === 'admin' ? 'flex-row-reverse' : ''}`}>
+                      <span className="font-semibold text-sm">
                         {msg.sender_type === 'admin' ? msg.admin?.name : msg.customer?.name}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        {format(new Date(msg.created_at), 'PPp')}
+                        {format(new Date(msg.created_at), 'MMM d, h:mm a')}
                       </span>
                     </div>
 
-                    <div className={`inline-block rounded-lg px-4 py-2 ${
+                    <div className={`rounded-2xl px-4 py-3 shadow-sm ${
                       msg.sender_type === 'admin'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
+                        ? 'bg-primary text-primary-foreground rounded-tr-sm'
+                        : 'bg-muted rounded-tl-sm'
                     }`}>
-                      <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.message}</p>
                     </div>
                   </div>
+
+                  {msg.sender_type === 'admin' && (
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-background">
+                      <UserCog className="w-5 h-5 text-primary" />
+                    </div>
+                  )}
                 </div>
               ))}
               <div ref={messagesEndRef} />
@@ -365,10 +369,10 @@ export default function SupportTicketDetails() {
         {/* Reply Form */}
         {ticket.status !== 'closed' && (
           <Card>
-            <CardHeader>
+            <CardHeader className="border-b">
               <CardTitle>Send Reply</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <form onSubmit={handleSendMessage} className="space-y-4">
                 <Textarea
                   value={message}
@@ -376,9 +380,10 @@ export default function SupportTicketDetails() {
                   placeholder="Type your message here..."
                   rows={4}
                   required
+                  className="resize-none"
                 />
                 <div className="flex justify-end">
-                  <Button type="submit" disabled={isSending || !message.trim()}>
+                  <Button type="submit" disabled={isSending || !message.trim()} size="lg">
                     <Send className="w-4 h-4 mr-2" />
                     {isSending ? 'Sending...' : 'Send Message'}
                   </Button>
