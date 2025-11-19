@@ -56,6 +56,12 @@ import ContactDetails from "./pages/admin/ContactDetails";
 import DealsManagement from "./pages/admin/DealsManagement";
 import DealForm from "./pages/admin/DealForm";
 import DealDetails from "./pages/admin/DealDetails";
+import CancellationRequests from "./pages/admin/CancellationRequests";
+import SupportTickets from "./pages/SupportTickets";
+import CreateSupportTicket from "./pages/CreateSupportTicket";
+import SupportTicketDetail from "./pages/SupportTicketDetail";
+import SupportTicketsManagement from "./pages/admin/SupportTicketsManagement";
+import SupportTicketDetails from "./pages/admin/SupportTicketDetails";
 
 const App = () => (
   <Provider store={store}>
@@ -78,6 +84,9 @@ const App = () => (
             <Route path="/customer/profile" element={<CustomerProfile />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/orders/:id" element={<OrderDetail />} />
+            <Route path="/support-tickets" element={<SupportTickets />} />
+            <Route path="/support-tickets/create" element={<CreateSupportTicket />} />
+            <Route path="/support-tickets/:id" element={<SupportTicketDetail />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/deals" element={<Deals />} />
           <Route path="/deals/:identifier" element={<DealDetail />} />
@@ -127,6 +136,9 @@ const App = () => (
             <Route path="deals/create" element={<DealForm />} />
             <Route path="deals/:id" element={<DealDetails />} />
             <Route path="deals/:id/edit" element={<DealForm />} />
+            <Route path="cancellation-requests" element={<CancellationRequests />} />
+            <Route path="support-tickets" element={<SupportTicketsManagement />} />
+            <Route path="support-tickets/:id" element={<SupportTicketDetails />} />
             <Route path="settings" element={<Settings />} />
           </Route>
 
