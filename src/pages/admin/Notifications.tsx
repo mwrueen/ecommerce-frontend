@@ -26,10 +26,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useGetPublicSettingsQuery } from '@/hooks/useApi';
+import { formatPrice } from '@/lib/currency';
 
 export default function Notifications() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { data: settings } = useGetPublicSettingsQuery({});
   const [activeTab, setActiveTab] = useState('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [notificationToDelete, setNotificationToDelete] = useState<string | null>(null);
@@ -258,7 +261,12 @@ export default function Notifications() {
                             <p>From: {notification.data.customer_name}</p>
                           )}
                           {notification.data.total_amount && (
-                            <p>Amount: ${notification.data.total_amount}</p>
+                            <p>Amount: {formatPrice(
+                              notification.data.total_amount,
+                              settings?.data?.currency_symbol,
+                              settings?.data?.currency_position,
+                              settings?.data?.formatted_currency
+                            )}</p>
                           )}
                           {notification.data.order_number && (
                             <p>Order: {notification.data.order_number}</p>
