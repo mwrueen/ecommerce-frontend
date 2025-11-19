@@ -1,15 +1,19 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
-import { useGetOrderQuery } from '@/store/api/ordersApi';
+import { useGetOrderQuery, useRequestOrderCancellationMutation, useCancelOrderMutation } from '@/store/api/ordersApi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Package, MapPin, Calendar, User } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ArrowLeft, Package, MapPin, Calendar, XCircle, Clock, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { formatPrice } from '@/lib/currency';
+import { CancelOrderDialog } from '@/components/CancelOrderDialog';
+import { useToast } from '@/hooks/use-toast';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
@@ -22,11 +26,69 @@ const statusColors: Record<string, string> = {
 const OrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const { data: orderData, isLoading } = useGetOrderQuery(id);
   const { data: settings } = useGetPublicSettingsQuery({});
+  const [requestCancellation] = useRequestOrderCancellationMutation();
+  const [cancelOrder] = useCancelOrderMutation();
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [cancelMode, setCancelMode] = useState<'request' | 'cancel'>('request');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const order = orderData?.order;
+
+  const handleRequestCancellation = async (reason: string) => {
+    try {
+      setIsProcessing(true);
+      await requestCancellation({ id, reason }).unwrap();
+      toast({
+        title: 'Cancellation Request Submitted',
+        description: 'Your cancellation request has been submitted and is awaiting admin approval.',
+      });
+      setShowCancelDialog(false);
+    } catch (error: any) {
+      toast({
+        title: 'Request Failed',
+        description: error?.data?.message || 'Failed to submit cancellation request',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleCancelOrder = async (reason: string) => {
+    try {
+      setIsProcessing(true);
+      await cancelOrder({ id, reason }).unwrap();
+      toast({
+        title: 'Order Cancelled',
+        description: 'Your order has been cancelled successfully.',
+      });
+      setShowCancelDialog(false);
+    } catch (error: any) {
+      toast({
+        title: 'Cancellation Failed',
+        description: error?.data?.message || 'Failed to cancel order',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleCancelDialogConfirm = (reason: string) => {
+    if (cancelMode === 'request') {
+      handleRequestCancellation(reason);
+    } else {
+      handleCancelOrder(reason);
+    }
+  };
+
+  const canRequestCancellation = order?.status === 'pending' && !order?.cancellation_requested_at;
+  const canDirectCancel = order?.status === 'pending' && !order?.cancellation_requested_at;
+  const hasPendingCancellationRequest = !!order?.cancellation_requested_at && order?.status !== 'cancelled';
 
   if (!isAuthenticated) {
     return (
@@ -70,15 +132,77 @@ const OrderDetail = () => {
   return (
     <div className="min-h-screen py-8">
       <div className="container mx-auto px-4 max-w-4xl">
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/orders')}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-lg md:text-xl font-bold">{order.order_number}</h1>
-            <p className="text-sm text-muted-foreground">Order Details</p>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/orders')}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-lg md:text-xl font-bold">{order.order_number}</h1>
+              <p className="text-sm text-muted-foreground">Order Details</p>
+            </div>
           </div>
+          {(canRequestCancellation || canDirectCancel) && (
+            <div className="flex gap-2">
+              {canDirectCancel && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => {
+                    setCancelMode('cancel');
+                    setShowCancelDialog(true);
+                  }}
+                >
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Cancel Order
+                </Button>
+              )}
+              {canRequestCancellation && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setCancelMode('request');
+                    setShowCancelDialog(true);
+                  }}
+                >
+                  <Clock className="h-4 w-4 mr-2" />
+                  Request Cancellation
+                </Button>
+              )}
+            </div>
+          )}
         </div>
+
+        {hasPendingCancellationRequest && (
+          <Alert className="mb-6 border-yellow-500/50 bg-yellow-500/10">
+            <Clock className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-600">
+              <strong>Cancellation Requested:</strong> Your cancellation request is pending admin approval.
+              {order.cancellation_reason && (
+                <span className="block mt-1 text-sm">Reason: {order.cancellation_reason}</span>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {order.status === 'cancelled' && (
+          <Alert className="mb-6 border-red-500/50 bg-red-500/10">
+            <AlertCircle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-600">
+              <strong>Order Cancelled</strong>
+              {order.cancelled_at && (
+                <span className="block text-sm">
+                  Cancelled on {format(new Date(order.cancelled_at), 'PPP')}
+                  {order.cancelled_by && ` by ${order.cancelled_by}`}
+                </span>
+              )}
+              {order.cancellation_reason && (
+                <span className="block mt-1 text-sm">Reason: {order.cancellation_reason}</span>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid gap-6 md:grid-cols-3">
           <Card className="md:col-span-2">
@@ -252,6 +376,15 @@ const OrderDetail = () => {
             )}
           </div>
         </div>
+
+        <CancelOrderDialog
+          open={showCancelDialog}
+          onOpenChange={setShowCancelDialog}
+          onConfirm={handleCancelDialogConfirm}
+          isLoading={isProcessing}
+          mode={cancelMode}
+          orderNumber={order.order_number}
+        />
       </div>
     </div>
   );
