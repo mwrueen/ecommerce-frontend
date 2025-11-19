@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { formatPrice } from '@/lib/currency';
+import { PaymentGateway } from '@/components/PaymentGateway';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -27,6 +28,12 @@ const Checkout = () => {
     shipping_address: user?.address || '',
     notes: '',
   });
+  const [showPaymentGateway, setShowPaymentGateway] = useState(false);
+
+  const totalAmount = 
+    total + 
+    (total >= parseFloat(settings?.data?.free_shipping_threshold || '0') ? 0 : parseFloat(settings?.data?.shipping_cost || '0')) +
+    (settings?.data?.tax_inclusive ? 0 : (total * (parseFloat(settings?.data?.tax_rate || '0') / 100)));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +49,11 @@ const Checkout = () => {
       return;
     }
 
+    // Show payment gateway instead of directly creating order
+    setShowPaymentGateway(true);
+  };
+
+  const handlePaymentComplete = async () => {
     try {
       const orderData = {
         customer_id: user.id,
@@ -53,12 +65,14 @@ const Checkout = () => {
         })),
       };
 
-      const result = await createOrder(orderData).unwrap();
+      await createOrder(orderData).unwrap();
       
-      toast.success('Order placed successfully!');
+      setShowPaymentGateway(false);
+      toast.success('Payment successful! Order placed.');
       dispatch(clearCart());
       navigate('/');
     } catch (error: any) {
+      setShowPaymentGateway(false);
       toast.error(error?.data?.message || 'Failed to place order');
     }
   };
@@ -224,6 +238,16 @@ const Checkout = () => {
             </Card>
           </div>
         </form>
+
+        <PaymentGateway
+          open={showPaymentGateway}
+          onClose={() => setShowPaymentGateway(false)}
+          onPaymentComplete={handlePaymentComplete}
+          amount={totalAmount}
+          currencySymbol={settings?.data?.currency_symbol}
+          currencyPosition={settings?.data?.currency_position}
+          formattedCurrency={settings?.data?.formatted_currency}
+        />
       </div>
     </div>
   );
