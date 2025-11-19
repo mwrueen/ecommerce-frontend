@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Home, MessageSquare } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGetPublicSettingsQuery } from '@/store/api/siteSettingsApi';
 import { NotificationDropdown } from './NotificationDropdown';
-import { Badge } from '@/components/ui/badge';
+import { SupportTicketDropdown } from './SupportTicketDropdown';
 
 export const AdminHeader = () => {
   const { data: settings } = useGetPublicSettingsQuery({});
@@ -31,15 +31,7 @@ export const AdminHeader = () => {
       </div>
       <div className="flex items-center gap-3">
         <NotificationDropdown />
-        <Button variant="ghost" size="icon" className="text-admin-header-foreground hover:bg-admin-header-foreground/10 relative">
-          <MessageSquare className="h-5 w-5" />
-          <Badge
-            variant="destructive"
-            className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
-          >
-            5
-          </Badge>
-        </Button>
+        <SupportTicketDropdown />
         <Link to="/">
           <Button variant="ghost" size="sm" className="text-admin-header-foreground hover:bg-admin-header-foreground/10">
             <Home className="h-4 w-4 mr-2" />
