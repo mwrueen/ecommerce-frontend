@@ -188,6 +188,20 @@ export const supportTicketsApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['SupportTicket'],
     }),
+
+    // Navbar Endpoints
+    getNavbarCount: builder.query<{ success: boolean; count: number; unread_count?: number; total_unresolved?: number }, {}>({
+      query: () => '/support-tickets/navbar/count',
+      providesTags: ['SupportTicket'],
+    }),
+
+    getNavbarLatest: builder.query<{ success: boolean; data: any[]; count: number }, { limit?: number }>({
+      query: (params) => ({
+        url: '/support-tickets/navbar/latest',
+        params,
+      }),
+      providesTags: ['SupportTicket'],
+    }),
   }),
 });
 
@@ -204,4 +218,6 @@ export const {
   useGetTicketMessagesQuery,
   useSendMessageMutation,
   useMarkMessageAsReadMutation,
+  useGetNavbarCountQuery,
+  useGetNavbarLatestQuery,
 } = supportTicketsApi;
