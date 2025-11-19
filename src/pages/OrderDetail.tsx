@@ -75,15 +75,15 @@ const OrderDetail = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-xl md:text-2xl font-bold">{order.order_number}</h1>
-            <p className="text-muted-foreground">Order Details</p>
+            <h1 className="text-lg md:text-xl font-bold">{order.order_number}</h1>
+            <p className="text-sm text-muted-foreground">Order Details</p>
           </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
           <Card className="md:col-span-2">
             <CardHeader>
-              <CardTitle>Order Items</CardTitle>
+              <CardTitle className="text-lg">Order Items</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {order.order_items?.map((item: any) => (
@@ -144,8 +144,8 @@ const OrderDetail = () => {
           <div className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="h-5 w-5" />
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Package className="h-4 w-4" />
                   Status
                 </CardTitle>
               </CardHeader>
@@ -158,8 +158,8 @@ const OrderDetail = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
                   Shipping Address
                 </CardTitle>
               </CardHeader>
@@ -170,8 +170,8 @@ const OrderDetail = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
                   Order Date
                 </CardTitle>
               </CardHeader>
@@ -186,7 +186,7 @@ const OrderDetail = () => {
             {order.notes && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Order Notes</CardTitle>
+                  <CardTitle className="text-lg">Order Notes</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div 
