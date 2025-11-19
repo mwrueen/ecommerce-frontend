@@ -131,12 +131,11 @@ export default function SupportTicketsManagement() {
                 />
               </div>
 
-              <Select value={filters.status} onValueChange={(value) => setFilters({ ...filters, status: value, page: 1 })}>
+              <Select value={filters.status || undefined} onValueChange={(value) => setFilters({ ...filters, status: value, page: 1 })}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
                   <SelectItem value="open">Open</SelectItem>
                   <SelectItem value="in_progress">In Progress</SelectItem>
                   <SelectItem value="resolved">Resolved</SelectItem>
@@ -144,12 +143,11 @@ export default function SupportTicketsManagement() {
                 </SelectContent>
               </Select>
 
-              <Select value={filters.priority} onValueChange={(value) => setFilters({ ...filters, priority: value, page: 1 })}>
+              <Select value={filters.priority || undefined} onValueChange={(value) => setFilters({ ...filters, priority: value, page: 1 })}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Priority" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Priority</SelectItem>
                   <SelectItem value="low">Low</SelectItem>
                   <SelectItem value="medium">Medium</SelectItem>
                   <SelectItem value="high">High</SelectItem>
@@ -157,12 +155,11 @@ export default function SupportTicketsManagement() {
                 </SelectContent>
               </Select>
 
-              <Select value={filters.category} onValueChange={(value) => setFilters({ ...filters, category: value, page: 1 })}>
+              <Select value={filters.category || undefined} onValueChange={(value) => setFilters({ ...filters, category: value, page: 1 })}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
                   <SelectItem value="technical">Technical</SelectItem>
                   <SelectItem value="billing">Billing</SelectItem>
                   <SelectItem value="order">Order</SelectItem>
