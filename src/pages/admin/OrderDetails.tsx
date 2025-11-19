@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useGetOrderQuery, useUpdateOrderStatusMutation, useDeleteOrderMutation } from '@/store/api/ordersApi';
+import { useGetOrderQuery, useUpdateOrderStatusMutation, useDeleteOrderMutation, useCancelOrderMutation } from '@/store/api/ordersApi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Trash2, Package, User, MapPin, Calendar } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ArrowLeft, Trash2, Package, User, MapPin, Calendar, XCircle, Clock, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
+import { CancelOrderDialog } from '@/components/CancelOrderDialog';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
@@ -26,9 +28,15 @@ const OrderDetails = () => {
   const { data: orderData, isLoading } = useGetOrderQuery(id);
   const [updateStatus, { isLoading: isUpdating }] = useUpdateOrderStatusMutation();
   const [deleteOrder, { isLoading: isDeleting }] = useDeleteOrderMutation();
+  const [cancelOrder] = useCancelOrderMutation();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const order = orderData?.order;
+
+  const canAdminCancel = order?.status === 'pending' || order?.status === 'processing';
+  const hasPendingCancellationRequest = !!order?.cancellation_requested_at && order?.status !== 'cancelled';
 
   // Define valid status transitions based on current status
   const getValidNextStatuses = (currentStatus: string): string[] => {
@@ -58,6 +66,19 @@ const OrderDetails = () => {
       navigate('/admin/orders');
     } catch (error: any) {
       toast.error(error?.data?.message || 'Failed to delete order');
+    }
+  };
+
+  const handleCancelOrder = async (reason: string) => {
+    try {
+      setIsProcessing(true);
+      await cancelOrder({ id: parseInt(id!), reason }).unwrap();
+      toast.success('Order cancelled successfully');
+      setShowCancelDialog(false);
+    } catch (error: any) {
+      toast.error(error?.data?.message || 'Failed to cancel order');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -118,6 +139,16 @@ const OrderDetails = () => {
             </div>
           </div>
           <div className="flex gap-2">
+            {canAdminCancel && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setShowCancelDialog(true)}
+              >
+                <XCircle className="h-4 w-4 mr-2" />
+                Cancel Order
+              </Button>
+            )}
             {order.status !== 'delivered' && (
               <Button
                 variant="destructive"
@@ -132,6 +163,46 @@ const OrderDetails = () => {
           </div>
         </div>
       </div>
+
+      {hasPendingCancellationRequest && (
+        <Alert className="border-yellow-500/50 bg-yellow-500/10">
+          <Clock className="h-4 w-4 text-yellow-600" />
+          <AlertDescription className="text-yellow-600">
+            <strong>Pending Cancellation Request</strong>
+            <span className="block mt-1">
+              Customer has requested to cancel this order. Review the request in{' '}
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-yellow-700 underline"
+                onClick={() => navigate('/admin/cancellation-requests')}
+              >
+                Cancellation Requests
+              </Button>
+            </span>
+            {order.cancellation_reason && (
+              <span className="block mt-2 text-sm">Reason: {order.cancellation_reason}</span>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {order.status === 'cancelled' && (
+        <Alert className="border-red-500/50 bg-red-500/10">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-600">
+            <strong>Order Cancelled</strong>
+            {order.cancelled_at && (
+              <span className="block text-sm">
+                Cancelled on {format(new Date(order.cancelled_at), 'PPP')}
+                {order.cancelled_by && ` by ${order.cancelled_by}`}
+              </span>
+            )}
+            {order.cancellation_reason && (
+              <span className="block mt-1 text-sm">Reason: {order.cancellation_reason}</span>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Content - Order Items */}
@@ -375,6 +446,17 @@ const OrderDetails = () => {
         onConfirm={handleDelete}
         title="Delete Order"
         description={`Are you sure you want to delete order ${order.order_number}? This action cannot be undone and will release all reserved stock.`}
+        variant="destructive"
+        confirmText="Delete Order"
+      />
+
+      <CancelOrderDialog
+        open={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+        onConfirm={handleCancelOrder}
+        isLoading={isProcessing}
+        mode="cancel"
+        orderNumber={order.order_number}
       />
     </div>
   );

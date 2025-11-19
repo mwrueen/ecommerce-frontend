@@ -60,6 +60,60 @@ export const ordersApi = apiSlice.injectEndpoints({
       },
       providesTags: ['Order'],
     }),
+    // Customer cancellation endpoints
+    requestOrderCancellation: builder.mutation({
+      query: ({ id, reason }) => ({
+        url: `/orders/${id}/request-cancellation`,
+        method: 'POST',
+        body: { reason },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: 'Order', id }, 'Order'],
+    }),
+    cancelOrder: builder.mutation({
+      query: ({ id, reason }) => ({
+        url: `/orders/${id}/cancel`,
+        method: 'POST',
+        body: { reason },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: 'Order', id }, 'Order'],
+    }),
+    // Admin cancellation endpoints
+    getPendingCancellations: builder.query({
+      query: (params: {
+        customer_id?: number;
+        search?: string;
+        date_from?: string;
+        date_to?: string;
+        sort_by?: string;
+        sort_order?: string;
+        per_page?: number;
+        page?: number;
+      } = {}) => {
+        const queryParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined) {
+            queryParams.append(key, value.toString());
+          }
+        });
+        return `/orders/pending-cancellations?${queryParams.toString()}`;
+      },
+      providesTags: ['Order'],
+    }),
+    approveCancellation: builder.mutation({
+      query: (id) => ({
+        url: `/orders/${id}/approve-cancellation`,
+        method: 'POST',
+      }),
+      invalidatesTags: (result, error, id) => [{ type: 'Order', id }, 'Order'],
+    }),
+    rejectCancellation: builder.mutation({
+      query: ({ id, admin_note }) => ({
+        url: `/orders/${id}/reject-cancellation`,
+        method: 'POST',
+        body: { admin_note },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: 'Order', id }, 'Order'],
+    }),
   }),
 });
 
@@ -70,4 +124,9 @@ export const {
   useUpdateOrderStatusMutation,
   useDeleteOrderMutation,
   useGetOrderStatsQuery,
+  useRequestOrderCancellationMutation,
+  useCancelOrderMutation,
+  useGetPendingCancellationsQuery,
+  useApproveCancellationMutation,
+  useRejectCancellationMutation,
 } = ordersApi;
