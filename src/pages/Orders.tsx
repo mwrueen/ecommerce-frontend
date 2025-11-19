@@ -52,22 +52,24 @@ const Orders = () => {
   }
 
   return (
-    <div className="min-h-screen py-8">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">My Orders</h1>
-            <p className="text-muted-foreground">Track and manage your orders</p>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 py-12">
+      <div className="container mx-auto px-4 max-w-7xl">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+          <div className="space-y-2">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              My Orders
+            </h1>
+            <p className="text-lg text-muted-foreground">Track and manage all your purchases in one place</p>
           </div>
-          <Button onClick={() => navigate('/products')}>
-            <ShoppingBag className="h-4 w-4 mr-2" />
+          <Button onClick={() => navigate('/products')} size="lg" className="gap-2">
+            <ShoppingBag className="h-5 w-5" />
             Continue Shopping
           </Button>
         </div>
 
-        <div className="mb-6">
+        <div className="flex items-center justify-between mb-8">
           <Select value={status || 'all'} onValueChange={(value) => setStatus(value === 'all' ? '' : value)}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-64 h-11">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
@@ -79,6 +81,11 @@ const Orders = () => {
               <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
+          {ordersData?.data && ordersData.data.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              Showing {ordersData.data.length} of {ordersData.pagination?.total || 0} orders
+            </p>
+          )}
         </div>
 
         {isLoading ? (
