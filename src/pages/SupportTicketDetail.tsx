@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import Layout from '@/components/Layout';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -84,29 +84,25 @@ export default function SupportTicketDetail() {
 
   if (isLoading) {
     return (
-      <Layout>
-        <div className="container mx-auto px-4 py-8">
-          <p className="text-center text-muted-foreground">Loading ticket...</p>
-        </div>
-      </Layout>
+      <div className="container mx-auto px-4 py-8">
+        <p className="text-center text-muted-foreground">Loading ticket...</p>
+      </div>
     );
   }
 
   if (!ticket) {
     return (
-      <Layout>
-        <div className="container mx-auto px-4 py-8">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>Ticket not found</AlertDescription>
-          </Alert>
-        </div>
-      </Layout>
+      <div className="container mx-auto px-4 py-8">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>Ticket not found</AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
   return (
-    <Layout>
+    <>
       <Helmet>
         <title>
           {ticket.subject} - Support Ticket - {settings?.meta_title || settings?.title || ''}
@@ -257,6 +253,6 @@ export default function SupportTicketDetail() {
           </Card>
         )}
       </div>
-    </Layout>
+    </>
   );
 }

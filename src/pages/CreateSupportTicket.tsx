@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import Layout from '@/components/Layout';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -58,7 +58,7 @@ export default function CreateSupportTicket() {
   };
 
   return (
-    <Layout>
+    <>
       <Helmet>
         <title>Create Support Ticket - {settings?.meta_title || settings?.title || ''}</title>
       </Helmet>
@@ -169,6 +169,6 @@ export default function CreateSupportTicket() {
           </CardContent>
         </Card>
       </div>
-    </Layout>
+    </>
   );
 }
