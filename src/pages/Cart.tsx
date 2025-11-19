@@ -142,13 +142,34 @@ const Cart = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Shipping</span>
-                    <span className="text-green-600">Free</span>
+                    {total >= parseFloat(settings?.data?.free_shipping_threshold || '0') ? (
+                      <span className="text-green-600 font-medium">Free</span>
+                    ) : (
+                      <span>
+                        {formatPrice(
+                          settings?.data?.shipping_cost || '0',
+                          settings?.data?.currency_symbol,
+                          settings?.data?.currency_position,
+                          settings?.data?.formatted_currency
+                        )}
+                      </span>
+                    )}
                   </div>
+                  {total < parseFloat(settings?.data?.free_shipping_threshold || '0') && (
+                    <div className="text-xs text-muted-foreground px-1">
+                      Add {formatPrice(
+                        parseFloat(settings?.data?.free_shipping_threshold || '0') - total,
+                        settings?.data?.currency_symbol,
+                        settings?.data?.currency_position,
+                        settings?.data?.formatted_currency
+                      )} more for free shipping
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
-                    <span>Tax</span>
+                    <span>Tax ({settings?.data?.tax_rate || '0'}%{settings?.data?.tax_inclusive ? ' - Inclusive' : ''})</span>
                     <span>
                       {formatPrice(
-                        total * 0.08,
+                        settings?.data?.tax_inclusive ? 0 : (total * (parseFloat(settings?.data?.tax_rate || '0') / 100)),
                         settings?.data?.currency_symbol,
                         settings?.data?.currency_position,
                         settings?.data?.formatted_currency
@@ -163,7 +184,9 @@ const Cart = () => {
                   <span>Total</span>
                   <span className="text-primary">
                     {formatPrice(
-                      total * 1.08,
+                      total + 
+                      (total >= parseFloat(settings?.data?.free_shipping_threshold || '0') ? 0 : parseFloat(settings?.data?.shipping_cost || '0')) +
+                      (settings?.data?.tax_inclusive ? 0 : (total * (parseFloat(settings?.data?.tax_rate || '0') / 100))),
                       settings?.data?.currency_symbol,
                       settings?.data?.currency_position,
                       settings?.data?.formatted_currency
