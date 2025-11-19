@@ -75,7 +75,7 @@ const OrderDetail = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">{order.order_number}</h1>
+            <h1 className="text-xl md:text-2xl font-bold">{order.order_number}</h1>
             <p className="text-muted-foreground">Order Details</p>
           </div>
         </div>
