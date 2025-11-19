@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import Layout from '@/components/Layout';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -43,7 +43,7 @@ export default function SupportTickets() {
   };
 
   return (
-    <Layout>
+    <>
       <Helmet>
         <title>Support Tickets - {settings?.meta_title || settings?.title || ''}</title>
       </Helmet>
@@ -225,6 +225,6 @@ export default function SupportTickets() {
           </>
         )}
       </div>
-    </Layout>
+    </>
   );
 }
