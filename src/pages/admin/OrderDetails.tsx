@@ -260,10 +260,26 @@ const OrderDetails = () => {
               </div>
 
               <div className="border-t bg-muted/20 p-6">
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-medium">${parseFloat(order.total_amount).toFixed(2)}</span>
+                    <span className="font-medium">${parseFloat(order.subtotal || order.total_amount).toFixed(2)}</span>
+                  </div>
+                  {order.discount_amount && parseFloat(order.discount_amount) > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Discount</span>
+                      <span className="font-medium text-green-600">-${parseFloat(order.discount_amount).toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Shipping</span>
+                    <span className="font-medium">${parseFloat(order.shipping_cost || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      Tax ({parseFloat(order.tax_rate || 0).toFixed(2)}%)
+                    </span>
+                    <span className="font-medium">${parseFloat(order.tax_amount || 0).toFixed(2)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
