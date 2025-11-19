@@ -98,7 +98,7 @@ const Login = () => {
               </p>
               <p>
                 Customer?{' '}
-                <Link to="/customer-auth" className="text-primary hover:underline font-medium">
+                <Link to="/customer/login" className="text-primary hover:underline font-medium">
                   Login with Phone
                 </Link>
               </p>
