@@ -26,3 +26,4 @@ export * from '@/store/api/dealsApi';
 export * from '@/store/api/supportTicketsApi';
 export * from '@/store/api/dashboardApi';
 export * from '@/store/api/exportsApi';
+export * from '@/store/api/landingApi';

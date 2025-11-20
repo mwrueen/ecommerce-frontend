@@ -13,6 +13,7 @@ interface RichTextEditorProps {
 
 const RichTextEditor = React.forwardRef<ReactQuill, RichTextEditorProps>(
   ({ value, onChange, placeholder, className, disabled }, ref) => {
+
     const modules = useMemo(
       () => ({
         toolbar: [

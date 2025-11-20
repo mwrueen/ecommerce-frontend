@@ -82,10 +82,10 @@ export const usersApi = apiSlice.injectEndpoints({
       invalidatesTags: ['User'],
     }),
     updateProfilePassword: builder.mutation({
-      query: ({ current_password, password, password_confirmation }) => ({
+      query: (data) => ({
         url: '/profile/password',
         method: 'PUT',
-        body: { current_password, password, password_confirmation },
+        body: data,
       }),
     }),
   }),

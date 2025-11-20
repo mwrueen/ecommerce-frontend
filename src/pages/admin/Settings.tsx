@@ -17,7 +17,28 @@ export default function Settings() {
   const { data: settingsData, isLoading } = useGetSiteSettingsQuery({});
   const [updateSettings, { isLoading: isUpdating }] = useUpdateSiteSettingsMutation();
   const [removeSliderItems] = useRemoveSliderItemsMutation();
-  const { register, handleSubmit, reset, watch, setValue } = useForm();
+  const { register, handleSubmit, reset, watch, setValue } = useForm({
+    defaultValues: {
+      store_enabled: false,
+      store_mode: 'live',
+      email_notifications: false,
+      sms_notifications: false,
+      currency_position: 'before',
+      tax_inclusive: false,
+      payment_methods: [],
+      shipping_methods: [],
+      accepted_countries: [],
+      business_hours: {
+        monday: { closed: false, open: '09:00', close: '17:00' },
+        tuesday: { closed: false, open: '09:00', close: '17:00' },
+        wednesday: { closed: false, open: '09:00', close: '17:00' },
+        thursday: { closed: false, open: '09:00', close: '17:00' },
+        friday: { closed: false, open: '09:00', close: '17:00' },
+        saturday: { closed: false, open: '09:00', close: '17:00' },
+        sunday: { closed: false, open: '09:00', close: '17:00' },
+      },
+    },
+  });
   
   const [headerLogoFile, setHeaderLogoFile] = useState<File | null>(null);
   const [footerLogoFile, setFooterLogoFile] = useState<File | null>(null);
@@ -32,7 +53,36 @@ export default function Settings() {
 
   useEffect(() => {
     if (settingsData?.data) {
-      reset(settingsData.data);
+      // Merge with defaults to ensure all fields are controlled
+      const mergedData = {
+        store_enabled: settingsData.data.store_enabled ?? false,
+        store_mode: settingsData.data.store_mode || 'live',
+        email_notifications: settingsData.data.email_notifications ?? false,
+        sms_notifications: settingsData.data.sms_notifications ?? false,
+        currency_position: settingsData.data.currency_position || 'before',
+        tax_inclusive: settingsData.data.tax_inclusive ?? false,
+        payment_methods: Array.isArray(settingsData.data.payment_methods) 
+          ? settingsData.data.payment_methods 
+          : [],
+        shipping_methods: Array.isArray(settingsData.data.shipping_methods) 
+          ? settingsData.data.shipping_methods 
+          : [],
+        accepted_countries: Array.isArray(settingsData.data.accepted_countries) 
+          ? settingsData.data.accepted_countries 
+          : [],
+        business_hours: settingsData.data.business_hours || {
+          monday: { closed: false, open: '09:00', close: '17:00' },
+          tuesday: { closed: false, open: '09:00', close: '17:00' },
+          wednesday: { closed: false, open: '09:00', close: '17:00' },
+          thursday: { closed: false, open: '09:00', close: '17:00' },
+          friday: { closed: false, open: '09:00', close: '17:00' },
+          saturday: { closed: false, open: '09:00', close: '17:00' },
+          sunday: { closed: false, open: '09:00', close: '17:00' },
+        },
+        ...settingsData.data,
+      };
+      
+      reset(mergedData);
       setHeaderLogoPreview(settingsData.data.header_logo || '');
       setFooterLogoPreview(settingsData.data.footer_logo || '');
       setFaviconPreview(settingsData.data.favicon || '');
@@ -365,14 +415,14 @@ export default function Settings() {
                 <div className="flex items-center space-x-2">
                   <Switch 
                     id="store_enabled" 
-                    checked={watch('store_enabled')}
+                    checked={!!watch('store_enabled')}
                     onCheckedChange={(checked) => setValue('store_enabled', checked)}
                   />
                   <Label htmlFor="store_enabled">Store Enabled</Label>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="store_mode">Store Mode</Label>
-                  <Select value={watch('store_mode')} onValueChange={(value) => setValue('store_mode', value)}>
+                  <Select value={watch('store_mode') || 'live'} onValueChange={(value) => setValue('store_mode', value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select store mode" />
                     </SelectTrigger>
@@ -682,7 +732,7 @@ export default function Settings() {
                   <div className="flex items-center space-x-2">
                     <Switch 
                       id="email_notifications" 
-                      checked={watch('email_notifications')}
+                      checked={!!watch('email_notifications')}
                       onCheckedChange={(checked) => setValue('email_notifications', checked)}
                     />
                     <Label htmlFor="email_notifications">Email Notifications</Label>
@@ -690,7 +740,7 @@ export default function Settings() {
                   <div className="flex items-center space-x-2">
                     <Switch 
                       id="sms_notifications" 
-                      checked={watch('sms_notifications')}
+                      checked={!!watch('sms_notifications')}
                       onCheckedChange={(checked) => setValue('sms_notifications', checked)}
                     />
                     <Label htmlFor="sms_notifications">SMS Notifications</Label>
@@ -724,7 +774,7 @@ export default function Settings() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="currency_position">Position</Label>
-                    <Select value={watch('currency_position')} onValueChange={(value) => setValue('currency_position', value)}>
+                    <Select value={watch('currency_position') || 'before'} onValueChange={(value) => setValue('currency_position', value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select position" />
                       </SelectTrigger>
@@ -755,7 +805,7 @@ export default function Settings() {
                   <div className="flex items-center space-x-2 pt-8">
                     <Switch 
                       id="tax_inclusive" 
-                      checked={watch('tax_inclusive')}
+                      checked={!!watch('tax_inclusive')}
                       onCheckedChange={(checked) => setValue('tax_inclusive', checked)}
                     />
                     <Label htmlFor="tax_inclusive">Tax Inclusive Prices</Label>
@@ -766,13 +816,16 @@ export default function Settings() {
                   <Label htmlFor="payment_methods">Payment Methods (comma-separated)</Label>
                   <Input 
                     id="payment_methods" 
-                    {...register('payment_methods')} 
                     placeholder="credit_card, paypal, stripe, bank_transfer" 
+                    value={Array.isArray(watch('payment_methods')) 
+                      ? watch('payment_methods').join(', ') 
+                      : (typeof watch('payment_methods') === 'string' 
+                        ? watch('payment_methods') 
+                        : '')}
                     onChange={(e) => {
                       const values = e.target.value.split(',').map(v => v.trim()).filter(Boolean);
                       setValue('payment_methods', values);
                     }}
-                    defaultValue={watch('payment_methods')?.join(', ') || ''}
                   />
                 </div>
 
@@ -780,13 +833,16 @@ export default function Settings() {
                   <Label htmlFor="shipping_methods">Shipping Methods (comma-separated)</Label>
                   <Input 
                     id="shipping_methods" 
-                    {...register('shipping_methods')} 
                     placeholder="standard, express, overnight, pickup" 
+                    value={Array.isArray(watch('shipping_methods')) 
+                      ? watch('shipping_methods').join(', ') 
+                      : (typeof watch('shipping_methods') === 'string' 
+                        ? watch('shipping_methods') 
+                        : '')}
                     onChange={(e) => {
                       const values = e.target.value.split(',').map(v => v.trim()).filter(Boolean);
                       setValue('shipping_methods', values);
                     }}
-                    defaultValue={watch('shipping_methods')?.join(', ') || ''}
                   />
                 </div>
 
@@ -794,13 +850,16 @@ export default function Settings() {
                   <Label htmlFor="accepted_countries">Accepted Countries (comma-separated codes)</Label>
                   <Input 
                     id="accepted_countries" 
-                    {...register('accepted_countries')} 
                     placeholder="US, CA, GB, AU, DE, FR" 
+                    value={Array.isArray(watch('accepted_countries')) 
+                      ? watch('accepted_countries').join(', ') 
+                      : (typeof watch('accepted_countries') === 'string' 
+                        ? watch('accepted_countries') 
+                        : '')}
                     onChange={(e) => {
                       const values = e.target.value.split(',').map(v => v.trim()).filter(Boolean);
                       setValue('accepted_countries', values);
                     }}
-                    defaultValue={watch('accepted_countries')?.join(', ') || ''}
                   />
                 </div>
 
@@ -828,12 +887,12 @@ export default function Settings() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Switch 
-                        checked={!watch(`business_hours.${day}.closed`)}
+                        checked={!watch(`business_hours.${day}.closed`) ?? false}
                         onCheckedChange={(checked) => setValue(`business_hours.${day}.closed`, !checked)}
                       />
                       <Label>Open</Label>
                     </div>
-                    {!watch(`business_hours.${day}.closed`) && (
+                    {!(watch(`business_hours.${day}.closed`) ?? false) && (
                       <>
                         <Input 
                           type="time" 

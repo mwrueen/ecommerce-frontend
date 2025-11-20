@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useState, useEffect, useRef } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -249,8 +250,30 @@ const Header = () => {
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
+                <Button
+                  variant="ghost"
+                  className="h-10 gap-3 rounded-full px-2 pr-3 hover:bg-accent"
+                >
+                  <Avatar className="h-9 w-9">
+                    {user?.profile_picture_url || user?.profile_picture ? (
+                      <AvatarImage
+                        src={user.profile_picture_url || user.profile_picture || ''}
+                        alt={user?.name || 'User avatar'}
+                      />
+                    ) : (
+                      <AvatarFallback className="bg-secondary">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div className="hidden md:flex flex-col items-start text-left">
+                    <span className="text-sm font-medium text-foreground">
+                      {user?.name || 'Account'}
+                    </span>
+                    <span className="text-xs text-muted-foreground capitalize">
+                      {user?.role || ''}
+                    </span>
+                  </div>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">

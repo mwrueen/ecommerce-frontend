@@ -2,13 +2,6 @@ import { apiSlice } from './apiSlice';
 
 export const customerAuthApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    sendOtp: builder.mutation({
-      query: (data) => ({
-        url: '/customer/send-otp',
-        method: 'POST',
-        body: data,
-      }),
-    }),
     registerCustomer: builder.mutation({
       query: (data) => ({
         url: '/customer/register',
@@ -19,6 +12,20 @@ export const customerAuthApi = apiSlice.injectEndpoints({
     loginCustomer: builder.mutation({
       query: (data) => ({
         url: '/customer/login',
+        method: 'POST',
+        body: data,
+      }),
+    }),
+    forgotPassword: builder.mutation({
+      query: (data) => ({
+        url: '/customer/forgot-password',
+        method: 'POST',
+        body: data,
+      }),
+    }),
+    resetPassword: builder.mutation({
+      query: (data) => ({
+        url: '/customer/reset-password',
         method: 'POST',
         body: data,
       }),
@@ -45,9 +52,10 @@ export const customerAuthApi = apiSlice.injectEndpoints({
 });
 
 export const {
-  useSendOtpMutation,
   useRegisterCustomerMutation,
   useLoginCustomerMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
   useGetCustomerProfileQuery,
   useUpdateCustomerProfileMutation,
   useLogoutCustomerMutation,
