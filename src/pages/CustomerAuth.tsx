@@ -20,6 +20,9 @@ import { Mail, Lock, ShieldCheck, ArrowLeft } from 'lucide-react';
 
 type AuthView = 'login' | 'register' | 'forgot-password' | 'reset-password';
 
+const DEMO_CUSTOMER_EMAIL = 'jane@example.com';
+const DEMO_CUSTOMER_PASSWORD = 'password';
+
 const CustomerAuth = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -45,6 +48,16 @@ const CustomerAuth = () => {
       navigate('/');
     }
   }, [isAuthenticated, user, navigate]);
+
+  useEffect(() => {
+    if (view === 'login' && email === '' && password === '') {
+      setEmail(DEMO_CUSTOMER_EMAIL);
+      setPassword(DEMO_CUSTOMER_PASSWORD);
+    } else if (view !== 'login' && email === DEMO_CUSTOMER_EMAIL && password === DEMO_CUSTOMER_PASSWORD) {
+      setEmail('');
+      setPassword('');
+    }
+  }, [view, email, password]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
