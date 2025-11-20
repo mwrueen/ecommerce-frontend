@@ -101,14 +101,23 @@ export default function CouponForm() {
 
   const onSubmit = async (data: CouponFormData) => {
     try {
+      // Prepare data: convert 0 to undefined for optional numeric fields
+      const submitData = {
+        ...data,
+        minimum_purchase: data.minimum_purchase && data.minimum_purchase > 0 ? data.minimum_purchase : undefined,
+        maximum_discount: data.maximum_discount && data.maximum_discount > 0 ? data.maximum_discount : undefined,
+        usage_limit: data.usage_limit && data.usage_limit > 0 ? data.usage_limit : undefined,
+        usage_limit_per_customer: data.usage_limit_per_customer && data.usage_limit_per_customer > 0 ? data.usage_limit_per_customer : undefined,
+      };
+
       if (isEdit) {
-        await updateCoupon({ id: parseInt(id!), ...data }).unwrap();
+        await updateCoupon({ id: parseInt(id!), ...submitData }).unwrap();
         toast({
           title: 'Success',
           description: 'Coupon updated successfully',
         });
       } else {
-        await createCoupon(data).unwrap();
+        await createCoupon(submitData).unwrap();
         toast({
           title: 'Success',
           description: 'Coupon created successfully',
@@ -116,6 +125,22 @@ export default function CouponForm() {
       }
       navigate('/admin/coupons');
     } catch (error: any) {
+      // Handle API validation errors
+      if (error?.data?.errors) {
+        const apiErrors = error.data.errors;
+        // Set field-level errors from API response
+        Object.keys(apiErrors).forEach((fieldName) => {
+          const fieldErrors = apiErrors[fieldName];
+          if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
+            // Use the first error message for each field
+            form.setError(fieldName as keyof CouponFormData, {
+              type: 'server',
+              message: fieldErrors[0],
+            });
+          }
+        });
+      }
+      
       toast({
         title: 'Error',
         description: error?.data?.message || `Failed to ${isEdit ? 'update' : 'create'} coupon`,
@@ -153,7 +178,9 @@ export default function CouponForm() {
                   name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Coupon Code</FormLabel>
+                      <FormLabel>
+                        Coupon Code <span className="text-destructive">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="SAVE20" className="font-mono uppercase" />
                       </FormControl>
@@ -169,7 +196,9 @@ export default function CouponForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>
+                        Name <span className="text-destructive">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="20% Off Summer Sale" />
                       </FormControl>
@@ -200,7 +229,9 @@ export default function CouponForm() {
                   render={({ field }) => (
                     <FormItem className="flex items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-base">Active</FormLabel>
+                        <FormLabel className="text-base">
+                          Active <span className="text-destructive">*</span>
+                        </FormLabel>
                         <FormDescription>
                           Make this coupon available for use
                         </FormDescription>
@@ -217,7 +248,9 @@ export default function CouponForm() {
                   render={({ field }) => (
                     <FormItem className="flex items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-base">First Order Only</FormLabel>
+                        <FormLabel className="text-base">
+                          First Order Only <span className="text-destructive">*</span>
+                        </FormLabel>
                         <FormDescription>
                           Restrict to first-time customers
                         </FormDescription>
@@ -243,7 +276,9 @@ export default function CouponForm() {
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Discount Type</FormLabel>
+                      <FormLabel>
+                        Discount Type <span className="text-destructive">*</span>
+                      </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -264,7 +299,9 @@ export default function CouponForm() {
                   name="discount_value"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Discount Value</FormLabel>
+                      <FormLabel>
+                        Discount Value <span className="text-destructive">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -343,7 +380,11 @@ export default function CouponForm() {
                         <Input
                           type="number"
                           {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          value={field.value ?? ''}
+                          onChange={(e) => {
+                            const value = e.target.value === '' ? undefined : parseInt(e.target.value);
+                            field.onChange(isNaN(value as number) ? 0 : value);
+                          }}
                         />
                       </FormControl>
                       <FormDescription>Total times coupon can be used</FormDescription>
@@ -361,7 +402,11 @@ export default function CouponForm() {
                         <Input
                           type="number"
                           {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          value={field.value ?? ''}
+                          onChange={(e) => {
+                            const value = e.target.value === '' ? undefined : parseInt(e.target.value);
+                            field.onChange(isNaN(value as number) ? 0 : value);
+                          }}
                         />
                       </FormControl>
                       <FormDescription>Times each customer can use it</FormDescription>

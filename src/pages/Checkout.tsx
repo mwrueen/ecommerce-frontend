@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store';
-import { clearCart } from '@/store/slices/cartSlice';
+import { clearCart, applyCoupon, removeCoupon } from '@/store/slices/cartSlice';
 import { useCreateOrderMutation } from '@/store/api/ordersApi';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,11 +15,12 @@ import { toast } from 'sonner';
 import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { formatPrice } from '@/lib/currency';
 import { PaymentGateway } from '@/components/PaymentGateway';
+import { CouponInput } from '@/components/CouponInput';
 
 const Checkout = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { items, total } = useSelector((state: RootState) => state.cart);
+  const { items, total, coupon } = useSelector((state: RootState) => state.cart);
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [createOrder, { isLoading }] = useCreateOrderMutation();
   const { data: settings } = useGetPublicSettingsQuery({});
@@ -30,10 +31,11 @@ const Checkout = () => {
   });
   const [showPaymentGateway, setShowPaymentGateway] = useState(false);
 
+  const subtotal = coupon ? coupon.total_after_discount : total;
   const totalAmount = 
-    total + 
-    (total >= parseFloat(settings?.data?.free_shipping_threshold || '0') ? 0 : parseFloat(settings?.data?.shipping_cost || '0')) +
-    (settings?.data?.tax_inclusive ? 0 : (total * (parseFloat(settings?.data?.tax_rate || '0') / 100)));
+    subtotal + 
+    (subtotal >= parseFloat(settings?.data?.free_shipping_threshold || '0') ? 0 : parseFloat(settings?.data?.shipping_cost || '0')) +
+    (settings?.data?.tax_inclusive ? 0 : (subtotal * (parseFloat(settings?.data?.tax_rate || '0') / 100)));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +57,7 @@ const Checkout = () => {
 
   const handlePaymentComplete = async () => {
     try {
-      const orderData = {
+      const orderData: any = {
         customer_id: user.id,
         shipping_address: formData.shipping_address,
         notes: formData.notes,
@@ -64,6 +66,11 @@ const Checkout = () => {
           quantity: item.quantity,
         })),
       };
+
+      // Add coupon code if applied
+      if (coupon?.code) {
+        orderData.coupon_code = coupon.code;
+      }
 
       await createOrder(orderData).unwrap();
       
@@ -141,7 +148,14 @@ const Checkout = () => {
             </Card>
           </div>
 
-          <div className="md:col-span-1">
+          <div className="md:col-span-1 space-y-4">
+            <CouponInput
+              items={items.map((item) => ({ id: item.id, quantity: item.quantity }))}
+              onCouponApplied={(couponData) => dispatch(applyCoupon(couponData))}
+              onCouponRemoved={() => dispatch(removeCoupon())}
+              appliedCoupon={coupon ? { code: coupon.code, discount_amount: coupon.discount_amount } : null}
+            />
+
             <Card>
               <CardHeader>
                 <CardTitle>Order Summary</CardTitle>
@@ -177,9 +191,22 @@ const Checkout = () => {
                       )}
                     </span>
                   </div>
+                  {coupon && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-green-600 dark:text-green-400">Discount ({coupon.code})</span>
+                      <span className="text-green-600 dark:text-green-400 font-semibold">
+                        -{formatPrice(
+                          coupon.discount_amount,
+                          settings?.data?.currency_symbol,
+                          settings?.data?.currency_position,
+                          settings?.data?.formatted_currency
+                        )}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span>Shipping</span>
-                    {total >= parseFloat(settings?.data?.free_shipping_threshold || '0') ? (
+                    {subtotal >= parseFloat(settings?.data?.free_shipping_threshold || '0') ? (
                       <span className="text-green-600 font-medium">Free</span>
                     ) : (
                       <span>
@@ -192,10 +219,10 @@ const Checkout = () => {
                       </span>
                     )}
                   </div>
-                  {total < parseFloat(settings?.data?.free_shipping_threshold || '0') && (
+                  {subtotal < parseFloat(settings?.data?.free_shipping_threshold || '0') && (
                     <div className="text-xs text-muted-foreground px-1">
                       Add {formatPrice(
-                        parseFloat(settings?.data?.free_shipping_threshold || '0') - total,
+                        parseFloat(settings?.data?.free_shipping_threshold || '0') - subtotal,
                         settings?.data?.currency_symbol,
                         settings?.data?.currency_position,
                         settings?.data?.formatted_currency
@@ -206,7 +233,7 @@ const Checkout = () => {
                     <span>Tax ({settings?.data?.tax_rate || '0'}%{settings?.data?.tax_inclusive ? ' - Inclusive' : ''})</span>
                     <span>
                       {formatPrice(
-                        settings?.data?.tax_inclusive ? 0 : (total * (parseFloat(settings?.data?.tax_rate || '0') / 100)),
+                        settings?.data?.tax_inclusive ? 0 : (subtotal * (parseFloat(settings?.data?.tax_rate || '0') / 100)),
                         settings?.data?.currency_symbol,
                         settings?.data?.currency_position,
                         settings?.data?.formatted_currency
@@ -221,9 +248,7 @@ const Checkout = () => {
                   <span>Total</span>
                   <span className="text-primary">
                     {formatPrice(
-                      total + 
-                      (total >= parseFloat(settings?.data?.free_shipping_threshold || '0') ? 0 : parseFloat(settings?.data?.shipping_cost || '0')) +
-                      (settings?.data?.tax_inclusive ? 0 : (total * (parseFloat(settings?.data?.tax_rate || '0') / 100))),
+                      totalAmount,
                       settings?.data?.currency_symbol,
                       settings?.data?.currency_position,
                       settings?.data?.formatted_currency

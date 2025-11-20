@@ -1,17 +1,18 @@
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store';
-import { removeFromCart, updateQuantity } from '@/store/slices/cartSlice';
+import { removeFromCart, updateQuantity, applyCoupon, removeCoupon } from '@/store/slices/cartSlice';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { formatPrice } from '@/lib/currency';
+import { CouponInput } from '@/components/CouponInput';
 
 const Cart = () => {
   const dispatch = useDispatch();
-  const { items, total } = useSelector((state: RootState) => state.cart);
+  const { items, total, coupon } = useSelector((state: RootState) => state.cart);
   const { data: settings } = useGetPublicSettingsQuery({});
 
   if (items.length === 0) {
@@ -122,7 +123,14 @@ const Cart = () => {
             ))}
           </div>
 
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-4">
+            <CouponInput
+              items={items.map((item) => ({ id: item.id, quantity: item.quantity }))}
+              onCouponApplied={(couponData) => dispatch(applyCoupon(couponData))}
+              onCouponRemoved={() => dispatch(removeCoupon())}
+              appliedCoupon={coupon ? { code: coupon.code, discount_amount: coupon.discount_amount } : null}
+            />
+
             <Card>
               <CardContent className="p-6 space-y-4">
                 <h2 className="text-xl font-bold">Order Summary</h2>
@@ -140,9 +148,22 @@ const Cart = () => {
                       )}
                     </span>
                   </div>
+                  {coupon && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-green-600 dark:text-green-400">Discount ({coupon.code})</span>
+                      <span className="text-green-600 dark:text-green-400 font-semibold">
+                        -{formatPrice(
+                          coupon.discount_amount,
+                          settings?.data?.currency_symbol,
+                          settings?.data?.currency_position,
+                          settings?.data?.formatted_currency
+                        )}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span>Shipping</span>
-                    {total >= parseFloat(settings?.data?.free_shipping_threshold || '0') ? (
+                    {(coupon ? coupon.total_after_discount : total) >= parseFloat(settings?.data?.free_shipping_threshold || '0') ? (
                       <span className="text-green-600 font-medium">Free</span>
                     ) : (
                       <span>
@@ -155,10 +176,10 @@ const Cart = () => {
                       </span>
                     )}
                   </div>
-                  {total < parseFloat(settings?.data?.free_shipping_threshold || '0') && (
+                  {(coupon ? coupon.total_after_discount : total) < parseFloat(settings?.data?.free_shipping_threshold || '0') && (
                     <div className="text-xs text-muted-foreground px-1">
                       Add {formatPrice(
-                        parseFloat(settings?.data?.free_shipping_threshold || '0') - total,
+                        parseFloat(settings?.data?.free_shipping_threshold || '0') - (coupon ? coupon.total_after_discount : total),
                         settings?.data?.currency_symbol,
                         settings?.data?.currency_position,
                         settings?.data?.formatted_currency
@@ -169,7 +190,7 @@ const Cart = () => {
                     <span>Tax ({settings?.data?.tax_rate || '0'}%{settings?.data?.tax_inclusive ? ' - Inclusive' : ''})</span>
                     <span>
                       {formatPrice(
-                        settings?.data?.tax_inclusive ? 0 : (total * (parseFloat(settings?.data?.tax_rate || '0') / 100)),
+                        settings?.data?.tax_inclusive ? 0 : ((coupon ? coupon.total_after_discount : total) * (parseFloat(settings?.data?.tax_rate || '0') / 100)),
                         settings?.data?.currency_symbol,
                         settings?.data?.currency_position,
                         settings?.data?.formatted_currency
@@ -184,9 +205,9 @@ const Cart = () => {
                   <span>Total</span>
                   <span className="text-primary">
                     {formatPrice(
-                      total + 
-                      (total >= parseFloat(settings?.data?.free_shipping_threshold || '0') ? 0 : parseFloat(settings?.data?.shipping_cost || '0')) +
-                      (settings?.data?.tax_inclusive ? 0 : (total * (parseFloat(settings?.data?.tax_rate || '0') / 100))),
+                      (coupon ? coupon.total_after_discount : total) + 
+                      ((coupon ? coupon.total_after_discount : total) >= parseFloat(settings?.data?.free_shipping_threshold || '0') ? 0 : parseFloat(settings?.data?.shipping_cost || '0')) +
+                      (settings?.data?.tax_inclusive ? 0 : ((coupon ? coupon.total_after_discount : total) * (parseFloat(settings?.data?.tax_rate || '0') / 100))),
                       settings?.data?.currency_symbol,
                       settings?.data?.currency_position,
                       settings?.data?.formatted_currency
