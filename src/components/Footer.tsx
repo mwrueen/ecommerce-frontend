@@ -20,7 +20,7 @@ const Footer = () => {
               ) : (
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary-dark" />
               )}
-              <span className="text-xl font-bold">{settings?.title || 'ShopHub'}</span>
+              <span className="text-xl font-bold">{settings?.title || 'eCommerce'}</span>
             </div>
             <div 
               className="text-sm text-muted-foreground prose prose-sm max-w-none"
@@ -106,7 +106,7 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-center md:text-left">
               <p className="text-sm text-muted-foreground">
-                © {new Date().getFullYear()} {settings?.business_name || settings?.title || 'ShopHub'}. All rights reserved.
+                © {new Date().getFullYear()} {settings?.business_name || settings?.title || 'eCommerce'}. All rights reserved.
               </p>
               {(settings?.email || settings?.contact_number) && (
                 <p className="text-sm text-muted-foreground mt-1">

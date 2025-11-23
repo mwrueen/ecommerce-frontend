@@ -113,7 +113,7 @@ const Header = () => {
             ) : (
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary-dark" />
             )}
-            <span className="text-xl font-bold text-foreground">{settings?.title || 'ShopHub'}</span>
+            <span className="text-xl font-bold text-foreground">{settings?.title || 'eCommerce'}</span>
           </Link>
           
           <nav className="hidden md:flex items-center gap-6">

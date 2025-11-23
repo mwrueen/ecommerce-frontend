@@ -24,7 +24,7 @@ const Layout = ({ children }: { children?: React.ReactNode }) => {
   return (
     <>
       <Helmet>
-        <title>{settings?.meta_title || settings?.title || 'ShopHub'}</title>
+        <title>{settings?.meta_title || settings?.title || 'eCommerce'}</title>
         <meta name="description" content={settings?.meta_description || 'Shop the best products online'} />
         <meta name="keywords" content={settings?.meta_keywords || 'ecommerce, online shopping, products'} />
         {settings?.google_analytics_id && (
