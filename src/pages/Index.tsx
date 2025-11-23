@@ -389,7 +389,7 @@ const Index = () => {
               {topSellingProducts.slice(0, 8).map((product) => (
                 <div key={product.id} className="relative">
                   <ProductCard product={product} />
-                  {product.total_sold && product.total_sold > 0 && (
+                  {product.total_sold > 0 && (
                     <Badge className="absolute top-2 left-2 bg-green-500 hover:bg-green-600">
                       {product.total_sold} sold
                     </Badge>
