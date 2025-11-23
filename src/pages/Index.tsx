@@ -297,7 +297,7 @@ const Index = () => {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 md:gap-6">
               {featuredCategories.slice(0, 8).map((category) => (
-                <Link key={category.id} to={`/categories/${category.slug}`}>
+                <Link key={category.id} to={`/products?category=${category.slug}`}>
                   <Card className="group hover:shadow-lg transition-all duration-300 hover:scale-105 h-full">
                     <CardContent className="p-6 text-center">
                       <div className="mb-4 mx-auto w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">

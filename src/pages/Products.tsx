@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useGetProductsQuery } from '@/store/api/productsApi';
 import { useGetCategoriesQuery } from '@/store/api/categoriesApi';
 import ProductCard from '@/components/ProductCard';
@@ -12,6 +13,7 @@ import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { formatPrice } from '@/lib/currency';
 
 const Products = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(1);
   const [categoryId, setCategoryId] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<string>('created_at');
@@ -48,9 +50,47 @@ const Products = () => {
     sort_order: 'asc'
   });
 
+  // Read category from URL parameter and set categoryId
+  useEffect(() => {
+    if (!categoriesData?.data) return;
+    
+    const categorySlug = searchParams.get('category');
+    if (categorySlug) {
+      const category = categoriesData.data.find((c: any) => c.slug === categorySlug);
+      if (category) {
+        setCategoryId((prevId) => {
+          if (prevId !== category.id) {
+            setPage(1);
+            return category.id;
+          }
+          return prevId;
+        });
+      }
+    } else {
+      setCategoryId((prevId) => {
+        if (prevId !== null) {
+          setPage(1);
+          return null;
+        }
+        return prevId;
+      });
+    }
+  }, [searchParams, categoriesData]);
+
   const handleCategoryClick = (id: number | null) => {
     setCategoryId(id);
     setPage(1);
+    // Update URL to reflect category filter
+    if (id && categoriesData?.data) {
+      const category = categoriesData.data.find((c: any) => c.id === id);
+      if (category) {
+        searchParams.set('category', category.slug);
+        setSearchParams(searchParams, { replace: true });
+      }
+    } else {
+      searchParams.delete('category');
+      setSearchParams(searchParams, { replace: true });
+    }
   };
 
   const handleSliderChange = (values: number[]) => {

@@ -16,8 +16,8 @@ export default function Categories() {
 
   const categories = data?.data || [];
 
-  const handleShowMore = (categoryId: number) => {
-    navigate(`/products?category_id=${categoryId}`);
+  const handleShowMore = (categorySlug: string) => {
+    navigate(`/products?category=${categorySlug}`);
   };
 
   if (isLoading) {
@@ -88,7 +88,7 @@ export default function Categories() {
                   {category.products.length > 0 && (
                     <Button
                       variant="outline"
-                      onClick={() => handleShowMore(category.id)}
+                      onClick={() => handleShowMore(category.slug)}
                       className="gap-2"
                     >
                       View All
@@ -110,7 +110,7 @@ export default function Categories() {
                     {category.products.length >= 8 && (
                       <div className="flex justify-center pt-4">
                         <Button
-                          onClick={() => handleShowMore(category.id)}
+                          onClick={() => handleShowMore(category.slug)}
                           variant="secondary"
                           size="lg"
                           className="gap-2"

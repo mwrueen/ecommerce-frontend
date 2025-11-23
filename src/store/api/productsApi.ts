@@ -7,6 +7,7 @@ export const productsApi = apiSlice.injectEndpoints({
         page?: number; 
         per_page?: number;
         category_id?: number;
+        category?: string;
         min_price?: string;
         max_price?: string;
         sort_by?: string;
@@ -16,6 +17,7 @@ export const productsApi = apiSlice.injectEndpoints({
         if (params.page) queryString.append('page', params.page.toString());
         if (params.per_page) queryString.append('per_page', params.per_page.toString());
         if (params.category_id) queryString.append('category_id', params.category_id.toString());
+        if (params.category) queryString.append('category', params.category);
         if (params.min_price) queryString.append('min_price', params.min_price);
         if (params.max_price) queryString.append('max_price', params.max_price);
         if (params.sort_by) queryString.append('sort_by', params.sort_by);
