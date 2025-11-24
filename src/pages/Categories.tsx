@@ -43,19 +43,21 @@ export default function Categories() {
         />
       </Helmet>
 
-      <div className="container mx-auto px-4 py-12">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Shop by Category</h1>
-          <p className="text-muted-foreground text-lg">
-            Explore our curated collections and discover products that match your style
-          </p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white py-12">
+        <div className="container mx-auto px-4 space-y-12">
+          {/* Header */}
+          <section className="rounded-3xl border border-slate-100 bg-white/95 p-8 text-center shadow-sm">
+            <p className="text-sm font-semibold uppercase tracking-wide text-primary mb-3">Shop by Category</p>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">Explore curated collections</h1>
+            <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
+              Browse lifestyle, tech, and essentials grouped into beautiful collections designed to inspire your next purchase.
+            </p>
+          </section>
 
-        {/* Categories with Products */}
-        <div className="space-y-16">
+          {/* Categories with Products */}
+          <div className="space-y-10">
           {categories.length === 0 ? (
-            <Card className="p-12 text-center">
+            <Card className="p-12 text-center rounded-3xl border border-slate-100 bg-white/90">
               <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-xl font-semibold mb-2">No Categories Available</h3>
               <p className="text-muted-foreground">
@@ -64,17 +66,25 @@ export default function Categories() {
             </Card>
           ) : (
             categories.map((category: any) => (
-              <div key={category.id} className="space-y-6">
+              <section
+                key={category.id}
+                className="rounded-3xl border border-slate-100 bg-white p-6 md:p-8 shadow-sm space-y-6"
+              >
                 {/* Category Header */}
-                <div className="flex items-center justify-between border-b pb-4">
-                  <div className="flex items-center gap-4">
-                    {category.image_url && (
-                      <img
-                        src={category.full_image_url || category.image_url}
-                        alt={category.name}
-                        className="h-16 w-16 rounded-lg object-cover"
-                      />
-                    )}
+                <div className="flex flex-col gap-4 border-b pb-4 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-start gap-4">
+                    <div className="relative h-16 w-16 shrink-0 rounded-2xl bg-primary/10 p-1.5 ring-2 ring-primary/10">
+                      {category.image_url ? (
+                        <img
+                          src={category.full_image_url || category.image_url}
+                          alt={category.name}
+                          className="h-full w-full rounded-2xl object-cover"
+                        />
+                      ) : (
+                        <Package className="h-full w-full text-primary" />
+                      )}
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/20 to-transparent" />
+                    </div>
                     <div>
                       <h2 className="text-2xl font-bold">{category.name}</h2>
                       {category.description && (
@@ -87,9 +97,9 @@ export default function Categories() {
                   </div>
                   {category.products.length > 0 && (
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       onClick={() => handleShowMore(category.slug)}
-                      className="gap-2"
+                      className="gap-2 rounded-full"
                     >
                       View All
                       <ArrowRight className="h-4 w-4" />
@@ -100,7 +110,7 @@ export default function Categories() {
                 {/* Products Grid */}
                 {category.products.length > 0 ? (
                   <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                       {category.products.map((product: any) => (
                         <ProductCard key={product.id} product={product} />
                       ))}
@@ -111,9 +121,9 @@ export default function Categories() {
                       <div className="flex justify-center pt-4">
                         <Button
                           onClick={() => handleShowMore(category.slug)}
-                          variant="secondary"
+                          variant="outline"
                           size="lg"
-                          className="gap-2"
+                          className="gap-2 rounded-full"
                         >
                           Show More from {category.name}
                           <ArrowRight className="h-4 w-4" />
@@ -122,27 +132,28 @@ export default function Categories() {
                     )}
                   </>
                 ) : (
-                  <Card className="p-8 text-center">
+                  <Card className="p-8 text-center rounded-2xl border border-slate-100 bg-slate-50">
                     <Package className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
                     <p className="text-muted-foreground">
                       No products available in this category yet.
                     </p>
                   </Card>
                 )}
-              </div>
+              </section>
             ))
           )}
         </div>
 
         {/* Browse All Products Link */}
-        <div className="mt-16 text-center">
+        <div className="text-center">
           <Link to="/products">
-            <Button size="lg" variant="outline" className="gap-2">
+            <Button size="lg" variant="outline" className="gap-3 rounded-full px-8">
               Browse All Products
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </div>
+      </div>
       </div>
     </>
   );

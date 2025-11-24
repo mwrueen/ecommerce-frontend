@@ -35,11 +35,11 @@ const Index = () => {
   const sliderImages = heroSection?.slider_images || [];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white">
       {/* Hero Slider Section */}
       {sliderImages.length > 0 && (
         <section className="w-full relative">
-          <div className="container mx-auto px-4 py-6 md:py-8">
+          <div className="container mx-auto px-4 py-6 md:py-10">
             <Carousel
               opts={{
                 align: "start",
@@ -53,62 +53,57 @@ const Index = () => {
               ]}
               className="w-full"
             >
-              <CarouselContent>
-                {sliderImages.map((slider, index) => (
-                  <CarouselItem key={index}>
-                    <div className="relative w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px] rounded-xl overflow-hidden group">
-                      {slider.hyperlink ? (
-                        <Link to={slider.hyperlink} className="block w-full h-full">
-                          <img
-                            src={slider.image}
-                            alt={slider.title || `Slider ${index + 1}`}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          />
-                          {(slider.title || slider.subtitle) && (
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end">
-                              <div className="p-6 md:p-10 lg:p-12 w-full">
-                                {slider.title && (
-                                  <h2 className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-3 drop-shadow-2xl">
-                                    {slider.title}
-                                  </h2>
-                                )}
-                                {slider.subtitle && (
-                                  <p className="text-white/95 text-base sm:text-lg md:text-xl lg:text-2xl drop-shadow-lg max-w-2xl">
-                                    {slider.subtitle}
-                                  </p>
-                                )}
-                              </div>
+              <CarouselContent className="rounded-3xl border border-slate-100 bg-white shadow-xl">
+                {sliderImages.map((slider, index) => {
+                  const slideBody = (
+                    <>
+                      <img
+                        src={slider.image}
+                        alt={slider.title || `Slider ${index + 1}`}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                      {(slider.title || slider.subtitle) && (
+                        <div className="absolute inset-x-0 bottom-0 px-6 pb-6 md:px-10 md:pb-10">
+                          <div className="max-w-2xl space-y-4 rounded-3xl border border-white/20 bg-white/10 p-6 md:p-8 text-white shadow-2xl backdrop-blur-md">
+                            {slider.title && (
+                              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight drop-shadow-2xl">
+                                {slider.title}
+                              </h2>
+                            )}
+                            {slider.subtitle && (
+                              <p className="text-sm sm:text-base md:text-lg text-white/90 drop-shadow">
+                                {slider.subtitle}
+                              </p>
+                            )}
+                            <div className="flex flex-wrap gap-3">
+                              <span className="rounded-full border border-white/30 bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white/80">
+                                Featured
+                              </span>
+                              <span className="rounded-full border border-white/20 bg-white/20 px-4 py-1 text-xs font-semibold text-white">
+                                Shop collection
+                              </span>
                             </div>
-                          )}
-                        </Link>
-                      ) : (
-                        <>
-                          <img
-                            src={slider.image}
-                            alt={slider.title || `Slider ${index + 1}`}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          />
-                          {(slider.title || slider.subtitle) && (
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end">
-                              <div className="p-6 md:p-10 lg:p-12 w-full">
-                                {slider.title && (
-                                  <h2 className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-3 drop-shadow-2xl">
-                                    {slider.title}
-                                  </h2>
-                                )}
-                                {slider.subtitle && (
-                                  <p className="text-white/95 text-base sm:text-lg md:text-xl lg:text-2xl drop-shadow-lg max-w-2xl">
-                                    {slider.subtitle}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                        </>
+                          </div>
+                        </div>
                       )}
-                    </div>
-                  </CarouselItem>
-                ))}
+                    </>
+                  );
+
+                  return (
+                    <CarouselItem key={index}>
+                      <div className="relative w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px] rounded-3xl overflow-hidden group">
+                        {slider.hyperlink ? (
+                          <Link to={slider.hyperlink} className="block w-full h-full">
+                            {slideBody}
+                          </Link>
+                        ) : (
+                          slideBody
+                        )}
+                      </div>
+                    </CarouselItem>
+                  );
+                })}
               </CarouselContent>
               <CarouselPrevious className="left-2 md:left-4 hidden sm:flex" />
               <CarouselNext className="right-2 md:right-4 hidden sm:flex" />
@@ -119,11 +114,11 @@ const Index = () => {
 
       {/* Hero Text Section */}
       {heroSection && (
-        <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-primary/5 border-b">
+        <section className="relative overflow-hidden border-y bg-white">
           <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20">
-            <div className="mx-auto max-w-4xl text-center">
+            <div className="mx-auto max-w-4xl text-center space-y-6">
               {heroSection.tagline && (
-                <Badge variant="secondary" className="mb-4 text-sm md:text-base">
+                <Badge variant="secondary" className="text-sm md:text-base px-4 py-2 rounded-full">
                   {heroSection.tagline}
                 </Badge>
               )}
@@ -154,11 +149,11 @@ const Index = () => {
       )}
 
       {/* Features Bar */}
-      <section className="py-8 md:py-10 border-b bg-secondary/20">
+      <section className="py-10 md:py-12 border-b bg-transparent">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-center sm:text-left">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 rounded-2xl border bg-white p-4 text-center sm:text-left shadow-sm">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 shrink-0">
                 <Truck className="h-6 w-6 text-primary" />
               </div>
               <div>
@@ -170,8 +165,8 @@ const Index = () => {
                 </p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-center sm:text-left">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 rounded-2xl border bg-white p-4 text-center sm:text-left shadow-sm">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 shrink-0">
                 <Shield className="h-6 w-6 text-primary" />
               </div>
               <div>
@@ -179,8 +174,8 @@ const Index = () => {
                 <p className="text-xs md:text-sm text-muted-foreground">100% protected</p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-center sm:text-left">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 rounded-2xl border bg-white p-4 text-center sm:text-left shadow-sm">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 shrink-0">
                 <Star className="h-6 w-6 text-primary" />
               </div>
               <div>
@@ -188,8 +183,8 @@ const Index = () => {
                 <p className="text-xs md:text-sm text-muted-foreground">Premium products</p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-center sm:text-left">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 rounded-2xl border bg-white p-4 text-center sm:text-left shadow-sm">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 shrink-0">
                 <ShoppingBag className="h-6 w-6 text-primary" />
               </div>
               <div>
@@ -298,23 +293,42 @@ const Index = () => {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 md:gap-6">
               {featuredCategories.slice(0, 8).map((category) => (
                 <Link key={category.id} to={`/products?category=${category.slug}`}>
-                  <Card className="group hover:shadow-lg transition-all duration-300 hover:scale-105 h-full">
-                    <CardContent className="p-6 text-center">
-                      <div className="mb-4 mx-auto w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        {category.image_url ? (
-                          <img
-                            src={category.image_url}
-                            alt={category.name}
-                            className="w-full h-full object-cover rounded-full"
-                          />
-                        ) : (
-                          <ShoppingBag className="h-8 w-8 md:h-10 md:w-10 text-primary" />
-                        )}
+                  <Card className="group h-full overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg">
+                    <CardContent className="flex h-full flex-col gap-4 p-5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="relative h-14 w-14 rounded-2xl bg-primary/10 p-2 ring-2 ring-primary/10">
+                            {category.image_url ? (
+                              <img
+                                src={category.image_url}
+                                alt={category.name}
+                                className="h-full w-full rounded-2xl object-cover"
+                              />
+                            ) : (
+                              <ShoppingBag className="h-full w-full text-primary" />
+                            )}
+                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/10 to-transparent opacity-0 transition group-hover:opacity-100" />
+                          </div>
+                          <div>
+                            <h3 className="text-base font-semibold text-slate-900">{category.name}</h3>
+                            <p className="text-xs text-muted-foreground">
+                              {category.active_products_count || 0} products
+                            </p>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="rounded-full border-primary/20 bg-primary/5 text-xs font-medium text-primary">
+                          Shop
+                        </Badge>
                       </div>
-                      <h3 className="font-semibold text-sm md:text-base mb-1">{category.name}</h3>
-                      <p className="text-xs md:text-sm text-muted-foreground">
-                        {category.active_products_count || 0} products
-                      </p>
+                      {category.description && (
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          {category.description}
+                        </p>
+                      )}
+                      <div className="mt-auto flex items-center justify-between text-sm font-semibold text-slate-600">
+                        <span>View products</span>
+                        <ArrowRight className="h-4 w-4 text-primary transition group-hover:translate-x-1" />
+                      </div>
                     </CardContent>
                   </Card>
                 </Link>
@@ -325,59 +339,14 @@ const Index = () => {
       )}
 
       {/* Latest Products */}
-      <section className="py-12 md:py-16 bg-secondary/30">
+      <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold mb-2">Latest Products</h2>
-              <p className="text-muted-foreground">Check out our newest arrivals</p>
-            </div>
-            <Link to="/products">
-              <Button variant="outline" className="gap-2">
-                View All <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-
-          {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {[...Array(8)].map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <Skeleton className="aspect-square w-full" />
-                  <CardContent className="p-4">
-                    <Skeleton className="h-4 w-3/4 mb-2" />
-                    <Skeleton className="h-3 w-1/2" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : latestProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {latestProducts.slice(0, 8).map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No products available at the moment</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Top Selling Products */}
-      {topSellingProducts.length > 0 && (
-        <section className="py-12 md:py-16">
-          <div className="container mx-auto px-4">
-            <div className="mb-8 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <TrendingUp className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-bold">Top Selling Products</h2>
-                  <p className="text-muted-foreground">Our most popular items</p>
-                </div>
+          <div className="rounded-3xl border border-slate-100 bg-white/90 p-6 md:p-8 shadow-sm">
+            <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wide text-primary">Fresh Picks</p>
+                <h2 className="text-2xl md:text-3xl font-bold mb-2">Latest Products</h2>
+                <p className="text-muted-foreground">Check out our newest arrivals</p>
               </div>
               <Link to="/products">
                 <Button variant="outline" className="gap-2">
@@ -385,17 +354,68 @@ const Index = () => {
                 </Button>
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {topSellingProducts.slice(0, 8).map((product) => (
-                <div key={product.id} className="relative">
-                  <ProductCard product={product} />
-                  {product.total_sold > 0 && (
-                    <Badge className="absolute top-2 left-2 bg-green-500 hover:bg-green-600">
-                      {product.total_sold} sold
-                    </Badge>
-                  )}
+
+            {isLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                {[...Array(8)].map((_, i) => (
+                  <Card key={i} className="overflow-hidden rounded-2xl border shadow-sm">
+                    <Skeleton className="aspect-[4/3] w-full" />
+                    <CardContent className="p-3 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : latestProducts.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                {latestProducts.slice(0, 8).map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No products available at the moment</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Top Selling Products */}
+      {topSellingProducts.length > 0 && (
+        <section className="py-12 md:py-16">
+          <div className="container mx-auto px-4">
+            <div className="rounded-3xl border border-slate-100 bg-white p-6 md:p-8 shadow-sm">
+              <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+                    <TrendingUp className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-wide text-primary">Fan Favorites</p>
+                    <h2 className="text-2xl md:text-3xl font-bold">Top Selling Products</h2>
+                    <p className="text-muted-foreground">Our most popular items</p>
+                  </div>
                 </div>
-              ))}
+                <Link to="/products">
+                  <Button variant="outline" className="gap-2">
+                    View All <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                {topSellingProducts.slice(0, 8).map((product) => (
+                  <div key={product.id} className="relative">
+                    <ProductCard product={product} />
+                    {product.total_sold > 0 && (
+                      <Badge className="absolute top-3 left-3 bg-green-500/90 text-[10px]">
+                        {product.total_sold} sold
+                      </Badge>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>

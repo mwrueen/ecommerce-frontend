@@ -37,8 +37,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   return (
     <Link to={`/products/${product.slug}`}>
-      <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300">
-        <div className="relative aspect-square overflow-hidden bg-secondary">
+      <Card className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+        <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
           {productImage ? (
             <img
               src={productImage}
@@ -47,30 +47,32 @@ const ProductCard = ({ product }: ProductCardProps) => {
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-              <ShoppingCart className="h-16 w-16" />
+              <ShoppingCart className="h-10 w-10" />
             </div>
           )}
           {product.stock_quantity < 10 && product.stock_quantity > 0 && (
-            <Badge className="absolute top-2 right-2" variant="destructive">
+            <Badge className="absolute top-2 right-2 text-[10px] px-2 py-0.5" variant="destructive">
               Only {product.stock_quantity} left
             </Badge>
           )}
           {product.stock_quantity === 0 && (
-            <Badge className="absolute top-2 right-2" variant="secondary">
+            <Badge className="absolute top-2 right-2 text-[10px] px-2 py-0.5" variant="secondary">
               Out of Stock
             </Badge>
           )}
         </div>
-        <CardContent className="p-4">
-          <h3 className="font-semibold line-clamp-1 group-hover:text-primary transition-colors">
+        <CardContent className="p-3 space-y-2">
+          <h3 className="text-sm font-semibold line-clamp-1 group-hover:text-primary transition-colors">
             {product.name}
           </h3>
-          <div 
-            className="text-sm text-muted-foreground line-clamp-2 mt-1 prose prose-sm max-w-none"
-            dangerouslySetInnerHTML={{ __html: product.description }}
-          />
-          <div className="mt-2 flex items-center justify-between">
-            <span className="text-xl font-bold text-primary">
+          {product.description && (
+            <div 
+              className="text-xs text-muted-foreground line-clamp-2"
+              dangerouslySetInnerHTML={{ __html: product.description }}
+            />
+          )}
+          <div className="flex items-center justify-between">
+            <span className="text-lg font-bold text-primary">
               {formatPrice(
                 product.price,
                 settings?.data?.currency_symbol,
@@ -79,15 +81,16 @@ const ProductCard = ({ product }: ProductCardProps) => {
               )}
             </span>
             {product.category && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-[10px]">
                 {product.category.name}
               </Badge>
             )}
           </div>
         </CardContent>
-        <CardFooter className="p-4 pt-0">
+        <CardFooter className="p-3 pt-0">
           <Button
             className="w-full gap-2"
+            size="sm"
             onClick={handleAddToCart}
             disabled={product.stock_quantity === 0}
           >

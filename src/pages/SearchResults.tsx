@@ -85,56 +85,58 @@ export default function SearchResults() {
         <meta name="description" content={`Search results for "${query}"`} />
       </Helmet>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white py-10">
+        <div className="container mx-auto px-4 space-y-10">
         {/* Search Bar */}
-        <div className="mb-8">
-          <form onSubmit={handleSearch} className="flex gap-2 mb-4">
+        <section className="rounded-3xl border border-slate-100 bg-white/95 p-6 md:p-8 shadow-sm">
+          <form onSubmit={handleSearch} className="flex flex-col gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400" />
               <Input
                 type="text"
-                placeholder="Search products and categories..."
+                placeholder="Search products, categories, or keywords..."
                 value={localQuery}
                 onChange={(e) => setLocalQuery(e.target.value)}
-                className="pl-10"
+                className="h-14 rounded-2xl border border-slate-200 bg-slate-50 pl-12 text-base"
               />
             </div>
-            <Button type="submit">Search</Button>
-          </form>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button type="submit" className="rounded-full px-6">Search</Button>
+              {query && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Type:</span>
+                    <Tabs value={type} onValueChange={handleTypeChange}>
+                      <TabsList className="rounded-full bg-slate-100">
+                        <TabsTrigger value="all" className="rounded-full px-4">All</TabsTrigger>
+                        <TabsTrigger value="products" className="rounded-full px-4">Products</TabsTrigger>
+                        <TabsTrigger value="categories" className="rounded-full px-4">Categories</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
 
-          {query && (
-            <div className="flex flex-wrap gap-4 items-center">
-              <div className="flex gap-2 items-center">
-                <span className="text-sm text-muted-foreground">Type:</span>
-                <Tabs value={type} onValueChange={handleTypeChange}>
-                  <TabsList>
-                    <TabsTrigger value="all">All</TabsTrigger>
-                    <TabsTrigger value="products">Products</TabsTrigger>
-                    <TabsTrigger value="categories">Categories</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
-
-              {type !== 'categories' && (
-                <div className="flex gap-2 items-center">
-                  <span className="text-sm text-muted-foreground">Sort:</span>
-                  <Select value={sortBy} onValueChange={handleSortChange}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="relevance">Relevance</SelectItem>
-                      <SelectItem value="name">Name</SelectItem>
-                      <SelectItem value="price_asc">Price: Low to High</SelectItem>
-                      <SelectItem value="price_desc">Price: High to Low</SelectItem>
-                      <SelectItem value="created_at">Newest</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                  {type !== 'categories' && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Sort:</span>
+                      <Select value={sortBy} onValueChange={handleSortChange}>
+                        <SelectTrigger className="w-[200px] rounded-full border-slate-200 bg-slate-50">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="relevance">Relevance</SelectItem>
+                          <SelectItem value="name">Name</SelectItem>
+                          <SelectItem value="price_asc">Price: Low to High</SelectItem>
+                          <SelectItem value="price_desc">Price: High to Low</SelectItem>
+                          <SelectItem value="created_at">Newest</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </>
               )}
             </div>
-          )}
-        </div>
+          </form>
+        </section>
 
         {/* Results */}
         {!query ? (
@@ -180,7 +182,7 @@ export default function SearchResults() {
             {categories && categories.data.length > 0 && (
               <div className="mb-12">
                 <div className="flex items-center gap-2 mb-6">
-                  <FolderOpen className="h-5 w-5" />
+                  <FolderOpen className="h-5 w-5 text-primary" />
                   <h2 className="text-xl font-semibold">Categories ({categories.total})</h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -188,21 +190,26 @@ export default function SearchResults() {
                     <Link
                       key={category.id}
                       to={`/categories/${category.slug}`}
-                      className="p-6 border rounded-lg hover:border-primary hover:shadow-md transition-all"
+                      className="group rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg"
                     >
                       {category.image_url && (
-                        <img
-                          src={category.image_url}
-                          alt={category.name}
-                          className="w-full h-32 object-cover rounded-md mb-4"
-                        />
+                        <div className="mb-4 h-32 w-full overflow-hidden rounded-2xl bg-slate-100">
+                          <img
+                            src={category.image_url}
+                            alt={category.name}
+                            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                          />
+                        </div>
                       )}
-                      <h3 className="font-semibold mb-2">{category.name}</h3>
+                      <h3 className="font-semibold mb-1">{category.name}</h3>
                       {category.description && (
                         <p className="text-sm text-muted-foreground line-clamp-2">
                           {category.description}
                         </p>
                       )}
+                      <div className="mt-3 text-sm font-medium text-primary flex items-center gap-1">
+                        View category <ChevronRight className="h-4 w-4" />
+                      </div>
                     </Link>
                   ))}
                 </div>
@@ -216,7 +223,7 @@ export default function SearchResults() {
                   <Package className="h-5 w-5" />
                   <h2 className="text-xl font-semibold">Products ({products.total})</h2>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                   {products.data.map((product: any) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
@@ -252,6 +259,7 @@ export default function SearchResults() {
             )}
           </>
         )}
+        </div>
       </div>
     </>
   );

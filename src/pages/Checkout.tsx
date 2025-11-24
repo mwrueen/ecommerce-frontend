@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store';
 import { clearCart, applyCoupon, removeCoupon } from '@/store/slices/cartSlice';
@@ -19,6 +19,7 @@ import { CouponInput } from '@/components/CouponInput';
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const { items, total, coupon } = useSelector((state: RootState) => state.cart);
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -42,7 +43,7 @@ const Checkout = () => {
 
     if (!isAuthenticated || !user) {
       toast.error('Please login to place an order');
-      navigate('/login');
+      navigate('/customer/login');
       return;
     }
 
@@ -85,21 +86,7 @@ const Checkout = () => {
   };
 
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen py-16 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Authentication Required</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground">Please login to proceed with checkout</p>
-            <Button className="w-full" onClick={() => navigate('/login')}>
-              Login
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <Navigate to="/customer/login" replace state={{ from: location.pathname }} />;
   }
 
   return (

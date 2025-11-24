@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   useRegisterCustomerMutation, 
@@ -25,6 +25,7 @@ const DEMO_CUSTOMER_PASSWORD = 'password';
 
 const CustomerAuth = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   const [registerCustomer, { isLoading: isRegistering }] = useRegisterCustomerMutation();
@@ -42,12 +43,14 @@ const CustomerAuth = () => {
   const [otp, setOtp] = useState('');
   const [resetEmail, setResetEmail] = useState('');
 
+  const redirectPath = (location.state as { from?: string } | null)?.from || '/';
+
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
-      navigate('/');
+      navigate(redirectPath, { replace: true });
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user, navigate, redirectPath]);
 
   useEffect(() => {
     if (view === 'login' && email === '' && password === '') {
@@ -74,7 +77,7 @@ const CustomerAuth = () => {
         token: result.token,
       }));
       toast.success('Welcome back!');
-      navigate('/');
+      navigate(redirectPath, { replace: true });
     } catch (error: any) {
       const errorMessage = error?.data?.message || error?.data?.errors?.email?.[0] || 'Login failed';
       toast.error(errorMessage);
@@ -114,7 +117,7 @@ const CustomerAuth = () => {
         token: result.token,
       }));
       toast.success('Account created successfully!');
-      navigate('/');
+      navigate(redirectPath, { replace: true });
     } catch (error: any) {
       const errorMessage = error?.data?.message || 
         Object.values(error?.data?.errors || {}).flat().join(', ') || 

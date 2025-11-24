@@ -145,21 +145,50 @@ const Products = () => {
     setPage(1);
   };
 
-  return (
-    <div className="min-h-screen py-8">
-      <div className="container mx-auto px-4">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">All Products</h1>
-          <p className="text-muted-foreground">
-            Discover our complete collection of quality products
-          </p>
-        </div>
+  const totalProducts = (() => {
+    if (data?.meta?.total !== undefined) return data.meta.total;
+    if (data?.meta?.total_items !== undefined) return data.meta.total_items;
+    if (Array.isArray(data?.data)) return data.data.length;
+    return 0;
+  })();
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white">
+      <div className="container mx-auto px-4 py-10 space-y-10">
+        <section className="overflow-hidden rounded-3xl border border-slate-100 bg-white/95 p-8 shadow-sm">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-3 max-w-2xl">
+              <p className="text-sm font-semibold uppercase tracking-wide text-primary">All Products</p>
+              <h1 className="text-3xl md:text-4xl font-bold leading-tight">Discover our complete collection</h1>
+              <p className="text-muted-foreground">
+                Browse curated selections, apply precise filters, and find the perfect products faster.
+              </p>
+              <div className="flex flex-wrap gap-3 text-sm text-slate-600">
+                <div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1">
+                  {totalProducts} items available
+                </div>
+                <div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1">
+                  {(categoriesData?.data?.length || 0)} categories
+                </div>
+                <div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1">
+                  Updated in real-time
+                </div>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 to-primary/5 p-6 text-primary">
+              <p className="text-sm font-medium uppercase tracking-wide mb-2">Quick Tip</p>
+              <p className="text-sm leading-relaxed text-primary/80">
+                Apply category + price filters together to surface the most relevant matches instantly.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar Filters */}
           <div className="lg:col-span-1">
-            <Card>
-              <CardContent className="p-4">
+            <Card className="sticky top-28 rounded-3xl border border-slate-100 shadow-sm">
+              <CardContent className="p-6 space-y-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Filter className="h-4 w-4" />
                   <h2 className="font-semibold">Filters</h2>
@@ -168,17 +197,17 @@ const Products = () => {
                 {/* Category Filter */}
                 <div className="mb-6">
                   <h3 className="text-sm font-medium mb-3">Categories</h3>
-                  <div className="space-y-2">
+                  <div className="space-y-2 max-h-[280px] overflow-y-auto pr-2">
                     <Button
                       variant={categoryId === null ? "default" : "ghost"}
-                      className="w-full justify-start"
+                      className="w-full justify-start rounded-2xl"
                       size="sm"
                       onClick={() => handleCategoryClick(null)}
                     >
                       All Categories
-                      {categoryId === null && data?.meta && (
+                      {categoryId === null && (data?.meta || data?.data) && (
                         <Badge variant="secondary" className="ml-auto">
-                          {data.meta.total}
+                          {totalProducts}
                         </Badge>
                       )}
                     </Button>
@@ -189,7 +218,7 @@ const Products = () => {
                         <Button
                           key={category.id}
                           variant={categoryId === category.id ? "default" : "ghost"}
-                          className="w-full justify-start"
+                          className="w-full justify-start rounded-2xl"
                           size="sm"
                           onClick={() => handleCategoryClick(category.id)}
                         >
@@ -209,7 +238,7 @@ const Products = () => {
                     <DollarSign className="h-4 w-4" />
                     Price Range
                   </h3>
-                  <div className="space-y-4">
+                  <div className="space-y-4 rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
                     {/* Price Display */}
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">
@@ -279,7 +308,7 @@ const Products = () => {
                         variant="outline"
                         size="sm"
                         onClick={handleClearPrice}
-                        className="w-full"
+                        className="w-full rounded-2xl"
                       >
                         Clear Price Filter
                       </Button>
@@ -298,7 +327,7 @@ const Products = () => {
                       setSortOrder(order);
                       setPage(1);
                     }}
-                    className="w-full p-2 rounded-md border bg-background text-sm"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm"
                   >
                     <option value="created_at_desc">Newest First</option>
                     <option value="created_at_asc">Oldest First</option>
@@ -315,15 +344,15 @@ const Products = () => {
           {/* Products Grid */}
           <div className="lg:col-span-3">
             {(categoryId || minPrice || maxPrice) && (
-              <div className="mb-4 flex flex-wrap gap-2">
+              <div className="mb-4 flex flex-wrap gap-3">
                 {categoryId && (
-                  <Badge variant="secondary" className="gap-2">
+                  <Badge variant="secondary" className="gap-2 rounded-full px-4 py-2 text-sm">
                     {categoriesData?.data?.find((c: any) => c.id === categoryId)?.name}
                     <button onClick={() => handleCategoryClick(null)} className="ml-1">×</button>
                   </Badge>
                 )}
                 {(minPrice || maxPrice) && (
-                  <Badge variant="secondary" className="gap-2">
+                  <Badge variant="secondary" className="gap-2 rounded-full px-4 py-2 text-sm">
                     Price: {formatPrice(
                       minPrice || '0',
                       settings?.data?.currency_symbol,
@@ -341,53 +370,57 @@ const Products = () => {
               </div>
             )}
 
-            {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(12)].map((_, i) => (
-                  <Card key={i} className="overflow-hidden">
-                    <div className="aspect-square bg-muted animate-pulse" />
-                    <CardContent className="p-4">
-                      <div className="h-4 bg-muted rounded animate-pulse mb-2" />
-                      <div className="h-3 bg-muted rounded animate-pulse w-2/3" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <>
+            <Card className="rounded-3xl border border-slate-100 bg-white/90 p-6 shadow-sm">
+              {isLoading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {data?.data?.map((product: any) => (
-                    <ProductCard key={product.id} product={product} />
+                  {[...Array(12)].map((_, i) => (
+                    <Card key={i} className="overflow-hidden rounded-2xl border">
+                      <div className="aspect-[4/3] bg-slate-100 animate-pulse" />
+                      <CardContent className="p-4 space-y-2">
+                        <div className="h-4 bg-slate-100 rounded animate-pulse" />
+                        <div className="h-3 bg-slate-100 rounded animate-pulse w-2/3" />
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
-
-                {data?.meta && (
-                  <div className="mt-8 flex items-center justify-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setPage(p => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm text-muted-foreground">
-                      Page {data.meta.current_page} of {data.meta.last_page}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setPage(p => p + 1)}
-                      disabled={page === data.meta.last_page}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                    {data?.data?.map((product: any) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
                   </div>
-                )}
-              </>
-            )}
+
+                  {data?.meta && (
+                    <div className="mt-10 flex items-center justify-center gap-3">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="rounded-full"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <span className="text-sm text-muted-foreground">
+                        Page {data.meta.current_page} of {data.meta.last_page}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setPage(p => p + 1)}
+                        disabled={page === data.meta.last_page}
+                        className="rounded-full"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
+            </Card>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );

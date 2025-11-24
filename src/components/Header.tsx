@@ -36,6 +36,9 @@ const Header = () => {
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
   
   const settings = settingsData?.data;
+  const primaryColor = settings?.primary_color || '#4f46e5';
+  const secondaryColor = settings?.secondary_color || '#0ea5e9';
+  const accentGradient = `linear-gradient(120deg, ${primaryColor}, ${secondaryColor})`;
   
   const cartItemsCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -104,26 +107,29 @@ const Header = () => {
   const hasResults = products.length > 0 || categories.length > 0;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+    <header className="sticky top-0 z-50 w-full">
+      <div className="h-1 w-full" style={{ background: accentGradient }} />
+      <div className="w-full border-b border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 shadow-sm">
+        <div className="container mx-auto flex h-20 items-center justify-between px-4 text-slate-900">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center space-x-2">
             {settings?.header_logo ? (
               <img src={settings.header_logo} alt={settings.title} className="h-8 w-auto" />
             ) : (
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary-dark" />
+
+            <span className="text-xl font-bold">{settings?.title || 'eCommerce'}</span>
+              
             )}
-            <span className="text-xl font-bold text-foreground">{settings?.title || 'eCommerce'}</span>
           </Link>
           
-          <nav className="hidden md:flex items-center gap-6">
-            <Link to="/products" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+          <nav className="hidden md:flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-sm font-medium shadow-inner">
+            <Link to="/products" className="px-4 py-1 text-sm font-semibold text-slate-600 transition hover:text-slate-900">
               Products
             </Link>
-            <Link to="/categories" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            <Link to="/categories" className="px-4 py-1 text-sm font-semibold text-slate-600 transition hover:text-slate-900">
               Categories
             </Link>
-            <Link to="/deals" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            <Link to="/deals" className="px-4 py-1 text-sm font-semibold text-slate-600 transition hover:text-slate-900">
               Deals
             </Link>
           </nav>
@@ -131,11 +137,11 @@ const Header = () => {
 
         <div className="hidden md:flex flex-1 max-w-md mx-6" ref={searchRef}>
           <form onSubmit={handleSearch} className="relative w-full">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
               type="search"
               placeholder="Search products..."
-              className="w-full pl-10 bg-secondary/50 border-0 focus-visible:ring-primary"
+              className="w-full rounded-full border border-slate-200 bg-white pl-10 text-slate-900 placeholder:text-slate-400 focus-visible:ring-slate-300 focus-visible:ring-offset-0"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoComplete="off"
@@ -143,11 +149,11 @@ const Header = () => {
             
             {/* Search Dropdown */}
             {showDropdown && searchQuery.trim() && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-background border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-2 max-h-96 overflow-y-auto rounded-2xl border border-slate-100 bg-white shadow-xl shadow-slate-500/10">
                 {isFetching ? (
                   <div className="p-4 flex items-center justify-center">
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                    <span className="ml-2 text-sm text-muted-foreground">Searching...</span>
+                    <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+                    <span className="ml-2 text-sm text-slate-500">Searching...</span>
                   </div>
                 ) : hasResults ? (
                   <div className="py-2">
@@ -162,7 +168,7 @@ const Header = () => {
                           <button
                             key={product.id}
                             onClick={() => handleResultClick(`/products/${product.slug}`)}
-                            className="w-full px-4 py-3 flex items-center gap-3 hover:bg-accent transition-colors text-left"
+                            className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors text-left"
                           >
                             {product.media?.[0]?.full_url ? (
                               <img
@@ -171,13 +177,13 @@ const Header = () => {
                                 className="w-10 h-10 object-cover rounded"
                               />
                             ) : (
-                              <div className="w-10 h-10 bg-secondary rounded flex items-center justify-center">
-                                <Package className="h-5 w-5 text-muted-foreground" />
+                              <div className="w-10 h-10 rounded bg-slate-100 flex items-center justify-center">
+                                <Package className="h-5 w-5 text-slate-400" />
                               </div>
                             )}
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm truncate">{product.name}</p>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="font-medium text-sm truncate text-slate-900">{product.name}</p>
+                              <p className="text-xs text-slate-500">
                                 {settings?.currency_symbol || '$'}{product.price}
                               </p>
                             </div>
@@ -189,23 +195,23 @@ const Header = () => {
                     {/* Categories */}
                     {categories.length > 0 && (
                       <div className={products.length > 0 ? 'border-t' : ''}>
-                        <div className="px-4 py-2 flex items-center gap-2 text-xs font-semibold text-muted-foreground border-b">
+                        <div className="px-4 py-2 flex items-center gap-2 text-xs font-semibold text-slate-500 border-b">
                           <FolderOpen className="h-3 w-3" />
                           CATEGORIES
                         </div>
                         {categories.map((category: any) => (
                           <button
                             key={category.id}
-                            onClick={() => handleResultClick(`/categories/${category.slug}`)}
-                            className="w-full px-4 py-3 flex items-center gap-3 hover:bg-accent transition-colors text-left"
+                            onClick={() => handleResultClick(`/products?category=${category.slug}`)}
+                            className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors text-left"
                           >
-                            <div className="w-10 h-10 bg-secondary rounded flex items-center justify-center">
-                              <FolderOpen className="h-5 w-5 text-muted-foreground" />
+                            <div className="w-10 h-10 rounded bg-slate-100 flex items-center justify-center">
+                              <FolderOpen className="h-5 w-5 text-slate-400" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm truncate">{category.name}</p>
+                              <p className="font-medium text-sm truncate text-slate-900">{category.name}</p>
                               {category.description && (
-                                <p className="text-xs text-muted-foreground truncate">
+                                <p className="text-xs text-slate-500 truncate">
                                   {category.description}
                                 </p>
                               )}
@@ -218,16 +224,16 @@ const Header = () => {
                     {/* View All Results */}
                     <button
                       onClick={() => handleResultClick(`/search?query=${encodeURIComponent(searchQuery)}`)}
-                      className="w-full px-4 py-3 text-sm text-primary font-medium hover:bg-accent transition-colors border-t"
+                      className="w-full px-4 py-3 text-sm font-semibold text-primary hover:bg-slate-50 transition-colors border-t"
                     >
                       View all results for "{searchQuery}"
                     </button>
                   </div>
                 ) : (
                   <div className="p-8 text-center">
-                    <Search className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">No results found</p>
-                    <p className="text-xs text-muted-foreground mt-1">Try different keywords</p>
+                    <Search className="h-10 w-10 mx-auto mb-2 text-slate-300" />
+                    <p className="text-sm text-slate-500">No results found</p>
+                    <p className="text-xs text-slate-400 mt-1">Try different keywords</p>
                   </div>
                 )}
               </div>
@@ -237,10 +243,10 @@ const Header = () => {
 
         <div className="flex items-center gap-2">
           <Link to="/cart">
-            <Button variant="ghost" size="icon" className="relative">
+            <Button variant="ghost" size="icon" className="relative text-slate-700 hover:bg-slate-100">
               <ShoppingCart className="h-5 w-5" />
               {cartItemsCount > 0 && (
-                <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-primary text-[10px]">
+                <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-primary text-white text-[10px]">
                   {cartItemsCount}
                 </Badge>
               )}
@@ -252,7 +258,7 @@ const Header = () => {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="h-10 gap-3 rounded-full px-2 pr-3 hover:bg-accent"
+                  className="h-10 gap-3 rounded-full px-2 pr-3 text-slate-700 hover:bg-slate-100"
                 >
                   <Avatar className="h-9 w-9">
                     {user?.profile_picture_url || user?.profile_picture ? (
@@ -261,16 +267,16 @@ const Header = () => {
                         alt={user?.name || 'User avatar'}
                       />
                     ) : (
-                      <AvatarFallback className="bg-secondary">
-                        <User className="h-4 w-4 text-muted-foreground" />
+                      <AvatarFallback className="bg-slate-100 text-slate-500">
+                        <User className="h-4 w-4" />
                       </AvatarFallback>
                     )}
                   </Avatar>
                   <div className="hidden md:flex flex-col items-start text-left">
-                    <span className="text-sm font-medium text-foreground">
+                    <span className="text-sm font-semibold text-slate-900">
                       {user?.name || 'Account'}
                     </span>
-                    <span className="text-xs text-muted-foreground capitalize">
+                    <span className="text-xs text-slate-500 capitalize">
                       {user?.role || ''}
                     </span>
                   </div>
@@ -320,7 +326,11 @@ const Header = () => {
             </DropdownMenu>
           ) : (
             <Link to="/customer/login">
-              <Button variant="ghost" size="sm">
+              <Button
+                size="sm"
+                className="rounded-full px-5 font-semibold text-white shadow-lg shadow-primary/30"
+                style={{ background: accentGradient }}
+              >
                 Sign In
               </Button>
             </Link>
@@ -328,7 +338,7 @@ const Header = () => {
 
           <Sheet>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="text-slate-700 hover:bg-slate-100">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
@@ -341,6 +351,7 @@ const Header = () => {
             </SheetContent>
           </Sheet>
         </div>
+      </div>
       </div>
     </header>
   );

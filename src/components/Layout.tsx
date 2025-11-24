@@ -8,6 +8,8 @@ import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 const Layout = ({ children }: { children?: React.ReactNode }) => {
   const { data: settingsData } = useGetPublicSettingsQuery({});
   const settings = settingsData?.data;
+  const accentHue = settings?.primary_color || 'rgba(79, 70, 229, 0.25)';
+  const accentSecondary = settings?.secondary_color || 'rgba(14, 165, 233, 0.2)';
 
   useEffect(() => {
     if (settings?.favicon) {
@@ -57,12 +59,29 @@ const Layout = ({ children }: { children?: React.ReactNode }) => {
           </script>
         )}
       </Helmet>
-      <div className="flex min-h-screen flex-col">
-        <Header />
-        <main className="flex-1">
-          {children || <Outlet />}
-        </main>
-        <Footer />
+      <div className="relative flex min-h-screen flex-col bg-gradient-to-b from-slate-50 via-white to-slate-100">
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden opacity-70">
+          <div
+            className="absolute -top-32 left-10 h-72 w-72 rounded-full blur-[120px]"
+            style={{ background: accentHue }}
+          />
+          <div
+            className="absolute top-40 right-[5%] h-64 w-64 rounded-full blur-[120px]"
+            style={{ background: accentSecondary }}
+          />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.25),_transparent_60%)]" />
+        </div>
+
+        <div className="relative flex min-h-screen flex-col">
+          <Header />
+
+          <main className="relative flex-1 text-slate-900">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/90 via-white/60 to-transparent" />
+            {children || <Outlet />}
+          </main>
+
+          <Footer />
+        </div>
       </div>
     </>
   );
