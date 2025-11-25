@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
-import { ChevronLeft, ChevronRight, Filter, DollarSign } from 'lucide-react';
+import { Filter, DollarSign, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { formatPrice } from '@/lib/currency';
@@ -20,6 +20,7 @@ const Products = () => {
   const [sortOrder, setSortOrder] = useState<string>('desc');
   const [minPrice, setMinPrice] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
+  const [accumulatedProducts, setAccumulatedProducts] = useState<any[]>([]);
   const { data: settings } = useGetPublicSettingsQuery({});
   
   // Slider state (0-10000 range)
@@ -34,7 +35,7 @@ const Products = () => {
     setPriceRange([min, max]);
   }, [minPrice, maxPrice]);
   
-  const { data, isLoading } = useGetProductsQuery({ 
+  const { data, isLoading, isFetching } = useGetProductsQuery({ 
     page, 
     per_page: 12,
     ...(categoryId && { category_id: categoryId }),
@@ -43,6 +44,29 @@ const Products = () => {
     sort_by: sortBy,
     sort_order: sortOrder
   });
+
+  // Reset accumulated products when filters change
+  useEffect(() => {
+    setAccumulatedProducts([]);
+    setPage(1);
+  }, [categoryId, minPrice, maxPrice, sortBy, sortOrder]);
+
+  // Accumulate products when new data arrives
+  useEffect(() => {
+    if (data?.data && Array.isArray(data.data)) {
+      if (page === 1) {
+        // First page - replace all products
+        setAccumulatedProducts(data.data);
+      } else {
+        // Subsequent pages - append new products
+        setAccumulatedProducts(prev => {
+          const existingIds = new Set(prev.map(p => p.id));
+          const newProducts = data.data.filter((p: any) => !existingIds.has(p.id));
+          return [...prev, ...newProducts];
+        });
+      }
+    }
+  }, [data, page]);
   
   const { data: categoriesData, isLoading: categoriesLoading } = useGetCategoriesQuery({
     active: 'true',
@@ -80,6 +104,7 @@ const Products = () => {
   const handleCategoryClick = (id: number | null) => {
     setCategoryId(id);
     setPage(1);
+    setAccumulatedProducts([]);
     // Update URL to reflect category filter
     if (id && categoriesData?.data) {
       const category = categoriesData.data.find((c: any) => c.id === id);
@@ -90,6 +115,12 @@ const Products = () => {
     } else {
       searchParams.delete('category');
       setSearchParams(searchParams, { replace: true });
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (data?.meta && page < data.meta.last_page) {
+      setPage(prev => prev + 1);
     }
   };
 
@@ -146,11 +177,19 @@ const Products = () => {
   };
 
   const totalProducts = (() => {
+    // Check for total at root level (API response structure)
+    if (data?.total !== undefined) return data.total;
     if (data?.meta?.total !== undefined) return data.meta.total;
     if (data?.meta?.total_items !== undefined) return data.meta.total_items;
+    if (accumulatedProducts.length > 0) return accumulatedProducts.length;
     if (Array.isArray(data?.data)) return data.data.length;
     return 0;
   })();
+
+  // Check for last_page at root level or in meta
+  const lastPage = data?.last_page ?? data?.meta?.last_page ?? 1;
+  const hasMorePages = lastPage > 1 && page < lastPage;
+  const isLoadingMore = isFetching && page > 1;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white">
@@ -205,7 +244,7 @@ const Products = () => {
                       onClick={() => handleCategoryClick(null)}
                     >
                       All Categories
-                      {categoryId === null && (data?.meta || data?.data) && (
+                      {categoryId === null && (data?.total !== undefined || data?.meta || data?.data) && (
                         <Badge variant="secondary" className="ml-auto">
                           {totalProducts}
                         </Badge>
@@ -371,7 +410,7 @@ const Products = () => {
             )}
 
             <Card className="rounded-3xl border border-slate-100 bg-white/90 p-6 shadow-sm">
-              {isLoading ? (
+              {isLoading && page === 1 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[...Array(12)].map((_, i) => (
                     <Card key={i} className="overflow-hidden rounded-2xl border">
@@ -385,35 +424,56 @@ const Products = () => {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    {data?.data?.map((product: any) => (
-                      <ProductCard key={product.id} product={product} />
-                    ))}
-                  </div>
+                  {accumulatedProducts.length > 0 ? (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                        {accumulatedProducts.map((product: any) => (
+                          <ProductCard key={product.id} product={product} />
+                        ))}
+                      </div>
 
-                  {data?.meta && (
-                    <div className="mt-10 flex items-center justify-center gap-3">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setPage(p => Math.max(1, p - 1))}
-                        disabled={page === 1}
-                        className="rounded-full"
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                      <span className="text-sm text-muted-foreground">
-                        Page {data.meta.current_page} of {data.meta.last_page}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setPage(p => p + 1)}
-                        disabled={page === data.meta.last_page}
-                        className="rounded-full"
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                      {/* Loading indicator for additional pages */}
+                      {isLoadingMore && (
+                        <div className="mt-6 flex justify-center">
+                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        </div>
+                      )}
+
+                      {/* Load More Button */}
+                      {hasMorePages && !isLoadingMore && (
+                        <div className="mt-10 flex flex-col items-center gap-3">
+                          <Button
+                            onClick={handleLoadMore}
+                            size="lg"
+                            className="rounded-full px-8 py-6 text-base font-semibold"
+                          >
+                            Load More Products
+                          </Button>
+                          <p className="text-sm text-muted-foreground">
+                            Showing {accumulatedProducts.length} of {data?.total || data?.meta?.total || 0} products
+                          </p>
+                        </div>
+                      )}
+
+                      {/* End of results message */}
+                      {!hasMorePages && accumulatedProducts.length > 0 && (
+                        <div className="mt-8 text-center py-4">
+                          <p className="text-sm text-muted-foreground">
+                            Showing all {accumulatedProducts.length} products
+                          </p>
+                        </div>
+                      )}
+
+                      {/* No products message */}
+                      {accumulatedProducts.length === 0 && !isLoading && (
+                        <div className="text-center py-12">
+                          <p className="text-muted-foreground">No products found matching your filters.</p>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground">No products available.</p>
                     </div>
                   )}
                 </>
