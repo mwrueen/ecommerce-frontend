@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useGetProductsQuery, useDeleteProductMutation, useGetPublicSettingsQuery, useExportProductsMutation } from '@/hooks/useApi';
+import { useGetCategoriesQuery } from '@/store/api/categoriesApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Trash2, Search, Eye, Download } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Eye, Download, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
@@ -13,12 +15,25 @@ import { toast as sonnerToast } from 'sonner';
 export default function ProductsManagement() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [categoryId, setCategoryId] = useState<string>('all');
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { data: settings } = useGetPublicSettingsQuery({});
   
-  const { data, isLoading } = useGetProductsQuery({ page, per_page: 10 });
+  // Fetch categories for filter
+  const { data: categoriesData } = useGetCategoriesQuery({
+    sort_by: 'name',
+    sort_order: 'asc',
+  });
+  
+  const categories = categoriesData?.data || [];
+  
+  const { data, isLoading } = useGetProductsQuery({ 
+    page, 
+    per_page: 10,
+    ...(categoryId !== 'all' && { category_id: parseInt(categoryId) })
+  });
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
   const [exportProducts, { isLoading: isExporting }] = useExportProductsMutation();
 
@@ -66,7 +81,7 @@ export default function ProductsManagement() {
         </div>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex gap-4 items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -76,6 +91,41 @@ export default function ProductsManagement() {
             className="pl-10"
           />
         </div>
+        <div className="w-[220px]">
+          <Select
+            value={categoryId}
+            onValueChange={(value) => {
+              setCategoryId(value);
+              setPage(1); // Reset to first page when category changes
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map((category: any) => (
+                <SelectItem key={category.id} value={category.id.toString()}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {categoryId !== 'all' && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setCategoryId('all');
+              setPage(1);
+            }}
+            className="text-muted-foreground"
+          >
+            Clear Filter
+          </Button>
+        )}
       </div>
 
       <div className="border rounded-lg">
@@ -160,20 +210,23 @@ export default function ProductsManagement() {
 
       <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">
-          Showing {data?.meta?.from || 0} to {data?.meta?.to || 0} of {data?.meta?.total || 0} products
+          Showing {data?.from ?? data?.meta?.from ?? 0} to {data?.to ?? data?.meta?.to ?? 0} of {data?.total ?? data?.meta?.total ?? 0} products
         </p>
         <div className="flex gap-2">
           <Button
             variant="outline"
             onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
+            disabled={page === 1 || isLoading}
           >
             Previous
           </Button>
+          <span className="flex items-center px-4 text-sm text-muted-foreground">
+            Page {data?.current_page ?? data?.meta?.current_page ?? page} of {data?.last_page ?? data?.meta?.last_page ?? 1}
+          </span>
           <Button
             variant="outline"
             onClick={() => setPage(p => p + 1)}
-            disabled={page >= (data?.meta?.last_page || 1)}
+            disabled={page >= (data?.last_page ?? data?.meta?.last_page ?? 1) || isLoading}
           >
             Next
           </Button>

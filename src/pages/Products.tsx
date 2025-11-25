@@ -119,7 +119,8 @@ const Products = () => {
   };
 
   const handleLoadMore = () => {
-    if (data?.meta && page < data.meta.last_page) {
+    const lastPage = data?.last_page ?? data?.meta?.last_page ?? 1;
+    if (page < lastPage) {
       setPage(prev => prev + 1);
     }
   };
@@ -188,7 +189,8 @@ const Products = () => {
 
   // Check for last_page at root level or in meta
   const lastPage = data?.last_page ?? data?.meta?.last_page ?? 1;
-  const hasMorePages = lastPage > 1 && page < lastPage;
+  const currentPage = data?.current_page ?? page;
+  const hasMorePages = data && lastPage > 1 && currentPage < lastPage;
   const isLoadingMore = isFetching && page > 1;
 
   return (
@@ -440,7 +442,7 @@ const Products = () => {
                       )}
 
                       {/* Load More Button */}
-                      {hasMorePages && !isLoadingMore && (
+                      {accumulatedProducts.length > 0 && hasMorePages && !isLoadingMore && (
                         <div className="mt-10 flex flex-col items-center gap-3">
                           <Button
                             onClick={handleLoadMore}
