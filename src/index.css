@@ -4,7 +4,7 @@
 
 @import './components/ui/rich-text-editor-styles.css';
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here.
 All colors MUST be HSL.
 */
 
@@ -21,7 +21,7 @@ All colors MUST be HSL.
 
     --primary: 188 94% 42%;
     --primary-foreground: 0 0% 100%;
-    
+
     --primary-light: 188 94% 92%;
     --primary-dark: 188 94% 32%;
 
@@ -41,39 +41,46 @@ All colors MUST be HSL.
     --input: 220 13% 91%;
     --ring: 188 94% 42%;
 
-    --radius: 0.5rem;
-    
+    --radius: 0.75rem;
+
     --success: 142 71% 45%;
     --warning: 38 92% 50%;
     --info: 199 89% 48%;
-    
+
     --gradient-primary: linear-gradient(135deg, hsl(188 94% 42%), hsl(188 94% 52%));
     --gradient-hero: linear-gradient(135deg, hsl(188 94% 42% / 0.1), hsl(188 94% 52% / 0.05));
-    
+
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-    
+
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-    /* Admin Sidebar - Navy Blue & Light Blue Theme */
-    --sidebar-background: 215 90% 25%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 205 100% 50%;
+    /* Admin Sidebar - Modern Gradient Theme */
+    --sidebar-background: 224 71% 4%;
+    --sidebar-foreground: 213 31% 91%;
+    --sidebar-primary: 210 100% 66%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 85% 35%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 215 80% 20%;
-    --sidebar-ring: 205 100% 50%;
-    
-    /* Admin Header - Light Blue Background */
-    --admin-header-bg: 205 100% 96%;
-    --admin-header-foreground: 215 90% 25%;
-    --admin-header-border: 205 80% 85%;
-    
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 216 34% 17%;
+    --sidebar-ring: 210 100% 66%;
+
+    /* Admin Header - Clean Modern */
+    --admin-header-bg: 0 0% 100%;
+    --admin-header-foreground: 224 71% 4%;
+    --admin-header-border: 220 13% 91%;
+
     /* Admin Content Background */
-    --admin-content-bg: 210 40% 98%;
+    --admin-content-bg: 220 14% 96%;
+
+    /* Chart colors */
+    --chart-1: 188 94% 42%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 
   .dark {
@@ -88,7 +95,7 @@ All colors MUST be HSL.
 
     --primary: 188 94% 42%;
     --primary-foreground: 0 0% 100%;
-    
+
     --primary-light: 188 94% 22%;
     --primary-dark: 188 94% 52%;
 
@@ -107,26 +114,34 @@ All colors MUST be HSL.
     --border: 217 33% 17%;
     --input: 217 33% 17%;
     --ring: 188 94% 42%;
-    
+
     --gradient-primary: linear-gradient(135deg, hsl(188 94% 32%), hsl(188 94% 42%));
     --gradient-hero: linear-gradient(135deg, hsl(188 94% 42% / 0.1), hsl(188 94% 52% / 0.05));
-    /* Admin Sidebar - Navy Blue & Light Blue Theme (Dark Mode) */
-    --sidebar-background: 215 95% 15%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 205 100% 60%;
+
+    /* Admin Sidebar - Dark Mode */
+    --sidebar-background: 224 71% 4%;
+    --sidebar-foreground: 213 31% 91%;
+    --sidebar-primary: 210 100% 66%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 90% 20%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 215 85% 12%;
-    --sidebar-ring: 205 100% 60%;
-    
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 216 34% 17%;
+    --sidebar-ring: 210 100% 66%;
+
     /* Admin Header - Dark Mode */
-    --admin-header-bg: 215 90% 18%;
-    --admin-header-foreground: 0 0% 100%;
-    --admin-header-border: 215 85% 12%;
-    
+    --admin-header-bg: 224 71% 4%;
+    --admin-header-foreground: 210 40% 98%;
+    --admin-header-border: 216 34% 17%;
+
     /* Admin Content Background - Dark Mode */
-    --admin-content-bg: 222 47% 11%;
+    --admin-content-bg: 222 47% 8%;
+
+    /* Chart colors - Dark */
+    --chart-1: 188 94% 50%;
+    --chart-2: 142 71% 50%;
+    --chart-3: 38 92% 55%;
+    --chart-4: 280 65% 65%;
+    --chart-5: 340 75% 60%;
   }
 }
 
@@ -136,6 +151,32 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+/* Custom scrollbar styles */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
   }
 }

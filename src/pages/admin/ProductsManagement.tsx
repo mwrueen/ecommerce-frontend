@@ -5,12 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Trash2, Search, Eye, Download, Filter } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Eye, Download, Filter, Package, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 import { formatPrice } from '@/lib/currency';
 import { toast as sonnerToast } from 'sonner';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 export default function ProductsManagement() {
   const [page, setPage] = useState(1);
@@ -64,43 +67,45 @@ export default function ProductsManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-foreground">Products</h2>
-          <p className="text-muted-foreground">Manage your product catalog</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Products</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage your product catalog</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleExport} disabled={isExporting}>
-            <Download className="h-4 w-4 mr-2" />
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={isExporting}>
+            {isExporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
             Export
           </Button>
-          <Button onClick={() => navigate('/admin/products/create')}>
+          <Button size="sm" onClick={() => navigate('/admin/products/create')}>
             <Plus className="h-4 w-4 mr-2" />
             Add Product
           </Button>
         </div>
       </div>
 
-      <div className="flex gap-4 items-center">
+      {/* Filters */}
+      <div className="flex flex-col md:flex-row gap-3 p-4 rounded-lg bg-muted/50 border border-dashed">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search products..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-9 h-8 text-sm"
           />
         </div>
-        <div className="w-[220px]">
+        <div className="flex items-center gap-2">
           <Select
             value={categoryId}
             onValueChange={(value) => {
               setCategoryId(value);
-              setPage(1); // Reset to first page when category changes
+              setPage(1);
             }}
           >
-            <SelectTrigger className="w-full">
-              <Filter className="h-4 w-4 mr-2" />
+            <SelectTrigger className="w-[180px] h-8 text-sm">
+              <Filter className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
@@ -112,123 +117,144 @@ export default function ProductsManagement() {
               ))}
             </SelectContent>
           </Select>
+          {categoryId !== 'all' && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setCategoryId('all');
+                setPage(1);
+              }}
+              className="h-8 text-xs"
+            >
+              Clear
+            </Button>
+          )}
         </div>
-        {categoryId !== 'all' && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setCategoryId('all');
-              setPage(1);
-            }}
-            className="text-muted-foreground"
-          >
-            Clear Filter
-          </Button>
-        )}
       </div>
 
-      <div className="border rounded-lg">
+      {/* Table */}
+      <Card>
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Image</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>SKU</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Stock</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="text-xs w-[60px]">Image</TableHead>
+              <TableHead className="text-xs">Product</TableHead>
+              <TableHead className="text-xs">SKU</TableHead>
+              <TableHead className="text-xs">Price</TableHead>
+              <TableHead className="text-xs text-center">Stock</TableHead>
+              <TableHead className="text-xs">Status</TableHead>
+              <TableHead className="text-xs text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center">Loading...</TableCell>
+                <TableCell colSpan={7} className="h-24">
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm text-muted-foreground">Loading...</span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : data?.data?.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="h-24 text-center text-sm text-muted-foreground">
+                  No products found
+                </TableCell>
               </TableRow>
             ) : (
               data?.data?.map((product: any) => {
-                const productImage = product.media?.find((m: any) => m.is_thumbnail)?.url || 
-                                    product.media?.[0]?.url || 
-                                    product.image_url || 
+                const productImage = product.media?.find((m: any) => m.is_thumbnail)?.url ||
+                                    product.media?.[0]?.url ||
+                                    product.image_url ||
                                     '/placeholder.svg';
                 return (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <img
-                      src={productImage}
-                      alt={product.name}
-                      className="h-10 w-10 rounded object-cover"
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{product.sku}</TableCell>
-                  <TableCell>{formatPrice(
-                    product.price,
-                    settings?.data?.currency_symbol,
-                    settings?.data?.currency_position,
-                    settings?.data?.formatted_currency
-                  )}</TableCell>
-                  <TableCell>{product.stock_quantity}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded text-xs ${product.is_active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
-                      {product.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/admin/products/${product.id}`)}
+                  <TableRow key={product.id}>
+                    <TableCell className="py-2">
+                      <div className="h-10 w-10 rounded-md overflow-hidden bg-muted">
+                        <img
+                          src={productImage}
+                          alt={product.name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <div className="text-sm font-medium">{product.name}</div>
+                      {product.category?.name && (
+                        <div className="text-xs text-muted-foreground">{product.category.name}</div>
+                      )}
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{product.sku}</code>
+                    </TableCell>
+                    <TableCell className="py-2 text-sm font-medium">
+                      {formatPrice(product.price, settings?.data?.currency_symbol, settings?.data?.currency_position, settings?.data?.formatted_currency)}
+                    </TableCell>
+                    <TableCell className="py-2 text-center">
+                      <Badge
+                        variant={product.stock_quantity <= 0 ? 'destructive' : product.stock_quantity <= 10 ? 'outline' : 'secondary'}
+                        className={cn("text-xs", product.stock_quantity > 0 && product.stock_quantity <= 10 && "border-amber-500 text-amber-600")}
                       >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/admin/products/${product.id}/edit`)}
+                        {product.stock_quantity}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <Badge
+                        variant={product.is_active ? 'default' : 'secondary'}
+                        className={cn("text-xs", product.is_active && 'bg-emerald-500/10 text-emerald-600 border-emerald-200')}
                       >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeleteId(product.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
+                        {product.is_active ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-2 text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => navigate(`/admin/products/${product.id}`)}>
+                          <Eye className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => navigate(`/admin/products/${product.id}/edit`)}>
+                          <Edit className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setDeleteId(product.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
               })
             )}
           </TableBody>
         </Table>
-      </div>
+      </Card>
 
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground">
-          Showing {data?.from ?? data?.meta?.from ?? 0} to {data?.to ?? data?.meta?.to ?? 0} of {data?.total ?? data?.meta?.total ?? 0} products
+      {/* Pagination */}
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">
+          Showing {data?.from ?? data?.meta?.from ?? 0} to {data?.to ?? data?.meta?.to ?? 0} of {data?.total ?? data?.meta?.total ?? 0}
         </p>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-1">
           <Button
             variant="outline"
+            size="sm"
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1 || isLoading}
+            className="h-8"
           >
-            Previous
+            <ChevronLeft className="h-3.5 w-3.5" />
           </Button>
-          <span className="flex items-center px-4 text-sm text-muted-foreground">
-            Page {data?.current_page ?? data?.meta?.current_page ?? page} of {data?.last_page ?? data?.meta?.last_page ?? 1}
+          <span className="text-xs text-muted-foreground px-2">
+            Page {page} of {data?.last_page ?? data?.meta?.last_page ?? 1}
           </span>
           <Button
             variant="outline"
+            size="sm"
             onClick={() => setPage(p => p + 1)}
             disabled={page >= (data?.last_page ?? data?.meta?.last_page ?? 1) || isLoading}
+            className="h-8"
           >
-            Next
+            <ChevronRight className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>

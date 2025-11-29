@@ -6,6 +6,7 @@ import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
 import { AdminFooter } from './AdminFooter';
 import { useGetPublicSettingsQuery } from '@/hooks/useApi';
+import { cn } from '@/lib/utils';
 
 export const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
   const { data: settingsData } = useGetPublicSettingsQuery({});
@@ -29,12 +30,19 @@ export const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
         <title>{settings?.meta_title || settings?.title || ''} - Admin</title>
       </Helmet>
       <SidebarProvider>
-        <div className="min-h-screen flex w-full bg-admin-content">
+        <div className="min-h-screen flex w-full bg-muted/40">
           <AdminSidebar />
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
             <AdminHeader />
-            <main className="flex-1 p-6">
-              {children || <Outlet />}
+            <main className={cn(
+              "flex-1 overflow-y-auto",
+              "bg-background/50"
+            )}>
+              <div className="p-6 lg:p-8">
+                <div className="mx-auto max-w-[1400px] w-full">
+                  {children || <Outlet />}
+                </div>
+              </div>
             </main>
             <AdminFooter />
           </div>
