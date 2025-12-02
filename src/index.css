@@ -57,19 +57,19 @@ All colors MUST be HSL.
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-    /* Admin Sidebar - Modern Gradient Theme */
-    --sidebar-background: 224 71% 4%;
-    --sidebar-foreground: 213 31% 91%;
-    --sidebar-primary: 210 100% 66%;
+    /* Admin Sidebar - Elegant Light Theme */
+    --sidebar-background: 220 20% 97%;
+    --sidebar-foreground: 222 47% 20%;
+    --sidebar-primary: 188 94% 38%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 216 34% 17%;
-    --sidebar-ring: 210 100% 66%;
+    --sidebar-accent: 220 14% 92%;
+    --sidebar-accent-foreground: 222 47% 15%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 188 94% 42%;
 
     /* Admin Header - Clean Modern */
     --admin-header-bg: 0 0% 100%;
-    --admin-header-foreground: 224 71% 4%;
+    --admin-header-foreground: 222 47% 15%;
     --admin-header-border: 220 13% 91%;
 
     /* Admin Content Background */
@@ -118,20 +118,20 @@ All colors MUST be HSL.
     --gradient-primary: linear-gradient(135deg, hsl(188 94% 32%), hsl(188 94% 42%));
     --gradient-hero: linear-gradient(135deg, hsl(188 94% 42% / 0.1), hsl(188 94% 52% / 0.05));
 
-    /* Admin Sidebar - Dark Mode */
-    --sidebar-background: 224 71% 4%;
-    --sidebar-foreground: 213 31% 91%;
-    --sidebar-primary: 210 100% 66%;
+    /* Admin Sidebar - Dark Mode (Soft Slate) */
+    --sidebar-background: 222 47% 14%;
+    --sidebar-foreground: 210 40% 92%;
+    --sidebar-primary: 188 94% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent: 222 40% 20%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 216 34% 17%;
-    --sidebar-ring: 210 100% 66%;
+    --sidebar-border: 222 30% 22%;
+    --sidebar-ring: 188 94% 50%;
 
     /* Admin Header - Dark Mode */
-    --admin-header-bg: 224 71% 4%;
+    --admin-header-bg: 222 47% 11%;
     --admin-header-foreground: 210 40% 98%;
-    --admin-header-border: 216 34% 17%;
+    --admin-header-border: 222 30% 20%;
 
     /* Admin Content Background - Dark Mode */
     --admin-content-bg: 222 47% 8%;
