@@ -13,11 +13,31 @@ import { useGetSiteSettingsQuery, useUpdateSiteSettingsMutation, useRemoveSlider
 import { toast } from 'sonner';
 import { Loader2, Upload, X, ChevronUp, ChevronDown } from 'lucide-react';
 
+// Fields sent per tab to keep payloads small
+const TAB_FIELDS: Record<string, string[]> = {
+  general: ['title', 'tagline', 'description', 'business_name', 'business_registration_number', 'tax_number', 'store_enabled', 'store_mode', 'maintenance_message'],
+  branding: ['header_logo', 'footer_logo', 'favicon', 'slider_images'],
+  contact: ['email', 'support_email', 'contact_number', 'address', 'notification_email', 'email_notifications', 'sms_notifications'],
+  ecommerce: ['currency', 'currency_symbol', 'currency_position', 'shipping_cost', 'free_shipping_threshold', 'tax_rate', 'tax_inclusive', 'payment_methods', 'shipping_methods', 'accepted_countries'],
+  business: ['business_hours'],
+  social: ['social_links'],
+  seo: ['meta_title', 'meta_description', 'meta_keywords', 'google_analytics_id', 'facebook_pixel_id', 'custom_scripts'],
+  legal: ['terms_of_service', 'privacy_policy', 'return_policy', 'shipping_policy'],
+};
+
+function pick(obj: Record<string, unknown>, keys: string[]): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  keys.forEach((key) => {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) out[key] = obj[key];
+  });
+  return out;
+}
+
 export default function Settings() {
   const { data: settingsData, isLoading } = useGetSiteSettingsQuery({});
   const [updateSettings, { isLoading: isUpdating }] = useUpdateSiteSettingsMutation();
   const [removeSliderItems] = useRemoveSliderItemsMutation();
-  const { register, handleSubmit, reset, watch, setValue } = useForm({
+  const { register, handleSubmit, reset, watch, setValue, getValues } = useForm({
     defaultValues: {
       store_enabled: false,
       store_mode: 'live',
@@ -220,75 +240,53 @@ export default function Settings() {
     }
   };
 
-  const onSubmit = async (data: any) => {
-    try {
-      console.log('Form data before processing:', data);
-      
-      // Prepare clean data with proper types and ensure all required fields exist
-      const cleanData: any = {
-        ...data,
-        // Ensure required object fields always exist (Laravel expects these as arrays/objects)
-        social_links: data.social_links || {},
-        business_hours: data.business_hours || {},
-        additional_settings: data.additional_settings || {},
-      };
-      
-      // Convert boolean fields - ensure they're actual booleans
-      const booleanFields = ['store_enabled', 'tax_inclusive', 'email_notifications', 'sms_notifications'];
-      booleanFields.forEach(field => {
-        if (field in cleanData) {
-          cleanData[field] = Boolean(cleanData[field]);
-        }
+  const appendToFormData = (fd: FormData, key: string, val: unknown) => {
+    if (val === null || val === undefined) return;
+    if (val instanceof File || val instanceof Blob) {
+      fd.append(key, val as Blob);
+    } else if (Array.isArray(val)) {
+      val.forEach((item, index) => {
+        appendToFormData(fd, `${key}[${index}]`, item);
       });
-      
-      console.log('Clean data after processing:', cleanData);
-      
-      // Check if we have files to upload
+    } else if (typeof val === 'object') {
+      Object.keys(val as object).forEach((childKey) => {
+        appendToFormData(fd, `${key}[${childKey}]`, (val as Record<string, unknown>)[childKey]);
+      });
+    } else if (typeof val === 'boolean') {
+      fd.append(key, val ? '1' : '0');
+    } else {
+      fd.append(key, String(val));
+    }
+  };
+
+  const submitTab = async (tab: string) => {
+    try {
+      const allValues = getValues() as Record<string, unknown>;
+      const keys = TAB_FIELDS[tab];
+      if (!keys?.length) return;
+      const data = pick(allValues, keys) as Record<string, unknown>;
+
+      const booleanFields = ['store_enabled', 'tax_inclusive', 'email_notifications', 'sms_notifications'];
+      booleanFields.forEach((field) => {
+        if (field in data) data[field] = Boolean(data[field]);
+      });
+      if ('social_links' in data && data.social_links == null) data.social_links = {};
+      if ('business_hours' in data && data.business_hours == null) data.business_hours = {};
+
       const hasFiles = headerLogoFile || footerLogoFile || faviconFile || sliderFiles.length > 0;
-      
-      if (hasFiles) {
+
+      if (tab === 'branding' && hasFiles) {
         const formData = new FormData();
-
-        // Helper to append nested objects/arrays using bracket notation for Laravel
-        const append = (fd: FormData, key: string, val: any) => {
-          if (val === null || val === undefined) return;
-          if (val instanceof File || val instanceof Blob) {
-            fd.append(key, val as Blob);
-          } else if (Array.isArray(val)) {
-            // Append array items with []/index notation
-            val.forEach((item, index) => {
-              append(fd, `${key}[${index}]`, item);
-            });
-          } else if (typeof val === 'object') {
-            Object.keys(val).forEach((childKey) => {
-              append(fd, `${key}[${childKey}]`, val[childKey]);
-            });
-          } else if (typeof val === 'boolean') {
-            fd.append(key, val ? '1' : '0');
-          } else {
-            fd.append(key, String(val));
-          }
-        };
-
-        // Append all fields; skip string logo fields if files are selected to avoid duplicates
-        Object.keys(cleanData).forEach((key) => {
-          if ((key === 'header_logo' && headerLogoFile) || 
-              (key === 'footer_logo' && footerLogoFile) || 
-              (key === 'favicon' && faviconFile) ||
-              (key === 'slider_images' && sliderFiles.length > 0)) {
-            return;
-          }
-          append(formData, key, cleanData[key]);
+        // Do not send logo/slider as URL strings — only send new files and slider JSON
+        const skipKeys = ['header_logo', 'footer_logo', 'favicon', 'slider_images'];
+        Object.keys(data).forEach((key) => {
+          if (skipKeys.includes(key)) return;
+          appendToFormData(formData, key, data[key]);
         });
-
-        // Append files
         if (headerLogoFile) formData.append('header_logo', headerLogoFile);
         if (footerLogoFile) formData.append('footer_logo', footerLogoFile);
         if (faviconFile) formData.append('favicon', faviconFile);
-
-        // Handle slider images with metadata
         if (sliderFiles.length > 0) {
-          // Upload new files
           sliderFiles.forEach((file, index) => {
             formData.append('slider_images[]', file);
             const sliderIndex = existingSliders.length + index;
@@ -297,53 +295,52 @@ export default function Settings() {
             formData.append('slider_hyperlinks[]', sliderPreviews[sliderIndex]?.hyperlink || '');
           });
         } else if (existingSliders.length > 0) {
-          // Update existing sliders (reorder or update metadata)
-          const sliderData = existingSliders.map(slider => ({
+          const sliderData = existingSliders.map((slider) => ({
             image: slider.image.includes('/storage/') ? slider.image.split('/storage/')[1] : slider.image,
             title: slider.title || '',
             subtitle: slider.subtitle || '',
-            hyperlink: slider.hyperlink || ''
+            hyperlink: slider.hyperlink || '',
           }));
           formData.append('slider_images', JSON.stringify(sliderData));
         } else {
-          // Empty array to clear all sliders
           formData.append('slider_images', JSON.stringify([]));
         }
-
-        console.log('FormData entries:', Array.from(formData.entries()));
-
-        await updateSettings(formData).unwrap();
-      } else {
-        // Use JSON for regular updates
-        // Include slider_images if only metadata was updated (no new files)
-        if (existingSliders.length > 0) {
-          const sliderData = existingSliders.map(slider => ({
-            image: slider.image.includes('/storage/') ? slider.image.split('/storage/')[1] : slider.image,
-            title: slider.title || '',
-            subtitle: slider.subtitle || '',
-            hyperlink: slider.hyperlink || ''
-          }));
-          cleanData.slider_images = sliderData;
+        const result = await updateSettings(formData).unwrap();
+        setHeaderLogoFile(null);
+        setFooterLogoFile(null);
+        setFaviconFile(null);
+        setSliderFiles([]);
+        if (result?.data) {
+          if (result.data.header_logo) setHeaderLogoPreview(result.data.header_logo);
+          if (result.data.footer_logo) setFooterLogoPreview(result.data.footer_logo);
+          if (result.data.favicon) setFaviconPreview(result.data.favicon);
+          if (Array.isArray(result.data.slider_images) && result.data.slider_images.length > 0) {
+            const formatted = result.data.slider_images.map((s: { image: string; title?: string; subtitle?: string; hyperlink?: string }) => ({
+              image: s.image ?? '',
+              title: s.title ?? '',
+              subtitle: s.subtitle ?? '',
+              hyperlink: s.hyperlink ?? '',
+            }));
+            setExistingSliders(formatted);
+            setSliderPreviews(formatted);
+          }
         }
-        
-        console.log('Sending JSON payload:', cleanData);
-        await updateSettings(cleanData).unwrap();
+      } else if (tab === 'branding') {
+        const sliderData = existingSliders.map((slider) => ({
+          image: slider.image.includes('/storage/') ? slider.image.split('/storage/')[1] : slider.image,
+          title: slider.title || '',
+          subtitle: slider.subtitle || '',
+          hyperlink: slider.hyperlink || '',
+        }));
+        await updateSettings({ ...data, slider_images: sliderData }).unwrap();
+      } else {
+        await updateSettings(data).unwrap();
       }
-      
+
       toast.success('Settings updated successfully');
-      
-      // Reset file states
-      setHeaderLogoFile(null);
-      setFooterLogoFile(null);
-      setFaviconFile(null);
-      setSliderFiles([]);
-      
-      // Update existing sliders from response - we need to refetch
-      // The existing sliders will be updated through the useEffect when data changes
-    } catch (error: any) {
-      console.error('Settings update error:', error);
-      console.error('Error details:', error?.data);
-      toast.error(error?.data?.message || 'Failed to update settings');
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string } };
+      toast.error(err?.data?.message || 'Failed to update settings');
     }
   };
 
@@ -381,7 +378,7 @@ export default function Settings() {
               <CardDescription>Update your store's basic information</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={handleSubmit(() => submitTab('general'))} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="title">Store Title</Label>
                   <Input id="title" {...register('title')} placeholder="My Store" />
@@ -455,7 +452,7 @@ export default function Settings() {
               <CardDescription>Upload your logos and favicon</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={handleSubmit(() => submitTab('branding'))} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="header_logo">Header Logo</Label>
                   <div className="flex items-center gap-4">
@@ -705,7 +702,7 @@ export default function Settings() {
               <CardDescription>Update your contact details</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={handleSubmit(() => submitTab('contact'))} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
@@ -762,7 +759,7 @@ export default function Settings() {
               <CardDescription>Configure your store's ecommerce options</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={handleSubmit(() => submitTab('ecommerce'))} className="space-y-4">
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="currency">Currency Code</Label>
@@ -879,7 +876,7 @@ export default function Settings() {
               <CardDescription>Set your business operating hours</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={handleSubmit(() => submitTab('business'))} className="space-y-4">
                 {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
                   <div key={day} className="flex items-center gap-4">
                     <div className="w-32">
@@ -925,7 +922,7 @@ export default function Settings() {
               <CardDescription>Connect your social media profiles</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={handleSubmit(() => submitTab('social'))} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="social_links.facebook">Facebook</Label>
@@ -972,7 +969,7 @@ export default function Settings() {
               <CardDescription>Optimize your store for search engines and track analytics</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={handleSubmit(() => submitTab('seo'))} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="meta_title">Meta Title</Label>
                   <Input id="meta_title" {...register('meta_title')} placeholder="Store Name - Best Products Online" maxLength={255} />
@@ -1016,7 +1013,7 @@ export default function Settings() {
               <CardDescription>Manage your legal policies and terms</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={handleSubmit(() => submitTab('legal'))} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="terms_of_service">Terms of Service</Label>
                   <RichTextEditor
