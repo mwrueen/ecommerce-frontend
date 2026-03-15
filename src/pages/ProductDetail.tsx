@@ -11,6 +11,7 @@ import { addToCart } from '@/store/slices/cartSlice';
 import { toast } from 'sonner';
 import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { formatPrice } from '@/lib/currency';
+import { getStorageUrl } from '@/lib/utils';
 
 const ProductDetail = () => {
   const { identifier } = useParams();
@@ -21,13 +22,13 @@ const ProductDetail = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   // Get thumbnail or first media image
-  const productImage = product?.media?.find((m: any) => m.is_thumbnail)?.url || 
-                       product?.media?.[0]?.url || 
-                       product?.image_url;
+  const productImage = product?.media?.find((m: any) => m.is_thumbnail)?.url ||
+    product?.media?.[0]?.url ||
+    product?.image_url;
 
   const handleAddToCart = () => {
     if (!product) return;
-    
+
     dispatch(addToCart({
       id: product.id,
       name: product.name,
@@ -83,7 +84,7 @@ const ProductDetail = () => {
             <div className="aspect-square rounded-lg overflow-hidden bg-secondary">
               {(selectedImage || productImage) ? (
                 <img
-                  src={selectedImage || productImage}
+                  src={getStorageUrl(selectedImage || productImage)}
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
@@ -96,14 +97,13 @@ const ProductDetail = () => {
             {product.media && product.media.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
                 {product.media.map((media: any) => (
-                  <div 
-                    key={media.id} 
-                    className={`aspect-square rounded-lg overflow-hidden bg-secondary cursor-pointer hover:opacity-75 transition-opacity border-2 ${
-                      (selectedImage || productImage) === media.url ? 'border-primary' : 'border-transparent'
-                    }`}
+                  <div
+                    key={media.id}
+                    className={`aspect-square rounded-lg overflow-hidden bg-secondary cursor-pointer hover:opacity-75 transition-opacity border-2 ${(selectedImage || productImage) === media.url ? 'border-primary' : 'border-transparent'
+                      }`}
                     onClick={() => setSelectedImage(media.url)}
                   >
-                    <img src={media.url} alt={media.alt_text || product.name} className="w-full h-full object-cover" />
+                    <img src={getStorageUrl(media.url)} alt={media.alt_text || product.name} className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>
@@ -145,12 +145,12 @@ const ProductDetail = () => {
 
             <div>
               <h3 className="font-semibold mb-2">Description</h3>
-              <div 
+              <div
                 className="text-muted-foreground prose prose-sm max-w-none"
                 dangerouslySetInnerHTML={{ __html: product.description }}
               />
               {product.long_description && (
-                <div 
+                <div
                   className="text-muted-foreground mt-4 prose prose-sm max-w-none"
                   dangerouslySetInnerHTML={{ __html: product.long_description }}
                 />

@@ -9,7 +9,7 @@ import ProductCard from '@/components/ProductCard';
 import Autoplay from 'embla-carousel-autoplay';
 import { formatPrice } from '@/lib/currency';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
+import { cn, getStorageUrl } from '@/lib/utils';
 
 const Index = () => {
   const { data: landingData, isLoading, error } = useGetLandingPageDataQuery();
@@ -59,7 +59,7 @@ const Index = () => {
                   const slideBody = (
                     <>
                       <img
-                        src={slider.image}
+                        src={getStorageUrl(slider.image)}
                         alt={slider.title || `Slider ${index + 1}`}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
@@ -211,7 +211,7 @@ const Index = () => {
                     <div className="relative aspect-square overflow-hidden bg-muted">
                       {deal.image_url ? (
                         <img
-                          src={deal.image_url}
+                          src={getStorageUrl(deal.image_url)}
                           alt={deal.title}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
@@ -279,7 +279,7 @@ const Index = () => {
                           <div className="relative h-14 w-14 rounded-2xl bg-primary/10 p-2 ring-2 ring-primary/10">
                             {category.image_url ? (
                               <img
-                                src={category.image_url}
+                                src={getStorageUrl(category.image_url)}
                                 alt={category.name}
                                 className="h-full w-full rounded-2xl object-cover"
                               />
@@ -427,7 +427,7 @@ const Index = () => {
                     <div className="relative aspect-video overflow-hidden bg-secondary">
                       {deal.banner_image_url || deal.image_url ? (
                         <img
-                          src={deal.banner_image_url || deal.image_url}
+                          src={getStorageUrl(deal.banner_image_url || deal.image_url)}
                           alt={deal.title}
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                         />

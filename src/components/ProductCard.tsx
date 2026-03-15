@@ -8,7 +8,7 @@ import { addToCart } from '@/store/slices/cartSlice';
 import { toast } from 'sonner';
 import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { formatPrice } from '@/lib/currency';
-import { cn } from '@/lib/utils';
+import { cn, getStorageUrl } from '@/lib/utils';
 
 interface ProductCardProps {
   product: any;
@@ -20,8 +20,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   // Get thumbnail or first media image
   const productImage = product.media?.find((m: any) => m.is_thumbnail)?.url ||
-                       product.media?.[0]?.url ||
-                       product.image_url;
+    product.media?.[0]?.url ||
+    product.image_url;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -48,7 +48,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <div className="relative aspect-[4/3] overflow-hidden bg-muted">
           {productImage ? (
             <img
-              src={productImage}
+              src={getStorageUrl(productImage)}
               alt={product.name}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
             />

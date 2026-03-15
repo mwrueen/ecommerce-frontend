@@ -53,6 +53,15 @@ export interface Deal {
     name: string;
     email: string;
   };
+  products_details?: {
+    id: number;
+    name: string;
+    sku: string;
+  }[];
+  categories_details?: {
+    id: number;
+    name: string;
+  }[];
 }
 
 export interface DealFormData {
@@ -143,6 +152,11 @@ export const dealsApi = apiSlice.injectEndpoints({
       providesTags: ['Deal'],
     }),
 
+    getAdminDeal: builder.query<{ success: boolean; data: Deal }, string | number>({
+      query: (id) => `/admin/deals/${id}`,
+      providesTags: ['Deal'],
+    }),
+
     getDealsForCategory: builder.query<{ success: boolean; data: Deal[] }, number>({
       query: (categoryId) => `/deals/category/${categoryId}`,
       providesTags: ['Deal'],
@@ -170,25 +184,25 @@ export const dealsApi = apiSlice.injectEndpoints({
       page?: number;
     }>({
       query: (params) => ({
-        url: '/deals',
+        url: '/admin/deals',
         params,
       }),
       providesTags: ['Deal'],
     }),
 
-    createDeal: builder.mutation<{ success: boolean; message: string; data: Deal }, DealFormData>({
+    createDeal: builder.mutation<{ success: boolean; message: string; data: Deal }, DealFormData | FormData>({
       query: (data) => ({
-        url: '/deals',
+        url: '/admin/deals',
         method: 'POST',
         body: data,
       }),
       invalidatesTags: ['Deal'],
     }),
 
-    updateDeal: builder.mutation<{ success: boolean; message: string; data: Deal }, { id: number; data: Partial<DealFormData> }>({
+    updateDeal: builder.mutation<{ success: boolean; message: string; data: Deal }, { id: number; data: Partial<DealFormData> | FormData }>({
       query: ({ id, data }) => ({
-        url: `/deals/${id}`,
-        method: 'PUT',
+        url: `/admin/deals/${id}`,
+        method: 'POST', // Use POST for multipart form update (with _method: PUT)
         body: data,
       }),
       invalidatesTags: ['Deal'],
@@ -196,7 +210,7 @@ export const dealsApi = apiSlice.injectEndpoints({
 
     deleteDeal: builder.mutation<{ success: boolean; message: string }, number>({
       query: (id) => ({
-        url: `/deals/${id}`,
+        url: `/admin/deals/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Deal'],
@@ -204,7 +218,7 @@ export const dealsApi = apiSlice.injectEndpoints({
 
     toggleDealActive: builder.mutation<{ success: boolean; message: string; data: Deal }, number>({
       query: (id) => ({
-        url: `/deals/${id}/toggle-active`,
+        url: `/admin/deals/${id}/toggle-active`,
         method: 'POST',
       }),
       invalidatesTags: ['Deal'],
@@ -212,7 +226,7 @@ export const dealsApi = apiSlice.injectEndpoints({
 
     toggleDealFeatured: builder.mutation<{ success: boolean; message: string; data: Deal }, number>({
       query: (id) => ({
-        url: `/deals/${id}/toggle-featured`,
+        url: `/admin/deals/${id}/toggle-featured`,
         method: 'POST',
       }),
       invalidatesTags: ['Deal'],
@@ -220,7 +234,7 @@ export const dealsApi = apiSlice.injectEndpoints({
 
     getDealStats: builder.query<{ success: boolean; data: any }, { deal_id?: number }>({
       query: (params) => ({
-        url: '/deals/stats',
+        url: '/admin/deals/stats',
         params,
       }),
     }),
@@ -236,6 +250,7 @@ export const {
   useGetDealsForCategoryQuery,
   useValidateDealMutation,
   useGetAllDealsQuery,
+  useGetAdminDealQuery,
   useCreateDealMutation,
   useUpdateDealMutation,
   useDeleteDealMutation,
