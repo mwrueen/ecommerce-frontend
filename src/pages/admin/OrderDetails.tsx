@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, Trash2, Package, User, MapPin, Calendar, XCircle, Clock, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Trash2, Package, User, MapPin, Calendar, XCircle, Clock, AlertCircle, Truck, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
@@ -35,6 +35,8 @@ const OrderDetails = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
   const order = orderData?.order;
 
@@ -53,12 +55,25 @@ const OrderDetails = () => {
     return transitions[currentStatus] || [];
   };
 
-  const handleStatusUpdate = async (newStatus: string) => {
+  const handleStatusUpdate = async () => {
+    if (!selectedStatus) return;
+
     try {
-      await updateStatus({ id: parseInt(id!), status: newStatus }).unwrap();
-      toast.success('Order status updated successfully');
+      await updateStatus({ id: parseInt(id!), status: selectedStatus }).unwrap();
+      toast.success(`Order status updated to ${selectedStatus}`);
+      setShowStatusDialog(false);
+      setSelectedStatus(null);
     } catch (error: any) {
       toast.error(error?.data?.message || 'Failed to update order status');
+    }
+  };
+
+  const initiateStatusUpdate = (status: string) => {
+    if (status === 'cancelled') {
+      setShowCancelDialog(true);
+    } else {
+      setSelectedStatus(status);
+      setShowStatusDialog(true);
     }
   };
 
@@ -114,9 +129,9 @@ const OrderDetails = () => {
       <div className="bg-card border rounded-lg p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-4">
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
               onClick={() => navigate('/admin/orders')}
               className="mt-1"
             >
@@ -174,8 +189,8 @@ const OrderDetails = () => {
             <strong>Pending Cancellation Request</strong>
             <span className="block mt-1">
               Customer has requested to cancel this order. Review the request in{' '}
-              <Button 
-                variant="link" 
+              <Button
+                variant="link"
                 className="p-0 h-auto text-yellow-700 underline"
                 onClick={() => navigate('/admin/cancellation-requests')}
               >
@@ -348,7 +363,7 @@ const OrderDetails = () => {
                 {order.notes && (
                   <div>
                     <div className="text-sm font-medium text-muted-foreground mb-2">Order Notes</div>
-                    <div 
+                    <div
                       className="text-sm leading-relaxed bg-muted/50 p-3 rounded-md prose prose-sm max-w-none"
                       dangerouslySetInnerHTML={{ __html: order.notes }}
                     />
@@ -376,40 +391,45 @@ const OrderDetails = () => {
                   {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                 </Badge>
               </div>
-              
+
               {getValidNextStatuses(order.status).length > 0 && (
                 <>
                   <Separator />
                   <div className="space-y-3">
-                    <label className="text-sm font-medium text-foreground">Change Status</label>
-                    <Select
-                      onValueChange={handleStatusUpdate}
-                      disabled={isUpdating}
-                    >
-                      <SelectTrigger className="bg-background border-input">
-                        <SelectValue placeholder="Select new status" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-popover border border-border z-[100]">
-                        {getValidNextStatuses(order.status).map((status) => (
-                          <SelectItem 
-                            key={status} 
-                            value={status}
-                            className="cursor-pointer"
+                    <label className="text-sm font-medium text-foreground">Actions</label>
+                    <div className="grid gap-2">
+                      {getValidNextStatuses(order.status).map((status) => {
+                        const isCancel = status === 'cancelled';
+                        const config = {
+                          processing: { label: 'Start Processing', icon: Clock, variant: 'default' as const },
+                          shipped: { label: 'Mark as Shipped', icon: Truck, variant: 'default' as const },
+                          delivered: { label: 'Mark as Delivered', icon: CheckCircle2, variant: 'default' as const },
+                          cancelled: { label: 'Cancel Order', icon: XCircle, variant: 'destructive' as const },
+                        }[status] || { label: status, icon: Package, variant: 'outline' as const };
+
+                        const Icon = config.icon;
+
+                        return (
+                          <Button
+                            key={status}
+                            variant={config.variant}
+                            className="w-full justify-start h-10 px-4"
+                            onClick={() => initiateStatusUpdate(status)}
+                            disabled={isUpdating}
                           >
-                            {status.charAt(0).toUpperCase() + status.slice(1)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {order.status === 'pending' && '→ Processing or Cancelled'}
-                      {order.status === 'processing' && '→ Shipped or Cancelled'}
-                      {order.status === 'shipped' && '→ Delivered or Cancelled'}
+                            <Icon className="mr-2 h-4 w-4" />
+                            {config.label}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed italic">
+                      Step by step order fulfillment process
                     </p>
                   </div>
                 </>
               )}
-              
+
               {(order.status === 'delivered' || order.status === 'cancelled') && (
                 <>
                   <Separator />
@@ -436,7 +456,7 @@ const OrderDetails = () => {
                 <div className="text-xs font-medium text-muted-foreground mb-1">Full Name</div>
                 <div className="text-sm font-medium">{order.customer?.name || 'N/A'}</div>
               </div>
-              
+
               {order.customer?.email && (
                 <>
                   <Separator />
@@ -446,7 +466,7 @@ const OrderDetails = () => {
                   </div>
                 </>
               )}
-              
+
               {order.customer?.phone && (
                 <>
                   <Separator />
@@ -477,9 +497,9 @@ const OrderDetails = () => {
                   {format(new Date(order.created_at), 'p')}
                 </div>
               </div>
-              
+
               <Separator />
-              
+
               <div>
                 <div className="text-xs font-medium text-muted-foreground mb-1">Last Updated</div>
                 <div className="text-sm font-medium">
@@ -502,6 +522,15 @@ const OrderDetails = () => {
         description={`Are you sure you want to delete order ${order.order_number}? This action cannot be undone and will release all reserved stock.`}
         variant="destructive"
         confirmText="Delete Order"
+      />
+
+      <ConfirmDialog
+        open={showStatusDialog}
+        onOpenChange={setShowStatusDialog}
+        onConfirm={handleStatusUpdate}
+        title="Update Order Status"
+        description={`Are you sure you want to change the status of order ${order.order_number} to "${selectedStatus}"?`}
+        confirmText="Update Status"
       />
 
       <CancelOrderDialog
