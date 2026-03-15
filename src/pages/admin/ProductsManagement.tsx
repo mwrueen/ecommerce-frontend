@@ -13,7 +13,7 @@ import { formatPrice } from '@/lib/currency';
 import { toast as sonnerToast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { cn, getStorageUrl } from '@/lib/utils';
 
 export default function ProductsManagement() {
   const [page, setPage] = useState(1);
@@ -23,18 +23,19 @@ export default function ProductsManagement() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { data: settings } = useGetPublicSettingsQuery({});
-  
+
   // Fetch categories for filter
   const { data: categoriesData } = useGetCategoriesQuery({
     sort_by: 'name',
     sort_order: 'asc',
   });
-  
+
   const categories = categoriesData?.data || [];
-  
-  const { data, isLoading } = useGetProductsQuery({ 
-    page, 
+
+  const { data, isLoading } = useGetProductsQuery({
+    page,
     per_page: 10,
+    search: search || undefined,
     ...(categoryId !== 'all' && { category_id: parseInt(categoryId) })
   });
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
@@ -166,15 +167,15 @@ export default function ProductsManagement() {
             ) : (
               data?.data?.map((product: any) => {
                 const productImage = product.media?.find((m: any) => m.is_thumbnail)?.url ||
-                                    product.media?.[0]?.url ||
-                                    product.image_url ||
-                                    '/placeholder.svg';
+                  product.media?.[0]?.url ||
+                  product.image_url ||
+                  '/placeholder.svg';
                 return (
                   <TableRow key={product.id}>
                     <TableCell className="py-2">
                       <div className="h-10 w-10 rounded-md overflow-hidden bg-muted">
                         <img
-                          src={productImage}
+                          src={getStorageUrl(productImage)}
                           alt={product.name}
                           className="h-full w-full object-cover"
                         />
