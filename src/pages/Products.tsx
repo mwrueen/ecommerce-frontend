@@ -22,21 +22,21 @@ const Products = () => {
   const [maxPrice, setMaxPrice] = useState<string>('');
   const [accumulatedProducts, setAccumulatedProducts] = useState<any[]>([]);
   const { data: settings } = useGetPublicSettingsQuery({});
-  
+
   // Slider state (0-10000 range)
   const MAX_PRICE = 10000;
   const [priceRange, setPriceRange] = useState<number[]>([0, MAX_PRICE]);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
-  
+
   // Sync slider with inputs
   useEffect(() => {
     const min = minPrice ? parseFloat(minPrice) : 0;
     const max = maxPrice ? parseFloat(maxPrice) : MAX_PRICE;
     setPriceRange([min, max]);
   }, [minPrice, maxPrice]);
-  
-  const { data, isLoading, isFetching } = useGetProductsQuery({ 
-    page, 
+
+  const { data, isLoading, isFetching } = useGetProductsQuery({
+    page,
     per_page: 12,
     ...(categoryId && { category_id: categoryId }),
     ...(minPrice && { min_price: minPrice }),
@@ -67,55 +67,67 @@ const Products = () => {
       }
     }
   }, [data, page]);
-  
+
   const { data: categoriesData, isLoading: categoriesLoading } = useGetCategoriesQuery({
     active: 'true',
     sort_by: 'name',
     sort_order: 'asc'
   });
 
-  // Read category from URL parameter and set categoryId
+  // Read parameters from URL and sync state
   useEffect(() => {
     if (!categoriesData?.data) return;
-    
+
     const categorySlug = searchParams.get('category');
+    const minParam = searchParams.get('min_price') || '';
+    const maxParam = searchParams.get('max_price') || '';
+
+    // Sync category
     if (categorySlug) {
       const category = categoriesData.data.find((c: any) => c.slug === categorySlug);
-      if (category) {
-        setCategoryId((prevId) => {
-          if (prevId !== category.id) {
-            setPage(1);
-            return category.id;
-          }
-          return prevId;
-        });
+      if (category && categoryId !== category.id) {
+        setCategoryId(category.id);
+        setPage(1);
       }
-    } else {
-      setCategoryId((prevId) => {
-        if (prevId !== null) {
-          setPage(1);
-          return null;
-        }
-        return prevId;
-      });
+    } else if (categoryId !== null) {
+      setCategoryId(null);
+      setPage(1);
+    }
+
+    // Sync prices
+    if (minParam !== minPrice) setMinPrice(minParam);
+    if (maxParam !== maxPrice) setMaxPrice(maxParam);
+
+    if (minParam || maxParam) {
+      const min = minParam ? parseFloat(minParam) : 0;
+      const max = maxParam ? parseFloat(maxParam) : MAX_PRICE;
+      setPriceRange([min, max]);
     }
   }, [searchParams, categoriesData]);
+
+  const updateUrlParams = (params: Record<string, string | null>) => {
+    const newParams = new URLSearchParams(searchParams);
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === null || value === '') {
+        newParams.delete(key);
+      } else {
+        newParams.set(key, value);
+      }
+    });
+    setSearchParams(newParams, { replace: true });
+  };
 
   const handleCategoryClick = (id: number | null) => {
     setCategoryId(id);
     setPage(1);
     setAccumulatedProducts([]);
-    // Update URL to reflect category filter
+
+    let slug = '';
     if (id && categoriesData?.data) {
       const category = categoriesData.data.find((c: any) => c.id === id);
-      if (category) {
-        searchParams.set('category', category.slug);
-        setSearchParams(searchParams, { replace: true });
-      }
-    } else {
-      searchParams.delete('category');
-      setSearchParams(searchParams, { replace: true });
+      slug = category?.slug || '';
     }
+    updateUrlParams({ category: slug || null });
   };
 
   const handleLoadMore = () => {
@@ -126,19 +138,20 @@ const Products = () => {
   };
 
   const handleSliderChange = (values: number[]) => {
-    // Update slider display immediately for smooth UX
     setPriceRange(values);
-    
-    // Debounce the actual price state update (which triggers API call)
-    if (debounceTimeout.current) {
-      clearTimeout(debounceTimeout.current);
-    }
-    
+
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+
     debounceTimeout.current = setTimeout(() => {
-      setMinPrice(values[0] > 0 ? values[0].toString() : '');
-      setMaxPrice(values[1] < MAX_PRICE ? values[1].toString() : '');
+      const min = values[0] > 0 ? values[0].toString() : '';
+      const max = values[1] < MAX_PRICE ? values[1].toString() : '';
+
+      updateUrlParams({
+        min_price: min || null,
+        max_price: max || null
+      });
       setPage(1);
-    }, 500); // Wait 500ms after user stops dragging
+    }, 500);
   };
 
   // Cleanup timeout on unmount
@@ -167,6 +180,10 @@ const Products = () => {
   };
 
   const handlePriceFilter = () => {
+    updateUrlParams({
+      min_price: minPrice || null,
+      max_price: maxPrice || null
+    });
     setPage(1);
   };
 
@@ -174,6 +191,10 @@ const Products = () => {
     setMinPrice('');
     setMaxPrice('');
     setPriceRange([0, MAX_PRICE]);
+    updateUrlParams({
+      min_price: null,
+      max_price: null
+    });
     setPage(1);
   };
 
@@ -299,7 +320,7 @@ const Products = () => {
                         )}
                       </span>
                     </div>
-                    
+
                     {/* Slider */}
                     <div className="px-2">
                       <Slider
