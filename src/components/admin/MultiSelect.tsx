@@ -50,7 +50,7 @@ export function MultiSelect({
                     <div className="flex flex-wrap gap-1">
                         {selected.length > 0 ? (
                             selected.map((value) => {
-                                const option = options.find((o) => o.value === value);
+                                const option = options.find((o) => String(o.value) === String(value));
                                 return (
                                     <Badge
                                         key={value}
@@ -95,9 +95,9 @@ export function MultiSelect({
                                     key={option.value}
                                     value={String(option.label)}
                                     onSelect={() => {
-                                        const isSelected = selected.includes(option.value);
+                                        const isSelected = selected.some(s => String(s) === String(option.value));
                                         if (isSelected) {
-                                            onChange(selected.filter((s) => s !== option.value));
+                                            onChange(selected.filter((s) => String(s) !== String(option.value)));
                                         } else {
                                             onChange([...selected, option.value]);
                                         }
@@ -106,7 +106,7 @@ export function MultiSelect({
                                     <div
                                         className={cn(
                                             "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                                            selected.includes(option.value)
+                                            selected.some(s => String(s) === String(option.value))
                                                 ? "bg-primary text-primary-foreground"
                                                 : "opacity-50 [&_svg]:invisible"
                                         )}

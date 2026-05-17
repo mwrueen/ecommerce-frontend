@@ -122,7 +122,19 @@ export default function DealForm() {
 
       // Append all simple values
       Object.entries(values).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && key !== 'applicable_products' && key !== 'applicable_categories' && key !== 'image' && key !== 'banner_image') {
+        // Skip buy_x_get_y specific fields if type is not buy_x_get_y
+        if (values.type !== 'buy_x_get_y' && ['buy_quantity', 'get_quantity', 'get_product_id'].includes(key)) {
+          return;
+        }
+
+        // Skip 0 or empty for optional numeric fields
+        if (['buy_quantity', 'get_quantity', 'get_product_id', 'maximum_discount', 'minimum_purchase_amount', 'usage_limit', 'usage_limit_per_customer'].includes(key)) {
+          if (value === undefined || value === null || value === '' || value === 0 || isNaN(value as number)) {
+            return;
+          }
+        }
+
+        if (value !== undefined && value !== null && value !== '' && key !== 'applicable_products' && key !== 'applicable_categories' && key !== 'image' && key !== 'banner_image') {
           // Convert booleans to 1/0 for Laravel validation compatibility
           if (typeof value === 'boolean') {
             formData.append(key, value ? '1' : '0');

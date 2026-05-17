@@ -158,7 +158,7 @@ export default function InventoryManagement() {
             <Package className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{productsData?.meta?.total || 0}</div>
+            <div className="text-2xl font-bold">{productsData?.total ?? productsData?.meta?.total ?? 0}</div>
             <p className="text-xs text-muted-foreground">In catalog</p>
           </CardContent>
         </Card>
@@ -242,7 +242,7 @@ export default function InventoryManagement() {
 
           <div className="flex justify-between items-center">
             <p className="text-sm text-muted-foreground">
-              Showing {productsData?.meta?.from || 0} to {productsData?.meta?.to || 0} of {productsData?.meta?.total || 0}
+              Showing {productsData?.from ?? productsData?.meta?.from ?? 0} to {productsData?.to ?? productsData?.meta?.to ?? 0} of {productsData?.total ?? productsData?.meta?.total ?? 0}
             </p>
             <div className="flex gap-2">
               <Button
@@ -255,7 +255,7 @@ export default function InventoryManagement() {
               <Button
                 variant="outline"
                 onClick={() => setPage(p => p + 1)}
-                disabled={page >= (productsData?.meta?.last_page || 1)}
+                disabled={page >= (productsData?.last_page ?? productsData?.meta?.last_page ?? 1)}
               >
                 Next
               </Button>
