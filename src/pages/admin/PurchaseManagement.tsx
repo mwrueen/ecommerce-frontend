@@ -52,7 +52,7 @@ export default function PurchaseManagement() {
   }]);
 
   // API hooks
-  const { data: productsData } = useGetProductsQuery({ page: 1, per_page: 1000 });
+  const { data: productsData } = useGetProductsQuery({ page: 1, per_page: 500 });
   const [recordPurchase, { isLoading: isRecording }] = useRecordPurchaseMutation();
   const [recordBulkPurchases, { isLoading: isBulkRecording }] = useRecordBulkPurchasesMutation();
   const { data: historyData, refetch: refetchHistory } = useGetPurchaseHistoryQuery({ per_page: 20 });
@@ -87,7 +87,7 @@ export default function PurchaseManagement() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.product_id || !formData.quantity) {
       toast({
         title: 'Validation Error',
@@ -108,7 +108,7 @@ export default function PurchaseManagement() {
       };
 
       const result = await recordPurchase(payload).unwrap();
-      
+
       toast({
         title: 'Success',
         description: `Purchase recorded: ${result.purchase.purchase_quantity} units of ${result.purchase.product_name}`,
@@ -138,7 +138,7 @@ export default function PurchaseManagement() {
 
   const handleBulkSubmit = async () => {
     const validPurchases = bulkPurchases.filter(p => p.product_id && p.quantity);
-    
+
     if (validPurchases.length === 0) {
       toast({
         title: 'Validation Error',
@@ -161,7 +161,7 @@ export default function PurchaseManagement() {
       };
 
       const result = await recordBulkPurchases(payload).unwrap();
-      
+
       toast({
         title: 'Success',
         description: `${result.total_purchases} purchases recorded successfully`,
@@ -218,7 +218,7 @@ export default function PurchaseManagement() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label>Product *</Label>
-                      <Select 
+                      <Select
                         value={purchase.product_id}
                         onValueChange={(value) => handleBulkInputChange(index, 'product_id', value)}
                       >
