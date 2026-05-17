@@ -62,6 +62,16 @@ export interface Deal {
     id: number;
     name: string;
   }[];
+  categories?: {
+    id: number;
+    name: string;
+    slug: string;
+  }[];
+  products?: {
+    id: number;
+    name: string;
+    slug: string;
+  }[];
 }
 
 export interface DealFormData {

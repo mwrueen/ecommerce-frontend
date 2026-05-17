@@ -61,14 +61,26 @@ const Cart = () => {
                           {item.name}
                         </h3>
                       </Link>
-                      <p className="text-lg font-bold text-primary mt-1">
-                        {formatPrice(
-                          item.price,
-                          settings?.data?.currency_symbol,
-                          settings?.data?.currency_position,
-                          settings?.data?.formatted_currency
+                      <div className="flex items-baseline gap-2 mt-1">
+                        <p className="text-lg font-bold text-primary">
+                          {formatPrice(
+                            item.price,
+                            settings?.data?.currency_symbol,
+                            settings?.data?.currency_position,
+                            settings?.data?.formatted_currency
+                          )}
+                        </p>
+                        {item.original_price && item.original_price !== item.price && (
+                          <p className="text-sm text-muted-foreground line-through">
+                            {formatPrice(
+                              item.original_price,
+                              settings?.data?.currency_symbol,
+                              settings?.data?.currency_position,
+                              settings?.data?.formatted_currency
+                            )}
+                          </p>
                         )}
-                      </p>
+                      </div>
 
                       <div className="flex items-center gap-4 mt-4">
                         <div className="flex items-center gap-2">

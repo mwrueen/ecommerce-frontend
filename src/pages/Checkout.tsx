@@ -152,14 +152,26 @@ const Checkout = () => {
                   {items.map((item) => (
                     <div key={item.id} className="flex justify-between text-sm">
                       <span>{item.name} x {item.quantity}</span>
-                      <span>
-                        {formatPrice(
-                          parseFloat(item.price) * item.quantity,
-                          settings?.data?.currency_symbol,
-                          settings?.data?.currency_position,
-                          settings?.data?.formatted_currency
+                      <div className="flex gap-2">
+                        {item.original_price && item.original_price !== item.price && (
+                          <span className="text-muted-foreground line-through">
+                            {formatPrice(
+                              parseFloat(item.original_price) * item.quantity,
+                              settings?.data?.currency_symbol,
+                              settings?.data?.currency_position,
+                              settings?.data?.formatted_currency
+                            )}
+                          </span>
                         )}
-                      </span>
+                        <span>
+                          {formatPrice(
+                            parseFloat(item.price) * item.quantity,
+                            settings?.data?.currency_symbol,
+                            settings?.data?.currency_position,
+                            settings?.data?.formatted_currency
+                          )}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>

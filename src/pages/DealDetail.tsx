@@ -171,6 +171,23 @@ export default function DealDetail() {
                   <span className="font-medium">{deal.usage_limit - deal.usage_count}</span>
                 </div>
               )}
+              {deal.categories && deal.categories.length > 0 && (
+                <div className="flex flex-col gap-2 pt-2 border-t">
+                  <span className="text-muted-foreground">Applicable Categories:</span>
+                  <div className="flex flex-wrap gap-2">
+                    {deal.categories.map((category: any) => (
+                      <Badge 
+                        key={category.id} 
+                        variant="secondary"
+                        className="cursor-pointer hover:bg-secondary/80 transition-colors"
+                        onClick={() => navigate(`/products?category=${category.slug}`)}
+                      >
+                        {category.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 

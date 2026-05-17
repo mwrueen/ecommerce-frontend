@@ -18,17 +18,27 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const dispatch = useDispatch();
   const { data: settings } = useGetPublicSettingsQuery({});
 
-  // Get thumbnail or first media image
   const productImage = product.media?.find((m: any) => m.is_thumbnail)?.url ||
     product.media?.[0]?.url ||
     product.image_url;
+
+  const deal = product.active_deal;
+  let discountedPrice = product.price;
+  if (deal) {
+    if (deal.discount_type === 'percentage') {
+      discountedPrice = product.price * (1 - deal.discount_value / 100);
+    } else {
+      discountedPrice = Math.max(0, product.price - deal.discount_value);
+    }
+  }
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     dispatch(addToCart({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: String(discountedPrice),
+      original_price: String(product.price),
       quantity: 1,
       image_url: productImage,
       slug: product.slug,
@@ -102,6 +112,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
               {product.category.name}
             </Badge>
           )}
+
+          {/* Deal badge */}
+          {deal && (
+            <Badge
+              className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 border-0 shadow-lg text-[10px] font-semibold"
+            >
+              {deal.discount_type === 'percentage' ? `${deal.discount_value}% OFF` : `-${formatPrice(deal.discount_value, settings?.data?.currency_symbol, settings?.data?.currency_position, settings?.data?.formatted_currency)}`}
+            </Badge>
+          )}
         </div>
 
         <CardContent className="p-4 space-y-3">
@@ -115,14 +134,26 @@ const ProductCard = ({ product }: ProductCardProps) => {
             />
           )}
           <div className="flex items-center justify-between pt-1">
-            <span className="text-xl font-bold text-primary">
-              {formatPrice(
-                product.price,
-                settings?.data?.currency_symbol,
-                settings?.data?.currency_position,
-                settings?.data?.formatted_currency
+            <div className="flex flex-col">
+              <span className="text-xl font-bold text-primary">
+                {formatPrice(
+                  discountedPrice,
+                  settings?.data?.currency_symbol,
+                  settings?.data?.currency_position,
+                  settings?.data?.formatted_currency
+                )}
+              </span>
+              {deal && (
+                <span className="text-sm text-muted-foreground line-through">
+                  {formatPrice(
+                    product.price,
+                    settings?.data?.currency_symbol,
+                    settings?.data?.currency_position,
+                    settings?.data?.formatted_currency
+                  )}
+                </span>
               )}
-            </span>
+            </div>
           </div>
         </CardContent>
 

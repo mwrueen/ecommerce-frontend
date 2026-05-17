@@ -26,13 +26,24 @@ const ProductDetail = () => {
     product?.media?.[0]?.url ||
     product?.image_url;
 
+  const deal = product?.active_deal;
+  let discountedPrice = product?.price || 0;
+  if (product && deal) {
+    if (deal.discount_type === 'percentage') {
+      discountedPrice = product.price * (1 - deal.discount_value / 100);
+    } else {
+      discountedPrice = Math.max(0, product.price - deal.discount_value);
+    }
+  }
+
   const handleAddToCart = () => {
     if (!product) return;
 
     dispatch(addToCart({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: String(discountedPrice),
+      original_price: String(product.price),
       quantity,
       image_url: productImage,
       slug: product.slug,
@@ -112,11 +123,18 @@ const ProductDetail = () => {
 
           <div className="space-y-6">
             <div>
-              {product.category && (
-                <Badge variant="secondary" className="mb-2">
-                  {product.category.name}
-                </Badge>
-              )}
+              <div className="flex gap-2 mb-2">
+                {product.category && (
+                  <Badge variant="secondary">
+                    {product.category.name}
+                  </Badge>
+                )}
+                {deal && (
+                  <Badge className="bg-red-500 hover:bg-red-600 border-0 shadow-sm text-xs font-semibold">
+                    {deal.discount_type === 'percentage' ? `${deal.discount_value}% OFF` : `-${formatPrice(deal.discount_value, settings?.data?.currency_symbol, settings?.data?.currency_position, settings?.data?.formatted_currency)}`}
+                  </Badge>
+                )}
+              </div>
               <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
               {product.brand && (
                 <p className="text-muted-foreground">Brand: {product.brand}</p>
@@ -124,14 +142,26 @@ const ProductDetail = () => {
             </div>
 
             <div className="flex items-baseline gap-4">
-              <span className="text-4xl font-bold text-primary">
-                {formatPrice(
-                  product.price,
-                  settings?.data?.currency_symbol,
-                  settings?.data?.currency_position,
-                  settings?.data?.formatted_currency
+              <div className="flex items-baseline gap-3">
+                <span className="text-4xl font-bold text-primary">
+                  {formatPrice(
+                    discountedPrice,
+                    settings?.data?.currency_symbol,
+                    settings?.data?.currency_position,
+                    settings?.data?.formatted_currency
+                  )}
+                </span>
+                {deal && (
+                  <span className="text-xl text-muted-foreground line-through">
+                    {formatPrice(
+                      product.price,
+                      settings?.data?.currency_symbol,
+                      settings?.data?.currency_position,
+                      settings?.data?.formatted_currency
+                    )}
+                  </span>
                 )}
-              </span>
+              </div>
               {product.stock_quantity > 0 ? (
                 <Badge variant="outline" className="text-green-600 border-green-600">
                   In Stock ({product.stock_quantity} available)

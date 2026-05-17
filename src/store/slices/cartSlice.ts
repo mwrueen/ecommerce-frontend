@@ -4,6 +4,7 @@ interface CartItem {
   id: number;
   name: string;
   price: string;
+  original_price?: string;
   quantity: number;
   image_url?: string;
   slug: string;
