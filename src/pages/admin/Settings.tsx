@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useGetSiteSettingsQuery } from '@/hooks/useApi';
-import { Loader2, Store, Sparkles, Mail, ShoppingBag, Clock, Share2, Search, ShieldAlert, LayoutGrid } from 'lucide-react';
+import { Loader2, Store, Sparkles, Mail, ShoppingBag, Clock, Share2, Search, ShieldAlert, LayoutGrid, Sliders } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Import split settings components
 import GeneralSettings from './settings/GeneralSettings';
 import BrandingSettings from './settings/BrandingSettings';
+import HeroSettings from './settings/HeroSettings';
 import ContactSettings from './settings/ContactSettings';
 import EcommerceSettings from './settings/EcommerceSettings';
 import BusinessSettings from './settings/BusinessSettings';
@@ -15,6 +16,7 @@ import LegalSettings from './settings/LegalSettings';
 
 const SETTINGS_TABS = [
   { id: 'general', label: 'General', icon: Store, color: 'text-primary' },
+  { id: 'hero', label: 'Hero Section', icon: Sliders, color: 'text-indigo-600' },
   { id: 'branding', label: 'Branding', icon: Sparkles, color: 'text-purple-600' },
   { id: 'contact', label: 'Contact', icon: Mail, color: 'text-blue-600' },
   { id: 'ecommerce', label: 'Ecommerce', icon: ShoppingBag, color: 'text-emerald-600' },
@@ -45,6 +47,7 @@ export default function Settings() {
   const renderContent = () => {
     switch (activeTab) {
       case 'general': return <GeneralSettings settings={settings} />;
+      case 'hero': return <HeroSettings settings={settings} />;
       case 'branding': return <BrandingSettings settings={settings} />;
       case 'contact': return <ContactSettings settings={settings} />;
       case 'ecommerce': return <EcommerceSettings settings={settings} />;

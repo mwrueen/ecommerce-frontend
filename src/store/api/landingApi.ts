@@ -5,6 +5,19 @@ export interface HeroSection {
   tagline: string;
   description: string;
   slider_images: SliderImage[];
+  mockup?: {
+    badge?: string;
+    product_name?: string;
+    product_description?: string;
+    price?: string;
+    discount?: string;
+    rating?: string;
+    happy_users?: string;
+    link?: string;
+  } | null;
+  bg_type?: string;
+  bg_color?: string;
+  bg_image?: string | null;
 }
 
 export interface SliderImage {

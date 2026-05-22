@@ -19,11 +19,11 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 188 94% 42%;
+    --primary: 243 75% 59%;
     --primary-foreground: 0 0% 100%;
 
-    --primary-light: 188 94% 92%;
-    --primary-dark: 188 94% 32%;
+    --primary-light: 243 75% 95%;
+    --primary-dark: 243 75% 48%;
 
     --secondary: 220 14% 96%;
     --secondary-foreground: 222 47% 11%;
@@ -31,7 +31,7 @@ All colors MUST be HSL.
     --muted: 220 14% 96%;
     --muted-foreground: 220 9% 46%;
 
-    --accent: 188 94% 42%;
+    --accent: 243 75% 59%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -39,7 +39,7 @@ All colors MUST be HSL.
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 188 94% 42%;
+    --ring: 243 75% 59%;
 
     --radius: 0.75rem;
 
@@ -47,8 +47,8 @@ All colors MUST be HSL.
     --warning: 38 92% 50%;
     --info: 199 89% 48%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(188 94% 42%), hsl(188 94% 52%));
-    --gradient-hero: linear-gradient(135deg, hsl(188 94% 42% / 0.1), hsl(188 94% 52% / 0.05));
+    --gradient-primary: linear-gradient(135deg, hsl(243 75% 59%), hsl(262 83% 58%));
+    --gradient-hero: linear-gradient(135deg, hsl(243 75% 59% / 0.08), hsl(262 83% 58% / 0.04));
 
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
@@ -60,12 +60,12 @@ All colors MUST be HSL.
     /* Admin Sidebar - Elegant Light Theme */
     --sidebar-background: 220 20% 97%;
     --sidebar-foreground: 222 47% 20%;
-    --sidebar-primary: 188 94% 38%;
+    --sidebar-primary: 243 75% 54%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 14% 92%;
     --sidebar-accent-foreground: 222 47% 15%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 188 94% 42%;
+    --sidebar-ring: 243 75% 59%;
 
     /* Admin Header - Clean Modern */
     --admin-header-bg: 0 0% 100%;
@@ -76,7 +76,7 @@ All colors MUST be HSL.
     --admin-content-bg: 220 14% 96%;
 
     /* Chart colors */
-    --chart-1: 188 94% 42%;
+    --chart-1: 243 75% 59%;
     --chart-2: 142 71% 45%;
     --chart-3: 38 92% 50%;
     --chart-4: 280 65% 60%;
@@ -93,11 +93,11 @@ All colors MUST be HSL.
     --popover: 222 47% 15%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 188 94% 42%;
+    --primary: 245 85% 66%;
     --primary-foreground: 0 0% 100%;
 
-    --primary-light: 188 94% 22%;
-    --primary-dark: 188 94% 52%;
+    --primary-light: 245 85% 25%;
+    --primary-dark: 245 85% 56%;
 
     --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 98%;
@@ -105,7 +105,7 @@ All colors MUST be HSL.
     --muted: 217 33% 17%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 188 94% 42%;
+    --accent: 245 85% 66%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 63% 31%;
@@ -113,20 +113,20 @@ All colors MUST be HSL.
 
     --border: 217 33% 17%;
     --input: 217 33% 17%;
-    --ring: 188 94% 42%;
+    --ring: 245 85% 66%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(188 94% 32%), hsl(188 94% 42%));
-    --gradient-hero: linear-gradient(135deg, hsl(188 94% 42% / 0.1), hsl(188 94% 52% / 0.05));
+    --gradient-primary: linear-gradient(135deg, hsl(245 85% 56%), hsl(262 83% 60%));
+    --gradient-hero: linear-gradient(135deg, hsl(245 85% 66% / 0.1), hsl(262 83% 60% / 0.05));
 
     /* Admin Sidebar - Dark Mode (Soft Slate) */
     --sidebar-background: 222 47% 14%;
     --sidebar-foreground: 210 40% 92%;
-    --sidebar-primary: 188 94% 50%;
+    --sidebar-primary: 245 85% 66%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 222 40% 20%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 222 30% 22%;
-    --sidebar-ring: 188 94% 50%;
+    --sidebar-ring: 245 85% 66%;
 
     /* Admin Header - Dark Mode */
     --admin-header-bg: 222 47% 11%;
@@ -137,7 +137,7 @@ All colors MUST be HSL.
     --admin-content-bg: 222 47% 8%;
 
     /* Chart colors - Dark */
-    --chart-1: 188 94% 50%;
+    --chart-1: 245 85% 66%;
     --chart-2: 142 71% 50%;
     --chart-3: 38 92% 55%;
     --chart-4: 280 65% 65%;
