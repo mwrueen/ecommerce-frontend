@@ -20,8 +20,7 @@ import { Mail, Lock, ShieldCheck, ArrowLeft } from 'lucide-react';
 
 type AuthView = 'login' | 'register' | 'forgot-password' | 'reset-password';
 
-const DEMO_CUSTOMER_EMAIL = 'jane@example.com';
-const DEMO_CUSTOMER_PASSWORD = 'password';
+
 
 const CustomerAuth = () => {
   const navigate = useNavigate();
@@ -33,7 +32,10 @@ const CustomerAuth = () => {
   const [forgotPassword, { isLoading: isSendingOtp }] = useForgotPasswordMutation();
   const [resetPassword, { isLoading: isResetting }] = useResetPasswordMutation();
   
-  const [view, setView] = useState<AuthView>('login');
+  const [view, setView] = useState<AuthView>(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('tab') === 'register' ? 'register' : 'login';
+  });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
@@ -52,15 +54,7 @@ const CustomerAuth = () => {
     }
   }, [isAuthenticated, user, navigate, redirectPath]);
 
-  useEffect(() => {
-    if (view === 'login' && email === '' && password === '') {
-      setEmail(DEMO_CUSTOMER_EMAIL);
-      setPassword(DEMO_CUSTOMER_PASSWORD);
-    } else if (view !== 'login' && email === DEMO_CUSTOMER_EMAIL && password === DEMO_CUSTOMER_PASSWORD) {
-      setEmail('');
-      setPassword('');
-    }
-  }, [view, email, password]);
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -249,9 +243,9 @@ const CustomerAuth = () => {
   );
 
   const renderRegisterForm = () => (
-    <form onSubmit={handleRegister} className="space-y-4">
+    <form onSubmit={handleRegister} className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="register-name">Full Name *</Label>
+        <Label htmlFor="register-name" className="text-primary font-medium">Full Name *</Label>
         <Input
           id="register-name"
           type="text"
@@ -259,12 +253,12 @@ const CustomerAuth = () => {
           required
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="h-12"
+          className="h-12 rounded-xl border border-primary/20 bg-white/5 backdrop-blur-sm text-primary placeholder:text-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="register-email">Email *</Label>
+        <Label htmlFor="register-email" className="text-primary font-medium">Email *</Label>
         <div className="relative">
           <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -274,37 +268,37 @@ const CustomerAuth = () => {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="pl-10 h-12"
+            className="pl-10 h-12 rounded-xl border border-primary/20 bg-white/5 backdrop-blur-sm text-primary placeholder:text-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="register-phone">Phone (Optional)</Label>
+        <Label htmlFor="register-phone" className="text-primary font-medium">Phone (Optional)</Label>
         <Input
           id="register-phone"
           type="tel"
           placeholder="+1234567890"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          className="h-12"
+          className="h-12 rounded-xl border border-primary/20 bg-white/5 backdrop-blur-sm text-primary placeholder:text-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="register-address">Address (Optional)</Label>
+        <Label htmlFor="register-address" className="text-primary font-medium">Address (Optional)</Label>
         <Input
           id="register-address"
           type="text"
           placeholder="123 Main St, City, Country"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          className="h-12"
+          className="h-12 rounded-xl border border-primary/20 bg-white/5 backdrop-blur-sm text-primary placeholder:text-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="register-password">Password *</Label>
+        <Label htmlFor="register-password" className="text-primary font-medium">Password *</Label>
         <div className="relative">
           <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -314,14 +308,14 @@ const CustomerAuth = () => {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="pl-10 h-12"
+            className="pl-10 h-12 rounded-xl border border-primary/20 bg-white/5 backdrop-blur-sm text-primary placeholder:text-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30"
             minLength={8}
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="register-password-confirmation">Confirm Password *</Label>
+        <Label htmlFor="register-password-confirmation" className="text-primary font-medium">Confirm Password *</Label>
         <div className="relative">
           <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -331,15 +325,15 @@ const CustomerAuth = () => {
             required
             value={passwordConfirmation}
             onChange={(e) => setPasswordConfirmation(e.target.value)}
-            className="pl-10 h-12"
+            className="pl-10 h-12 rounded-xl border border-primary/20 bg-white/5 backdrop-blur-sm text-primary placeholder:text-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30"
             minLength={8}
           />
         </div>
       </div>
 
-      <Button 
-        type="submit" 
-        className="w-full h-12 text-base" 
+      <Button
+        type="submit"
+        className="w-full h-12 bg-gradient-to-r from-primary to-primary/70 text-white font-medium rounded-xl hover:scale-[1.02] transition-transform disabled:opacity-50"
         disabled={isRegistering}
       >
         {isRegistering ? 'Creating account...' : 'Create Account'}
@@ -563,19 +557,9 @@ const CustomerAuth = () => {
         
         <CardFooter className="flex flex-col gap-2 border-t pt-6">
           {view === 'login' || view === 'register' ? (
-            <>
-              <p className="text-xs text-center text-muted-foreground">
-                By continuing, you agree to our Terms of Service
-              </p>
-              <Button 
-                type="button" 
-                variant="ghost" 
-                onClick={() => navigate('/login')}
-                className="text-sm w-full"
-              >
-                Admin/Staff Login →
-              </Button>
-            </>
+            <p className="text-xs text-center text-muted-foreground">
+              By continuing, you agree to our Terms of Service
+            </p>
           ) : null}
         </CardFooter>
       </Card>

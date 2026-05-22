@@ -739,7 +739,7 @@ const Index = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link to="/register" className="w-full sm:w-auto">
+            <Link to="/customer/login?tab=register" className="w-full sm:w-auto">
               <Button size="lg" className="w-full sm:w-auto gap-2 bg-white text-primary hover:bg-slate-100 hover:scale-[1.02] active:scale-[0.98] h-14 px-8 rounded-2xl shadow-xl shadow-black/10 text-base font-bold transition-all border-0">
                 Create Free Account <ArrowRight className="h-5 w-5" />
               </Button>

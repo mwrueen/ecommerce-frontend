@@ -10,8 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from 'sonner';
 import { RootState } from '@/store';
 
-const DEMO_ADMIN_EMAIL = 'admin@example.com';
-const DEMO_ADMIN_PASSWORD = 'password';
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,8 +19,8 @@ const Login = () => {
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   
   const [formData, setFormData] = useState({
-    email: DEMO_ADMIN_EMAIL,
-    password: DEMO_ADMIN_PASSWORD,
+    email: '',
+    password: '',
   });
 
   // Redirect if already authenticated
@@ -93,12 +92,6 @@ const Login = () => {
               {isLoading ? 'Logging in...' : 'Login'}
             </Button>
             <div className="flex flex-col gap-2 text-sm text-center text-muted-foreground">
-              <p>
-                Admin Registration?{' '}
-                <Link to="/register" className="text-primary hover:underline font-medium">
-                  Sign up
-                </Link>
-              </p>
               <p>
                 Customer?{' '}
                 <Link to="/customer/login" className="text-primary hover:underline font-medium">
