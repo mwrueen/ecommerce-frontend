@@ -232,112 +232,130 @@ const CustomerAuth = () => {
         Forgot password?
       </Button>
 
-      <Button 
-        type="submit" 
-        className="w-full h-12 text-base" 
+      <Button
+        type="submit"
+        className="w-full h-12 bg-primary text-white hover:bg-primary/90"
         disabled={isLoggingIn}
       >
         {isLoggingIn ? 'Logging in...' : 'Login'}
       </Button>
+
+      <p className="text-sm text-center text-muted-foreground">
+        Don't have an account?{' '}
+        <button
+          type="button"
+          className="text-primary font-medium hover:underline"
+          onClick={() => setView('register')}
+        >
+          Register
+        </button>
+      </p>
     </form>
   );
 
   const renderRegisterForm = () => (
-    <form onSubmit={handleRegister} className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="register-name" className="text-primary font-medium">Full Name *</Label>
-        <Input
-          id="register-name"
-          type="text"
-          placeholder="John Doe"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="h-12 rounded-xl border border-primary/20 bg-white/5 backdrop-blur-sm text-primary placeholder:text-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="register-email" className="text-primary font-medium">Email *</Label>
-        <div className="relative">
-          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+    <form onSubmit={handleRegister} className="space-y-4">
+      <div className="grid md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="register-name">Full Name *</Label>
           <Input
-            id="register-email"
-            type="email"
-            placeholder="john@example.com"
+            id="register-name"
+            type="text"
+            placeholder="John Doe"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="pl-10 h-12 rounded-xl border border-primary/20 bg-white/5 backdrop-blur-sm text-primary placeholder:text-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="h-12"
           />
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="register-phone" className="text-primary font-medium">Phone (Optional)</Label>
-        <Input
-          id="register-phone"
-          type="tel"
-          placeholder="+1234567890"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="h-12 rounded-xl border border-primary/20 bg-white/5 backdrop-blur-sm text-primary placeholder:text-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="register-address" className="text-primary font-medium">Address (Optional)</Label>
-        <Input
-          id="register-address"
-          type="text"
-          placeholder="123 Main St, City, Country"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          className="h-12 rounded-xl border border-primary/20 bg-white/5 backdrop-blur-sm text-primary placeholder:text-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="register-password" className="text-primary font-medium">Password *</Label>
-        <div className="relative">
-          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <div className="space-y-2">
+          <Label htmlFor="register-email">Email *</Label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="register-email"
+              type="email"
+              placeholder="john@example.com"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="pl-10 h-12"
+            />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="register-phone">Phone (Optional)</Label>
           <Input
-            id="register-password"
-            type="password"
-            placeholder="At least 8 characters"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="pl-10 h-12 rounded-xl border border-primary/20 bg-white/5 backdrop-blur-sm text-primary placeholder:text-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30"
-            minLength={8}
+            id="register-phone"
+            type="tel"
+            placeholder="+1234567890"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="h-12"
           />
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="register-password-confirmation" className="text-primary font-medium">Confirm Password *</Label>
-        <div className="relative">
-          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <div className="space-y-2">
+          <Label htmlFor="register-address">Address (Optional)</Label>
           <Input
-            id="register-password-confirmation"
-            type="password"
-            placeholder="Confirm your password"
-            required
-            value={passwordConfirmation}
-            onChange={(e) => setPasswordConfirmation(e.target.value)}
-            className="pl-10 h-12 rounded-xl border border-primary/20 bg-white/5 backdrop-blur-sm text-primary placeholder:text-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/30"
-            minLength={8}
+            id="register-address"
+            type="text"
+            placeholder="123 Main St, City, Country"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            className="h-12"
           />
         </div>
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="register-password">Password *</Label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="register-password"
+              type="password"
+              placeholder="At least 8 characters"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="pl-10 h-12"
+              minLength={8}
+            />
+          </div>
+        </div>
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="register-password-confirmation">Confirm Password *</Label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="register-password-confirmation"
+              type="password"
+              placeholder="Confirm your password"
+              required
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
+              className="pl-10 h-12"
+              minLength={8}
+            />
+          </div>
+        </div>
       </div>
-
       <Button
         type="submit"
-        className="w-full h-12 bg-gradient-to-r from-primary to-primary/70 text-white font-medium rounded-xl hover:scale-[1.02] transition-transform disabled:opacity-50"
+        className="w-full h-12 bg-primary text-white hover:bg-primary/90"
         disabled={isRegistering}
       >
         {isRegistering ? 'Creating account...' : 'Create Account'}
       </Button>
+
+      <p className="text-sm text-center text-muted-foreground">
+        Already have an account?{' '}
+        <button
+          type="button"
+          className="text-primary font-medium hover:underline"
+          onClick={() => setView('login')}
+        >
+          Sign In
+        </button>
+      </p>
     </form>
   );
 
@@ -481,88 +499,93 @@ const CustomerAuth = () => {
     </form>
   );
 
-  const getViewTitle = () => {
-    switch (view) {
-      case 'login':
-        return 'Welcome Back';
-      case 'register':
-        return 'Create Account';
-      case 'forgot-password':
-        return 'Reset Password';
-      case 'reset-password':
-        return 'Enter OTP';
-      default:
-        return 'Welcome';
-    }
-  };
-
-  const getViewDescription = () => {
-    switch (view) {
-      case 'login':
-        return 'Login to your account to continue';
-      case 'register':
-        return 'Create a new account to get started';
-      case 'forgot-password':
-        return 'Enter your email to receive a password reset OTP';
-      case 'reset-password':
-        return 'Enter the OTP sent to your email and set a new password';
-      default:
-        return '';
-    }
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-background via-background to-muted/20">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="text-center space-y-4 pb-8">
-          <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <Mail className="w-8 h-8 text-primary" />
+    <div className="min-h-screen flex">
+      {/* Left branding panel */}
+      <div
+        className="hidden lg:flex flex-col justify-between w-1/2 relative overflow-hidden"
+        style={{ background: 'linear-gradient(160deg, #0f0c29 0%, #302b63 50%, #24243e 100%)' }}
+      >
+        {/* Decorative background circles */}
+        <div style={{ position: 'absolute', top: '-80px', right: '-80px', width: '320px', height: '320px', borderRadius: '50%', background: 'rgba(139,92,246,0.18)', filter: 'blur(2px)' }} />
+        <div style={{ position: 'absolute', bottom: '-60px', left: '-60px', width: '260px', height: '260px', borderRadius: '50%', background: 'rgba(99,102,241,0.15)', filter: 'blur(2px)' }} />
+        <div style={{ position: 'absolute', top: '42%', left: '60%', width: '120px', height: '120px', borderRadius: '50%', background: 'rgba(167,139,250,0.10)' }} />
+
+        {/* Top logo */}
+        <div className="px-14 pt-12">
+          <div className="flex items-center gap-3">
+            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: 'white', fontWeight: 700, fontSize: '18px' }}>M</span>
+            </div>
+            <span style={{ color: 'white', fontWeight: 700, fontSize: '20px', letterSpacing: '0.5px' }}>My Ecommerce Store</span>
           </div>
-          <div>
-            <CardTitle className="text-3xl font-bold">{getViewTitle()}</CardTitle>
-            <CardDescription className="text-base mt-2">
-              {getViewDescription()}
-            </CardDescription>
+        </div>
+
+        {/* Center content */}
+        <div className="px-14 py-8" style={{ zIndex: 1 }}>
+          <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'white', lineHeight: 1.2, marginBottom: '16px' }}>
+            Shop Smarter,<br />
+            <span style={{ background: 'linear-gradient(90deg,#a78bfa,#818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Live Better</span>
+          </h2>
+          <p style={{ color: '#c4b5fd', fontSize: '1rem', marginBottom: '36px', lineHeight: 1.7 }}>
+            Join thousands of customers enjoying exclusive deals, fast shipping, and world-class support.
+          </p>
+
+          {/* Feature cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {[
+              { icon: '🛒', title: 'Fast & Secure Checkout', desc: 'Encrypted payments, multiple methods' },
+              { icon: '🎁', title: 'Exclusive Member Discounts', desc: 'Up to 40% off for members' },
+              { icon: '📦', title: 'Real-Time Order Tracking', desc: 'Know where your order is, always' },
+              { icon: '💬', title: '24/7 Customer Support', desc: 'We\'re here whenever you need us' },
+            ].map((f) => (
+              <div key={f.title} style={{ display: 'flex', alignItems: 'center', gap: '14px', background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '12px 16px', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <span style={{ fontSize: '22px' }}>{f.icon}</span>
+                <div>
+                  <div style={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{f.title}</div>
+                  <div style={{ color: '#a5b4fc', fontSize: '0.75rem' }}>{f.desc}</div>
+                </div>
+              </div>
+            ))}
           </div>
-        </CardHeader>
-        
-        <CardContent>
-          {view === 'login' || view === 'register' ? (
-            <Tabs 
-              value={view} 
-              onValueChange={(value) => {
-                setView(value as AuthView);
-                setPassword('');
-                setPasswordConfirmation('');
-              }}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Register</TabsTrigger>
-              </TabsList>
-              <TabsContent value="login" className="mt-6">
-                {renderLoginForm()}
-              </TabsContent>
-              <TabsContent value="register" className="mt-6">
-                {renderRegisterForm()}
-              </TabsContent>
-            </Tabs>
-          ) : view === 'forgot-password' ? (
-            renderForgotPasswordForm()
-          ) : (
-            renderResetPasswordForm()
-          )}
-        </CardContent>
-        
-        <CardFooter className="flex flex-col gap-2 border-t pt-6">
-          {view === 'login' || view === 'register' ? (
-            <p className="text-xs text-center text-muted-foreground">
-              By continuing, you agree to our Terms of Service
+        </div>
+
+        {/* Bottom testimonial */}
+        <div className="px-14 pb-10" style={{ zIndex: 1 }}>
+          <div style={{ background: 'rgba(255,255,255,0.07)', borderRadius: '12px', padding: '16px 20px', borderLeft: '3px solid #7c3aed' }}>
+            <p style={{ color: '#e0e7ff', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: '8px' }}>
+              "Best shopping experience I've had. Fast delivery and amazing deals every week!"
             </p>
-          ) : null}
-        </CardFooter>
-      </Card>
+            <span style={{ color: '#a78bfa', fontSize: '0.78rem', fontWeight: 600 }}>— Sarah K., Verified Customer</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Right form panel */}
+      <div className="flex-1 flex items-center justify-center bg-gray-50 px-8 py-12">
+        <div className="w-full max-w-md">
+          <div className="mb-8 text-center">
+            <h1 className="text-2xl font-bold text-gray-900">
+              {view === 'login' && 'Sign In'}
+              {view === 'register' && 'Create Account'}
+              {view === 'forgot-password' && 'Forgot Password'}
+              {view === 'reset-password' && 'Reset Password'}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {view === 'login' && 'Enter your credentials to access your account'}
+              {view === 'register' && 'Fill in your details to get started'}
+              {view === 'forgot-password' && 'Enter your email to receive a reset code'}
+              {view === 'reset-password' && 'Enter the OTP sent to your email'}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border p-8">
+            {view === 'login' && renderLoginForm()}
+            {view === 'register' && renderRegisterForm()}
+            {view === 'forgot-password' && renderForgotPasswordForm()}
+            {view === 'reset-password' && renderResetPasswordForm()}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
