@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { ArrowLeft } from 'lucide-react';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -424,7 +425,7 @@ export default function CouponForm() {
                     <FormItem>
                       <FormLabel>Valid From</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <DatePicker value={field.value} onChange={field.onChange} placeholder="Select valid from date" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -437,7 +438,7 @@ export default function CouponForm() {
                     <FormItem>
                       <FormLabel>Valid Until</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <DatePicker value={field.value} onChange={field.onChange} placeholder="Select valid until date" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

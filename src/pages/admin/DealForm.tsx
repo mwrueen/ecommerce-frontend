@@ -15,6 +15,7 @@ import { ChevronLeft, Save, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { MultiSelect } from '@/components/admin/MultiSelect';
+import { DatePicker } from '@/components/ui/date-picker';
 
 const dealSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -499,7 +500,7 @@ export default function DealForm() {
                     <FormItem>
                       <FormLabel>Start Date *</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <DatePicker value={field.value} onChange={field.onChange} placeholder="Select start date" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -513,7 +514,7 @@ export default function DealForm() {
                     <FormItem>
                       <FormLabel>End Date *</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <DatePicker value={field.value} onChange={field.onChange} placeholder="Select end date" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

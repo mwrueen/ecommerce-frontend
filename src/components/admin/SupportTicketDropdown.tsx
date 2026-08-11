@@ -41,13 +41,13 @@ export const SupportTicketDropdown = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="text-admin-header-foreground hover:bg-admin-header-foreground/10 relative"
+          className="relative h-9 w-9 rounded-xl hover:bg-slate-800 text-slate-300 hover:text-white transition-all duration-200"
         >
-          <MessageSquare className="h-5 w-5" />
+          <MessageSquare className="h-4 w-4" />
           {count > 0 && (
             <Badge
               variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+              className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px] bg-indigo-500 font-bold"
             >
               {count > 99 ? '99+' : count}
             </Badge>
@@ -56,7 +56,7 @@ export const SupportTicketDropdown = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-[400px] bg-background border shadow-lg z-50"
+        className="w-[400px] bg-slate-900 border-slate-800 text-slate-100 shadow-2xl rounded-2xl p-0 z-50"
       >
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-semibold">Support Tickets</h3>

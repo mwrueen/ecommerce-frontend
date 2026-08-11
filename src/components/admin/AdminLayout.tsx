@@ -30,9 +30,9 @@ export const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
         <title>{settings?.meta_title || settings?.title || ''} - Admin</title>
       </Helmet>
       <SidebarProvider>
-        <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
+        <div className="h-screen flex w-full overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
           <AdminSidebar />
-          <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
             <AdminHeader />
             <main className={cn(
               "flex-1 overflow-y-auto",
