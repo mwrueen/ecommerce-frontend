@@ -44,65 +44,71 @@ export default function Categories() {
         />
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white py-12">
-        <div className="container mx-auto px-4 space-y-12">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10">
+        <div className="container mx-auto px-4 space-y-10">
+          
           {/* Header */}
-          <section className="rounded-3xl border border-slate-100 bg-white/95 p-8 text-center shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-wide text-primary mb-3">Shop by Category</p>
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">Explore curated collections</h1>
-            <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
-              Browse lifestyle, tech, and essentials grouped into beautiful collections designed to inspire your next purchase.
-            </p>
+          <section className="relative overflow-hidden rounded-3xl bg-slate-950 text-white border border-slate-800 p-8 sm:p-12 text-center shadow-2xl">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-80 w-80 bg-gradient-to-b from-indigo-500/15 to-transparent rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 max-w-3xl mx-auto space-y-3">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-extrabold tracking-wider uppercase">
+                EXPLORE BY CATEGORY
+              </span>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
+                Browse Curated Product Collections
+              </h1>
+              <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                Discover lifestyle, technology, fashion, and daily essentials grouped into inspiring collections for faster browsing.
+              </p>
+            </div>
           </section>
 
           {/* Categories with Products */}
           <div className="space-y-10">
             {categories.length === 0 ? (
-              <Card className="p-12 text-center rounded-3xl border border-slate-100 bg-white/90">
-                <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-xl font-semibold mb-2">No Categories Available</h3>
-                <p className="text-muted-foreground">
-                  Check back soon for new categories and products.
+              <Card className="p-12 text-center rounded-3xl border border-slate-200 dark:border-slate-800 bg-card">
+                <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <h3 className="text-xl font-bold mb-2">No Categories Available</h3>
+                <p className="text-muted-foreground text-sm">
+                  Check back soon for new collections and featured products.
                 </p>
               </Card>
             ) : (
               categories.map((category: any) => (
                 <section
                   key={category.id}
-                  className="rounded-3xl border border-slate-100 bg-white p-6 md:p-8 shadow-sm space-y-6"
+                  className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-card p-6 md:p-8 shadow-xl space-y-6"
                 >
                   {/* Category Header */}
-                  <div className="flex flex-col gap-4 border-b pb-4 md:flex-row md:items-center md:justify-between">
-                    <div className="flex items-start gap-4">
-                      <div className="relative h-16 w-16 shrink-0 rounded-2xl bg-primary/10 p-1.5 ring-2 ring-primary/10">
+                  <div className="flex flex-col gap-4 border-b border-slate-200/60 dark:border-slate-800 pb-4 md:flex-row md:items-center md:justify-between">
+                    <div className="flex items-center gap-4 text-left">
+                      <div className="relative h-14 w-14 shrink-0 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 p-1.5 border border-indigo-500/20 shadow-inner flex items-center justify-center">
                         {category.image_url ? (
                           <img
                             src={getStorageUrl(category.full_image_url || category.image_url)}
                             alt={category.name}
-                            className="h-full w-full rounded-2xl object-cover"
+                            className="h-full w-full rounded-xl object-cover"
                           />
                         ) : (
-                          <Package className="h-full w-full text-primary" />
+                          <Package className="h-7 w-7 text-indigo-500" />
                         )}
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/20 to-transparent" />
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold">{category.name}</h2>
+                        <h2 className="text-2xl font-extrabold text-foreground tracking-tight">{category.name}</h2>
                         {category.description && (
-                          <p className="text-muted-foreground">{category.description}</p>
+                          <p className="text-xs text-muted-foreground line-clamp-1">{category.description}</p>
                         )}
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {category.active_products_count} {category.active_products_count === 1 ? 'product' : 'products'} available
+                        <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mt-0.5">
+                          {category.active_products_count} {category.active_products_count === 1 ? 'Product' : 'Products'} Available
                         </p>
                       </div>
                     </div>
                     {category.products.length > 0 && (
                       <Button
-                        variant="secondary"
                         onClick={() => handleShowMore(category.slug)}
-                        className="gap-2 rounded-full"
+                        className="gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shrink-0"
                       >
-                        View All
+                        Explore All ({category.name})
                         <ArrowRight className="h-4 w-4" />
                       </Button>
                     )}

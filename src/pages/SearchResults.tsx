@@ -7,8 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, ChevronLeft, ChevronRight, Package, FolderOpen } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search, ChevronLeft, ChevronRight, Package, FolderOpen, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { getStorageUrl } from '@/lib/utils';
 
 export default function SearchResults() {
@@ -86,177 +86,290 @@ export default function SearchResults() {
         <meta name="description" content={`Search results for "${query}"`} />
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white py-10">
-        <div className="container mx-auto px-4 space-y-10">
-          {/* Search Bar */}
-          <section className="rounded-3xl border border-slate-100 bg-white/95 p-6 md:p-8 shadow-sm">
-            <form onSubmit={handleSearch} className="flex flex-col gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400" />
-                <Input
-                  type="text"
-                  placeholder="Search products, categories, or keywords..."
-                  value={localQuery}
-                  onChange={(e) => setLocalQuery(e.target.value)}
-                  className="h-14 rounded-2xl border border-slate-200 bg-slate-50 pl-12 text-base"
-                />
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <Button type="submit" className="rounded-full px-6">Search</Button>
-                {query && (
-                  <>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">Type:</span>
-                      <Tabs value={type} onValueChange={handleTypeChange}>
-                        <TabsList className="rounded-full bg-slate-100">
-                          <TabsTrigger value="all" className="rounded-full px-4">All</TabsTrigger>
-                          <TabsTrigger value="products" className="rounded-full px-4">Products</TabsTrigger>
-                          <TabsTrigger value="categories" className="rounded-full px-4">Categories</TabsTrigger>
-                        </TabsList>
-                      </Tabs>
-                    </div>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-6">
+        <div className="container mx-auto px-4 space-y-5">
 
-                    {type !== 'categories' && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Sort:</span>
-                        <Select value={sortBy} onValueChange={handleSortChange}>
-                          <SelectTrigger className="w-[200px] rounded-full border-slate-200 bg-slate-50">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="relevance">Relevance</SelectItem>
-                            <SelectItem value="name">Name</SelectItem>
-                            <SelectItem value="price_asc">Price: Low to High</SelectItem>
-                            <SelectItem value="price_desc">Price: High to Low</SelectItem>
-                            <SelectItem value="created_at">Newest</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-                  </>
+          {/* ── Compact Search Bar ── */}
+          <section className="relative overflow-hidden rounded-2xl bg-slate-950 border border-slate-800 px-5 py-5 shadow-xl">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-40 w-40 bg-gradient-to-b from-indigo-500/15 to-transparent rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4">
+              <div className="shrink-0 text-center sm:text-left">
+                <h1 className="text-lg font-bold text-white leading-tight">
+                  {query ? (
+                    <>Results for "<span className="text-indigo-300">{query}</span>"</>
+                  ) : (
+                    'Search Store'
+                  )}
+                </h1>
+                {meta && (
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    {meta.total_results} result{meta.total_results !== 1 ? 's' : ''} found
+                  </p>
                 )}
               </div>
-            </form>
+              <form onSubmit={handleSearch} className="flex gap-2 flex-1 w-full sm:max-w-lg sm:ml-auto">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                  <Input
+                    type="text"
+                    placeholder="Search products…"
+                    value={localQuery}
+                    onChange={(e) => setLocalQuery(e.target.value)}
+                    className="h-10 rounded-xl border-slate-700 bg-slate-900/80 pl-10 text-sm text-white placeholder:text-slate-500 focus:border-indigo-500 focus:ring-indigo-500/30"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="h-10 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-500/20"
+                >
+                  Search
+                </Button>
+              </form>
+            </div>
           </section>
 
-          {/* Results */}
+          {/* ── Filter toolbar ── */}
+          {query && (
+            <section className="rounded-xl border border-slate-200 dark:border-slate-800 bg-card px-4 py-2.5 shadow-sm">
+              <div className="flex flex-wrap items-center gap-3">
+                <Tabs value={type} onValueChange={handleTypeChange}>
+                  <TabsList className="rounded-lg bg-slate-100 dark:bg-slate-800 h-8">
+                    <TabsTrigger value="all" className="rounded-md px-3 text-xs font-semibold h-6">All</TabsTrigger>
+                    <TabsTrigger value="products" className="rounded-md px-3 text-xs font-semibold h-6">Products</TabsTrigger>
+                    <TabsTrigger value="categories" className="rounded-md px-3 text-xs font-semibold h-6">Categories</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+
+                {type !== 'categories' && (
+                  <div className="flex items-center gap-2 ml-auto">
+                    <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+                    <Select value={sortBy} onValueChange={handleSortChange}>
+                      <SelectTrigger className="w-[160px] rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 h-8 text-xs font-semibold">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="relevance">Relevance</SelectItem>
+                        <SelectItem value="name">Name</SelectItem>
+                        <SelectItem value="price_asc">Price: Low → High</SelectItem>
+                        <SelectItem value="price_desc">Price: High → Low</SelectItem>
+                        <SelectItem value="created_at">Newest First</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* ── Content ── */}
           {!query ? (
-            <div className="text-center py-12">
-              <Search className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <h2 className="text-2xl font-semibold mb-2">Start Searching</h2>
-              <p className="text-muted-foreground">Enter a search term to find products and categories</p>
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-card py-20 text-center shadow-sm">
+              <Search className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-40" />
+              <h2 className="text-lg font-bold mb-1 text-foreground">Start Searching</h2>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                Enter a keyword above to discover products and categories.
+              </p>
             </div>
           ) : isLoading ? (
-            <div className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[...Array(8)].map((_, i) => (
-                  <Skeleton key={i} className="h-80" />
-                ))}
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {[...Array(8)].map((_, i) => (
+                <Skeleton key={i} className="h-72 rounded-2xl" />
+              ))}
             </div>
           ) : (
             <>
-              {/* Results Summary */}
-              {meta && (
-                <div className="mb-6 pb-4 border-b">
-                  <h1 className="text-2xl font-bold mb-2">
-                    Search results for "{query}"
-                  </h1>
-                  <p className="text-muted-foreground">
-                    Found {meta.total_results} results
-                    {meta.products_count > 0 && ` (${meta.products_count} products`}
-                    {meta.categories_count > 0 && `, ${meta.categories_count} categories)`}
+              {/* No Results */}
+              {meta?.total_results === 0 && (
+                <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-card py-16 text-center shadow-sm">
+                  <Package className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-40" />
+                  <h2 className="text-lg font-bold mb-1 text-foreground">No results found</h2>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                    We couldn't find anything matching "<strong>{query}</strong>". Try different keywords.
                   </p>
                 </div>
               )}
 
-              {/* No Results */}
-              {meta?.total_results === 0 && (
-                <div className="text-center py-12">
-                  <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                  <h2 className="text-2xl font-semibold mb-2">No results found</h2>
-                  <p className="text-muted-foreground">Try adjusting your search terms or filters</p>
+              {/* ── Two-column layout: Products (main) + Categories (sidebar) ── */}
+              {meta && meta.total_results > 0 && (
+                <div className="flex gap-6 items-start">
+
+                  {/* Main — Products */}
+                  <div className="flex-1 min-w-0">
+                    {products && products.data.length > 0 && (
+                      <section className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <Package className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                          <h2 className="text-base font-extrabold text-foreground tracking-tight">
+                            Products
+                          </h2>
+                          <span className="text-xs text-muted-foreground">({products.total})</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {products.data.map((product: any) => (
+                            <ProductCard key={product.id} product={product} />
+                          ))}
+                        </div>
+
+                        {/* Pagination */}
+                        {products.last_page > 1 && (
+                          <div className="flex justify-center items-center gap-1.5 pt-4">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handlePageChange(page - 1)}
+                              disabled={page === 1 || isFetching}
+                              className="rounded-lg border-slate-200 dark:border-slate-700 h-9 px-3 gap-1 font-semibold text-xs"
+                            >
+                              <ChevronLeft className="h-3.5 w-3.5" />
+                              Prev
+                            </Button>
+
+                            <div className="flex items-center gap-1">
+                              {Array.from({ length: Math.min(products.last_page, 5) }, (_, i) => {
+                                let pageNum: number;
+                                if (products.last_page <= 5) {
+                                  pageNum = i + 1;
+                                } else if (page <= 3) {
+                                  pageNum = i + 1;
+                                } else if (page >= products.last_page - 2) {
+                                  pageNum = products.last_page - 4 + i;
+                                } else {
+                                  pageNum = page - 2 + i;
+                                }
+                                return (
+                                  <Button
+                                    key={pageNum}
+                                    variant={pageNum === page ? 'default' : 'ghost'}
+                                    size="sm"
+                                    onClick={() => handlePageChange(pageNum)}
+                                    disabled={isFetching}
+                                    className={`h-9 w-9 rounded-lg text-xs font-bold ${
+                                      pageNum === page
+                                        ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                    }`}
+                                  >
+                                    {pageNum}
+                                  </Button>
+                                );
+                              })}
+                            </div>
+
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handlePageChange(page + 1)}
+                              disabled={!products.has_more_pages || isFetching}
+                              className="rounded-lg border-slate-200 dark:border-slate-700 h-9 px-3 gap-1 font-semibold text-xs"
+                            >
+                              Next
+                              <ChevronRight className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        )}
+                      </section>
+                    )}
+
+                    {/* If only categories, no products */}
+                    {(!products || products.data.length === 0) && categories && categories.data.length > 0 && (
+                      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-card py-12 text-center">
+                        <Package className="h-10 w-10 mx-auto mb-2 text-muted-foreground opacity-40" />
+                        <p className="text-sm text-muted-foreground">No products found. Check matching categories →</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Sidebar — Categories */}
+                  {categories && categories.data.length > 0 && (
+                    <aside className="hidden lg:block w-72 xl:w-80 shrink-0 sticky top-24">
+                      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-card shadow-sm overflow-hidden">
+                        <div className="bg-slate-100 dark:bg-slate-800/60 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+                          <div className="flex items-center gap-2">
+                            <FolderOpen className="h-4 w-4 text-indigo-500" />
+                            <h3 className="text-sm font-bold text-foreground">Related Categories</h3>
+                            <span className="ml-auto text-[10px] font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full">
+                              {categories.total}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                          {categories.data.map((category: any) => (
+                            <Link
+                              key={category.id}
+                              to={`/categories/${category.slug}`}
+                              className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                            >
+                              <div className="h-10 w-10 shrink-0 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                                {category.image_url ? (
+                                  <img
+                                    src={getStorageUrl(category.image_url)}
+                                    alt={category.name}
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="flex h-full w-full items-center justify-center">
+                                    <FolderOpen className="h-4 w-4 text-muted-foreground" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-foreground group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+                                  {category.name}
+                                </p>
+                                {category.description && (
+                                  <p className="text-[11px] text-muted-foreground line-clamp-1">{category.description}</p>
+                                )}
+                              </div>
+                              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    </aside>
+                  )}
                 </div>
               )}
 
-              {/* Categories Results */}
+              {/* Mobile-only categories (below products) */}
               {categories && categories.data.length > 0 && (
-                <div className="mb-12">
-                  <div className="flex items-center gap-2 mb-6">
-                    <FolderOpen className="h-5 w-5 text-primary" />
-                    <h2 className="text-xl font-semibold">Categories ({categories.total})</h2>
+                <section className="lg:hidden space-y-3 pt-2">
+                  <div className="flex items-center gap-2">
+                    <FolderOpen className="h-4 w-4 text-indigo-500" />
+                    <h2 className="text-base font-extrabold text-foreground tracking-tight">Related Categories</h2>
+                    <span className="text-xs text-muted-foreground">({categories.total})</span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {categories.data.map((category: any) => (
                       <Link
                         key={category.id}
                         to={`/categories/${category.slug}`}
-                        className="group rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg"
+                        className="group flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-card p-3 shadow-sm transition-all hover:border-indigo-500/30 hover:shadow-md"
                       >
-                        {category.image_url && (
-                          <div className="mb-4 h-32 w-full overflow-hidden rounded-2xl bg-slate-100">
+                        <div className="h-10 w-10 shrink-0 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                          {category.image_url ? (
                             <img
                               src={getStorageUrl(category.image_url)}
                               alt={category.name}
-                              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                              className="h-full w-full object-cover"
                             />
-                          </div>
-                        )}
-                        <h3 className="font-semibold mb-1">{category.name}</h3>
-                        {category.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {category.description}
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center">
+                              <FolderOpen className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-foreground group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+                            {category.name}
                           </p>
-                        )}
-                        <div className="mt-3 text-sm font-medium text-primary flex items-center gap-1">
-                          View category <ChevronRight className="h-4 w-4" />
+                          <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">Browse →</span>
                         </div>
                       </Link>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {/* Products Results */}
-              {products && products.data.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-6">
-                    <Package className="h-5 w-5" />
-                    <h2 className="text-xl font-semibold">Products ({products.total})</h2>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                    {products.data.map((product: any) => (
-                      <ProductCard key={product.id} product={product} />
-                    ))}
-                  </div>
-
-                  {/* Pagination */}
-                  {products.last_page > 1 && (
-                    <div className="mt-8 flex justify-center items-center gap-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handlePageChange(page - 1)}
-                        disabled={page === 1 || isFetching}
-                      >
-                        <ChevronLeft className="h-4 w-4 mr-1" />
-                        Previous
-                      </Button>
-                      <span className="text-sm text-muted-foreground">
-                        Page {products.current_page} of {products.last_page}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handlePageChange(page + 1)}
-                        disabled={!products.has_more_pages || isFetching}
-                      >
-                        Next
-                        <ChevronRight className="h-4 w-4 ml-1" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                </section>
               )}
             </>
           )}

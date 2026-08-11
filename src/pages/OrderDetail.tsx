@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { useGetOrderQuery, useRequestOrderCancellationMutation, useCancelOrderMutation } from '@/store/api/ordersApi';
@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, Package, MapPin, Calendar, XCircle, Clock, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, Calendar, XCircle, Clock, AlertCircle, CheckCircle2, Banknote, Truck } from 'lucide-react';
 import { format } from 'date-fns';
 import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { formatPrice } from '@/lib/currency';
@@ -26,6 +26,8 @@ const statusColors: Record<string, string> = {
 const OrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isOrderSuccess = searchParams.get('success') === 'true';
   const { toast } = useToast();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const { data: orderData, isLoading } = useGetOrderQuery(id);
@@ -174,7 +176,43 @@ const OrderDetail = () => {
           )}
         </div>
 
-        {hasPendingCancellationRequest && (
+        {isOrderSuccess && (
+          <div className="rounded-3xl bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-950 text-white border border-indigo-500/30 p-6 shadow-2xl space-y-4 mb-6 relative overflow-hidden">
+            <div className="flex items-start gap-4 relative z-10">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shrink-0">
+                <CheckCircle2 className="h-6 w-6" />
+              </div>
+              <div className="space-y-1">
+                <Badge className="bg-emerald-500 text-white border-0 font-bold px-2.5 py-0.5 text-[10px]">
+                  ORDER CONFIRMED
+                </Badge>
+                <h2 className="text-xl sm:text-2xl font-black text-white">🎉 Order Placed Successfully!</h2>
+                <p className="text-xs sm:text-sm text-slate-300">
+                  Thank you for shopping with us. Your order <span className="font-bold text-amber-300">{order.order_number}</span> has been confirmed and is being processed by our warehouse.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 relative z-10 border-t border-white/10 text-xs">
+              <div className="flex items-center gap-2 text-slate-200 bg-white/5 p-3 rounded-2xl border border-white/10">
+                <Banknote className="h-4 w-4 text-emerald-400 shrink-0" />
+                <div>
+                  <p className="font-bold text-white">Payment Method</p>
+                  <p className="text-emerald-300 font-semibold">
+                    {order.payment_method === 'cod' ? 'Cash on Delivery (Pay on Receive)' : 'Paid Online'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-slate-200 bg-white/5 p-3 rounded-2xl border border-white/10">
+                <Truck className="h-4 w-4 text-amber-400 shrink-0" />
+                <div>
+                  <p className="font-bold text-white">Estimated Delivery</p>
+                  <p className="text-amber-200 font-semibold">2 - 4 Business Days</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
           <Alert className="mb-6 border-yellow-500/50 bg-yellow-500/10">
             <Clock className="h-4 w-4 text-yellow-600" />
             <AlertDescription className="text-yellow-600">

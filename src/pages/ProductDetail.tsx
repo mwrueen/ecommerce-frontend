@@ -82,17 +82,28 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-screen py-8">
-      <div className="container mx-auto px-4">
-        <Link to="/products">
-          <Button variant="ghost" className="mb-6 gap-2">
-            <ArrowLeft className="h-4 w-4" /> Back to Products
-          </Button>
-        </Link>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10">
+      <div className="container mx-auto px-4 max-w-6xl space-y-8">
+        
+        {/* Back Link & Breadcrumb */}
+        <div className="flex items-center justify-between">
+          <Link to="/products">
+            <Button variant="ghost" className="rounded-xl gap-2 font-bold text-xs hover:bg-slate-200 dark:hover:bg-slate-800">
+              <ArrowLeft className="h-4 w-4" /> Back to Products Catalog
+            </Button>
+          </Link>
+          {product.category && (
+            <Badge className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-extrabold text-xs">
+              Category: {product.category.name}
+            </Badge>
+          )}
+        </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <div className="aspect-square rounded-lg overflow-hidden bg-secondary">
+        <div className="grid md:grid-cols-12 gap-8 items-start">
+          
+          {/* Left Column: Media Gallery (5 cols) */}
+          <div className="md:col-span-5 space-y-4">
+            <div className="aspect-square rounded-3xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl relative">
               {(selectedImage || productImage) ? (
                 <img
                   src={getStorageUrl(selectedImage || productImage)}
@@ -101,17 +112,24 @@ const ProductDetail = () => {
                 />
               ) : (
                 <div className="flex h-full items-center justify-center text-muted-foreground">
-                  <Package className="h-32 w-32" />
+                  <Package className="h-28 w-28 opacity-40" />
                 </div>
               )}
+              {deal && (
+                <Badge className="absolute top-4 left-4 bg-gradient-to-r from-rose-500 to-amber-500 text-white border-0 font-black text-xs px-3 py-1 shadow-lg">
+                  {deal.discount_type === 'percentage' ? `${deal.discount_value}% OFF` : `-${formatPrice(deal.discount_value, settings?.data?.currency_symbol, settings?.data?.currency_position, settings?.data?.formatted_currency)}`}
+                </Badge>
+              )}
             </div>
+
             {product.media && product.media.length > 1 && (
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-4 gap-3">
                 {product.media.map((media: any) => (
                   <div
                     key={media.id}
-                    className={`aspect-square rounded-lg overflow-hidden bg-secondary cursor-pointer hover:opacity-75 transition-opacity border-2 ${(selectedImage || productImage) === media.url ? 'border-primary' : 'border-transparent'
-                      }`}
+                    className={`aspect-square rounded-2xl overflow-hidden bg-white dark:bg-slate-900 cursor-pointer hover:opacity-90 transition-all border-2 ${
+                      (selectedImage || productImage) === media.url ? 'border-indigo-600 ring-2 ring-indigo-500/20' : 'border-slate-200 dark:border-slate-800'
+                    }`}
                     onClick={() => setSelectedImage(media.url)}
                   >
                     <img src={getStorageUrl(media.url)} alt={media.alt_text || product.name} className="w-full h-full object-cover" />
@@ -121,95 +139,100 @@ const ProductDetail = () => {
             )}
           </div>
 
-          <div className="space-y-6">
-            <div>
-              <div className="flex gap-2 mb-2">
-                {product.category && (
-                  <Badge variant="secondary">
-                    {product.category.name}
+          {/* Right Column: Information & Actions (7 cols) */}
+          <div className="md:col-span-7 space-y-6 text-left">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                {product.brand && (
+                  <Badge variant="outline" className="rounded-lg text-[11px] uppercase font-bold tracking-wider">
+                    {product.brand}
                   </Badge>
                 )}
-                {deal && (
-                  <Badge className="bg-red-500 hover:bg-red-600 border-0 shadow-sm text-xs font-semibold">
-                    {deal.discount_type === 'percentage' ? `${deal.discount_value}% OFF` : `-${formatPrice(deal.discount_value, settings?.data?.currency_symbol, settings?.data?.currency_position, settings?.data?.formatted_currency)}`}
+                {product.stock_quantity > 0 ? (
+                  <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold text-xs">
+                    In Stock ({product.stock_quantity} available)
                   </Badge>
+                ) : (
+                  <Badge variant="destructive" className="font-bold text-xs">Out of Stock</Badge>
                 )}
               </div>
-              <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-              {product.brand && (
-                <p className="text-muted-foreground">Brand: {product.brand}</p>
+              
+              <h1 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight leading-tight">
+                {product.name}
+              </h1>
+              
+              {product.sku && (
+                <p className="text-xs text-muted-foreground font-mono">SKU: {product.sku}</p>
               )}
             </div>
 
-            <div className="flex items-baseline gap-4">
-              <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-bold text-primary">
-                  {formatPrice(
-                    discountedPrice,
-                    settings?.data?.currency_symbol,
-                    settings?.data?.currency_position,
-                    settings?.data?.formatted_currency
-                  )}
-                </span>
-                {deal && (
-                  <span className="text-xl text-muted-foreground line-through">
+            {/* Pricing Section */}
+            <div className="p-5 rounded-3xl bg-slate-950 text-white border border-slate-800 shadow-xl flex items-center justify-between">
+              <div>
+                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Special Price</p>
+                <div className="flex items-baseline gap-3 mt-1">
+                  <span className="text-3xl sm:text-4xl font-black text-amber-400">
                     {formatPrice(
-                      product.price,
+                      discountedPrice,
                       settings?.data?.currency_symbol,
                       settings?.data?.currency_position,
                       settings?.data?.formatted_currency
                     )}
                   </span>
-                )}
+                  {deal && (
+                    <span className="text-sm sm:text-base text-slate-500 line-through">
+                      {formatPrice(
+                        product.price,
+                        settings?.data?.currency_symbol,
+                        settings?.data?.currency_position,
+                        settings?.data?.formatted_currency
+                      )}
+                    </span>
+                  )}
+                </div>
               </div>
-              {product.stock_quantity > 0 ? (
-                <Badge variant="outline" className="text-green-600 border-green-600">
-                  In Stock ({product.stock_quantity} available)
+              {deal && (
+                <Badge className="bg-rose-500 text-white font-extrabold text-xs px-3 py-1.5 shadow-md">
+                  SAVE UP TO {deal.discount_type === 'percentage' ? `${deal.discount_value}%` : `$${deal.discount_value}`}
                 </Badge>
-              ) : (
-                <Badge variant="destructive">Out of Stock</Badge>
               )}
             </div>
 
-            <Separator />
-
-            <div>
-              <h3 className="font-semibold mb-2">Description</h3>
+            {/* Description */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-extrabold uppercase text-muted-foreground tracking-wide">Overview</h3>
               <div
-                className="text-muted-foreground prose prose-sm max-w-none"
+                className="text-sm text-foreground/90 leading-relaxed prose prose-sm max-w-none"
                 dangerouslySetInnerHTML={{ __html: product.description }}
               />
               {product.long_description && (
                 <div
-                  className="text-muted-foreground mt-4 prose prose-sm max-w-none"
+                  className="text-sm text-muted-foreground leading-relaxed mt-2 prose prose-sm max-w-none"
                   dangerouslySetInnerHTML={{ __html: product.long_description }}
                 />
               )}
             </div>
 
-            {product.sku && (
-              <div className="text-sm text-muted-foreground">
-                SKU: {product.sku}
-              </div>
-            )}
-
-            <Card>
-              <CardContent className="p-4 space-y-4">
+            {/* Quantity Selector & Add to Cart */}
+            <Card className="rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl">
+              <CardContent className="p-6 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold">Quantity</span>
-                  <div className="flex items-center gap-2">
+                  <span className="font-extrabold text-sm text-foreground">Select Quantity</span>
+                  <div className="flex items-center gap-3">
                     <Button
                       variant="outline"
                       size="icon"
+                      className="h-9 w-9 rounded-xl border-slate-300 dark:border-slate-700"
                       onClick={() => setQuantity(q => Math.max(1, q - 1))}
                       disabled={quantity <= 1}
                     >
                       <Minus className="h-4 w-4" />
                     </Button>
-                    <span className="w-12 text-center font-semibold">{quantity}</span>
+                    <span className="w-10 text-center font-extrabold text-base">{quantity}</span>
                     <Button
                       variant="outline"
                       size="icon"
+                      className="h-9 w-9 rounded-xl border-slate-300 dark:border-slate-700"
                       onClick={() => setQuantity(q => Math.min(product.stock_quantity, q + 1))}
                       disabled={quantity >= product.stock_quantity}
                     >
@@ -219,34 +242,35 @@ const ProductDetail = () => {
                 </div>
 
                 <Button
-                  className="w-full gap-2"
-                  size="lg"
+                  className="w-full h-13 rounded-2xl bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-extrabold text-base shadow-xl shadow-rose-500/20 border-0 gap-2 transition-all hover:scale-[1.01]"
                   onClick={handleAddToCart}
                   disabled={product.stock_quantity === 0}
                 >
                   <ShoppingCart className="h-5 w-5" />
-                  Add to Cart
+                  {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Shopping Cart'}
                 </Button>
               </CardContent>
             </Card>
 
+            {/* Trust Badges */}
             <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-4 rounded-lg bg-secondary/50">
-                <Truck className="h-6 w-6 mx-auto mb-2 text-primary" />
-                <p className="text-sm font-medium">Free Shipping</p>
-                <p className="text-xs text-muted-foreground">On orders over $50</p>
+              <div className="text-center p-4 rounded-2xl bg-card border border-slate-200 dark:border-slate-800 shadow-md space-y-1">
+                <Truck className="h-6 w-6 mx-auto text-indigo-500" />
+                <p className="text-xs font-bold text-foreground">Fast Delivery</p>
+                <p className="text-[10px] text-muted-foreground">Doorstep dispatch</p>
               </div>
-              <div className="text-center p-4 rounded-lg bg-secondary/50">
-                <Shield className="h-6 w-6 mx-auto mb-2 text-primary" />
-                <p className="text-sm font-medium">Secure Payment</p>
-                <p className="text-xs text-muted-foreground">100% protected</p>
+              <div className="text-center p-4 rounded-2xl bg-card border border-slate-200 dark:border-slate-800 shadow-md space-y-1">
+                <Shield className="h-6 w-6 mx-auto text-emerald-500" />
+                <p className="text-xs font-bold text-foreground">100% Secure</p>
+                <p className="text-[10px] text-muted-foreground">Encrypted Checkout</p>
               </div>
-              <div className="text-center p-4 rounded-lg bg-secondary/50">
-                <Package className="h-6 w-6 mx-auto mb-2 text-primary" />
-                <p className="text-sm font-medium">Easy Returns</p>
-                <p className="text-xs text-muted-foreground">30-day guarantee</p>
+              <div className="text-center p-4 rounded-2xl bg-card border border-slate-200 dark:border-slate-800 shadow-md space-y-1">
+                <Package className="h-6 w-6 mx-auto text-amber-500" />
+                <p className="text-xs font-bold text-foreground">Easy Returns</p>
+                <p className="text-[10px] text-muted-foreground">30-day guarantee</p>
               </div>
             </div>
+
           </div>
         </div>
       </div>

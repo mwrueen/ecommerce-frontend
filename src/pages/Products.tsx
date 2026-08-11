@@ -215,32 +215,39 @@ const Products = () => {
   const isLoadingMore = isFetching && page > 1;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white">
-      <div className="container mx-auto px-4 py-10 space-y-10">
-        <section className="overflow-hidden rounded-3xl border border-slate-100 bg-white/95 p-8 shadow-sm">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-3 max-w-2xl">
-              <p className="text-sm font-semibold uppercase tracking-wide text-primary">All Products</p>
-              <h1 className="text-3xl md:text-4xl font-bold leading-tight">Discover our complete collection</h1>
-              <p className="text-muted-foreground">
-                Browse curated selections, apply precise filters, and find the perfect products faster.
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10">
+      <div className="container mx-auto px-4 space-y-8">
+        <section className="relative overflow-hidden rounded-3xl bg-slate-950 text-white border border-slate-800 p-8 sm:p-10 shadow-2xl">
+          <div className="absolute top-0 right-0 h-80 w-80 bg-gradient-to-bl from-indigo-500/15 via-rose-500/15 to-transparent rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-3 max-w-2xl text-left">
+              <Badge className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0 font-extrabold px-3 py-1 text-xs shadow-md">
+                EXPLORE PRODUCT CATALOG
+              </Badge>
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-white">
+                Discover Our Complete Collection
+              </h1>
+              <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                Filter by category, price, and instant sorting to surface hand-picked items for your lifestyle.
               </p>
-              <div className="flex flex-wrap gap-3 text-sm text-slate-600">
-                <div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1">
-                  {totalProducts} items available
+              <div className="flex flex-wrap gap-3 text-xs font-bold text-slate-300 pt-1">
+                <div className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 backdrop-blur-md">
+                  📦 <span className="text-amber-400 font-extrabold ml-1">{totalProducts}</span> Items Available
                 </div>
-                <div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1">
-                  {(categoriesData?.data?.length || 0)} categories
+                <div className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 backdrop-blur-md">
+                  🏷️ <span className="text-indigo-400 font-extrabold ml-1">{(categoriesData?.data?.length || 0)}</span> Categories
                 </div>
-                <div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1">
-                  Updated in real-time
+                <div className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 backdrop-blur-md text-emerald-400">
+                  ⚡ Real-Time Stock Updates
                 </div>
               </div>
             </div>
-            <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 to-primary/5 p-6 text-primary">
-              <p className="text-sm font-medium uppercase tracking-wide mb-2">Quick Tip</p>
-              <p className="text-sm leading-relaxed text-primary/80">
-                Apply category + price filters together to surface the most relevant matches instantly.
+            
+            <div className="rounded-2xl border border-indigo-500/30 bg-white/5 backdrop-blur-md p-6 text-slate-200 max-w-xs text-left">
+              <p className="text-xs font-extrabold uppercase tracking-wide text-amber-400 mb-1.5">Pro Shopping Tip</p>
+              <p className="text-xs leading-relaxed text-slate-300">
+                Combine Category & Price Range filters to instantly narrow down products matching your exact budget.
               </p>
             </div>
           </div>
