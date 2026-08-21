@@ -29,7 +29,8 @@ export default function ContactSettings({ settings }: { settings: any }) {
             await updateSettings(data).unwrap();
             toast.success('Contact info updated');
         } catch (error: any) {
-            toast.error('Failed to update');
+            const msg = error?.data?.message || (error?.data?.errors ? Object.values(error.data.errors).flat().join(', ') : 'Failed to update contact info');
+            toast.error(msg);
         }
     };
 

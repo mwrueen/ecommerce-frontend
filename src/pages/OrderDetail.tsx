@@ -213,6 +213,7 @@ const OrderDetail = () => {
             </div>
           </div>
         )}
+        {hasPendingCancellationRequest && (
           <Alert className="mb-6 border-yellow-500/50 bg-yellow-500/10">
             <Clock className="h-4 w-4 text-yellow-600" />
             <AlertDescription className="text-yellow-600">

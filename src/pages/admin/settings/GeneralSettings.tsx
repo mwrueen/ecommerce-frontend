@@ -33,7 +33,8 @@ export default function GeneralSettings({ settings }: { settings: any }) {
             await updateSettings(data).unwrap();
             toast.success('General settings updated successfully');
         } catch (error: any) {
-            toast.error(error?.data?.message || 'Failed to update settings');
+            const msg = error?.data?.message || (error?.data?.errors ? Object.values(error.data.errors).flat().join(', ') : 'Failed to update settings');
+            toast.error(msg);
         }
     };
 

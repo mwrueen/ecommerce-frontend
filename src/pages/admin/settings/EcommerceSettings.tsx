@@ -26,10 +26,17 @@ export default function EcommerceSettings({ settings }: { settings: any }) {
 
     const onSubmit = async (data: any) => {
         try {
-            await updateSettings(data).unwrap();
+            const payload = {
+                ...data,
+                shipping_cost: data.shipping_cost !== '' && data.shipping_cost !== null && !isNaN(Number(data.shipping_cost)) ? Number(data.shipping_cost) : 0,
+                free_shipping_threshold: data.free_shipping_threshold !== '' && data.free_shipping_threshold !== null && !isNaN(Number(data.free_shipping_threshold)) ? Number(data.free_shipping_threshold) : 0,
+                tax_rate: data.tax_rate !== '' && data.tax_rate !== null && !isNaN(Number(data.tax_rate)) ? Number(data.tax_rate) : 0,
+            };
+            await updateSettings(payload).unwrap();
             toast.success('Ecommerce settings updated');
         } catch (error: any) {
-            toast.error('Failed to update');
+            const msg = error?.data?.message || (error?.data?.errors ? Object.values(error.data.errors).flat().join(', ') : 'Failed to update');
+            toast.error(msg);
         }
     };
 
