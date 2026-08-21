@@ -29,6 +29,7 @@ import ProductCard from '@/components/ProductCard';
 import Autoplay from 'embla-carousel-autoplay';
 import { formatPrice } from '@/lib/currency';
 import { Skeleton } from '@/components/ui/skeleton';
+import SEO from '@/components/SEO';
 import { cn, getStorageUrl } from '@/lib/utils';
 
 const Index = () => {
@@ -57,6 +58,35 @@ const Index = () => {
   const featuredDeals = landingData?.data?.featured_deals || [];
   const flashDeals = landingData?.data?.flash_deals || [];
   const sliderImages = heroSection?.slider_images || [];
+
+  const websiteUrl = window.location.origin;
+
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    'name': siteInfo?.title || 'eCommerce Store',
+    'url': websiteUrl,
+    'description': siteInfo?.description || siteInfo?.meta_description || 'Shop top products online with great prices and fast shipping.',
+    'potentialAction': {
+      '@type': 'SearchAction',
+      'target': `${websiteUrl}/search?q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
+  const storeSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'OnlineStore',
+    'name': siteInfo?.title || 'eCommerce Store',
+    'url': websiteUrl,
+    'description': siteInfo?.description || siteInfo?.meta_description,
+    'logo': siteInfo?.header_logo ? getStorageUrl(siteInfo.header_logo) : undefined,
+    'contactPoint': siteInfo?.contact_number ? {
+      '@type': 'ContactPoint',
+      'telephone': siteInfo.contact_number,
+      'contactType': 'customer service',
+    } : undefined,
+  };
 
   const mockup = heroSection?.mockup || {
     badge: 'Special Offer',
@@ -91,6 +121,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background overflow-x-hidden">
+      <SEO
+        title={siteInfo?.meta_title || siteInfo?.title || 'Home - Premium Products & Best Deals'}
+        description={siteInfo?.meta_description || siteInfo?.description || 'Shop the best online selection of top-rated products, exclusive flash sales, and special promotional deals.'}
+        keywords={siteInfo?.meta_keywords || 'ecommerce, online store, shop deals, discount products'}
+        jsonLd={[websiteSchema, storeSchema]}
+      />
       
       {/* Top Prominent Offer Ticker Bar */}
       <div className="bg-slate-950 text-slate-100 border-b border-amber-500/30 py-2.5 px-4 shadow-lg relative z-20">

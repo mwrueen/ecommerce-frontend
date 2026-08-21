@@ -35,6 +35,13 @@ export interface SiteInfo {
   formatted_currency: string;
   free_shipping_threshold: number;
   shipping_cost: number;
+  title?: string;
+  description?: string;
+  meta_title?: string;
+  meta_description?: string;
+  meta_keywords?: string;
+  header_logo?: string;
+  contact_number?: string;
 }
 
 export interface LandingPageCategory {

@@ -8,6 +8,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Clock, Tag, TrendingUp, Sparkles, Flame, Gift, Percent, ArrowRight, ShoppingBag } from 'lucide-react';
 import { getStorageUrl } from '@/lib/utils';
 import { formatPrice } from '@/lib/currency';
+import CountdownTimer from '@/components/CountdownTimer';
+
+import SEO from '@/components/SEO';
 
 export default function Deals() {
   const navigate = useNavigate();
@@ -45,8 +48,47 @@ export default function Deals() {
     { label: 'Min Purchase', value: 'minimum_purchase', icon: Percent },
   ];
 
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': 'Home',
+        'item': `${window.location.origin}/`,
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': 'Special Deals',
+        'item': `${window.location.origin}/deals`,
+      },
+    ],
+  };
+
+  const offerCatalogSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'OfferCatalog',
+    'name': 'Special Deals & Limited Offers Catalog',
+    'url': `${window.location.origin}/deals`,
+    'numberOfItems': deals.length,
+    'itemListElement': deals.slice(0, 10).map((d: any, idx: number) => ({
+      '@type': 'ListItem',
+      'position': idx + 1,
+      'name': d.title,
+      'url': `${window.location.origin}/deals/${d.slug || d.id}`,
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-slate-50/50 py-10">
+      <SEO
+        title="Special Deals & Limited Flash Offers"
+        description="Explore active promotional deals, flash sales, volume discounts, and bundle savings across top quality store products."
+        keywords="deals, flash sale, discount coupons, special offers, promotion"
+        jsonLd={[breadcrumbSchema, offerCatalogSchema]}
+      />
       <div className="container mx-auto px-4 max-w-7xl space-y-10">
         {/* Hero Section */}
         <section className="rounded-3xl bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-950 p-8 sm:p-12 text-white border border-indigo-500/20 shadow-2xl relative overflow-hidden">
@@ -204,10 +246,10 @@ export default function Deals() {
                         </CardHeader>
 
                         <CardContent className="p-6 pt-2 space-y-3 text-xs text-slate-600">
-                          {deal.time_remaining && (
-                            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-100/80 font-medium">
-                              <Clock className="h-4 w-4 text-indigo-600 shrink-0" />
-                              <span>Ends in: <strong className="text-slate-900 font-bold">{formatTimeRemaining(deal.time_remaining)}</strong></span>
+                          {(deal.end_date || deal.time_remaining) && (
+                            <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 text-white font-medium shadow-xs">
+                              <span className="text-[11px] font-bold text-slate-300">Time Left:</span>
+                              <CountdownTimer endDate={deal.end_date} startDate={deal.start_date} variant="inline" />
                             </div>
                           )}
 

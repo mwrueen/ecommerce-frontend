@@ -189,7 +189,7 @@ const CustomerAuth = () => {
   const renderLoginForm = () => (
     <form onSubmit={handleLogin} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="login-email">Email</Label>
+        <Label htmlFor="login-email">Email <span className="text-red-500">*</span></Label>
         <div className="relative">
           <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -205,7 +205,7 @@ const CustomerAuth = () => {
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="login-password">Password</Label>
+        <Label htmlFor="login-password">Password <span className="text-red-500">*</span></Label>
         <div className="relative">
           <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -257,7 +257,7 @@ const CustomerAuth = () => {
     <form onSubmit={handleRegister} className="space-y-4">
       <div className="grid md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="register-name">Full Name *</Label>
+          <Label htmlFor="register-name">Full Name <span className="text-red-500">*</span></Label>
           <Input
             id="register-name"
             type="text"
@@ -269,7 +269,7 @@ const CustomerAuth = () => {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="register-email">Email *</Label>
+          <Label htmlFor="register-email">Email <span className="text-red-500">*</span></Label>
           <div className="relative">
             <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
@@ -284,7 +284,7 @@ const CustomerAuth = () => {
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="register-phone">Phone (Optional)</Label>
+          <Label htmlFor="register-phone">Phone <span className="text-xs text-muted-foreground font-normal">(Optional)</span></Label>
           <Input
             id="register-phone"
             type="tel"
@@ -295,7 +295,7 @@ const CustomerAuth = () => {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="register-address">Address (Optional)</Label>
+          <Label htmlFor="register-address">Address <span className="text-xs text-muted-foreground font-normal">(Optional)</span></Label>
           <Input
             id="register-address"
             type="text"
@@ -306,7 +306,7 @@ const CustomerAuth = () => {
           />
         </div>
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="register-password">Password *</Label>
+          <Label htmlFor="register-password">Password <span className="text-red-500">*</span></Label>
           <div className="relative">
             <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
@@ -322,7 +322,7 @@ const CustomerAuth = () => {
           </div>
         </div>
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="register-password-confirmation">Confirm Password *</Label>
+          <Label htmlFor="register-password-confirmation">Confirm Password <span className="text-red-500">*</span></Label>
           <div className="relative">
             <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
@@ -362,7 +362,7 @@ const CustomerAuth = () => {
   const renderForgotPasswordForm = () => (
     <form onSubmit={handleForgotPassword} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="forgot-email">Email</Label>
+        <Label htmlFor="forgot-email">Email <span className="text-red-500">*</span></Label>
         <div className="relative">
           <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -415,7 +415,7 @@ const CustomerAuth = () => {
       </div>
 
       <div className="space-y-3">
-        <Label htmlFor="reset-otp">Enter Verification Code</Label>
+        <Label htmlFor="reset-otp">Enter Verification Code <span className="text-red-500">*</span></Label>
         <div className="flex justify-center">
           <InputOTP
             maxLength={6}
@@ -441,7 +441,7 @@ const CustomerAuth = () => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="reset-password">New Password *</Label>
+        <Label htmlFor="reset-password">New Password <span className="text-red-500">*</span></Label>
         <div className="relative">
           <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -458,7 +458,7 @@ const CustomerAuth = () => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="reset-password-confirmation">Confirm New Password *</Label>
+        <Label htmlFor="reset-password-confirmation">Confirm New Password <span className="text-red-500">*</span></Label>
         <div className="relative">
           <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input

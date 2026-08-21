@@ -2,14 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useGetProductsQuery } from '@/store/api/productsApi';
 import { useGetCategoriesQuery } from '@/store/api/categoriesApi';
+import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
-import { Filter, DollarSign, Loader2 } from 'lucide-react';
+import { Filter, DollarSign, Loader2, Search, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useGetPublicSettingsQuery } from '@/hooks/useApi';
+import SEO from '@/components/SEO';
 import { formatPrice } from '@/lib/currency';
 
 const Products = () => {
@@ -20,6 +21,9 @@ const Products = () => {
   const [sortOrder, setSortOrder] = useState<string>('desc');
   const [minPrice, setMinPrice] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>(
+    searchParams.get('search') || searchParams.get('query') || searchParams.get('q') || ''
+  );
   const [accumulatedProducts, setAccumulatedProducts] = useState<any[]>([]);
   const { data: settings } = useGetPublicSettingsQuery({});
 
@@ -41,6 +45,7 @@ const Products = () => {
     ...(categoryId && { category_id: categoryId }),
     ...(minPrice && { min_price: minPrice }),
     ...(maxPrice && { max_price: maxPrice }),
+    ...(searchQuery && { search: searchQuery }),
     sort_by: sortBy,
     sort_order: sortOrder
   });
@@ -49,7 +54,7 @@ const Products = () => {
   useEffect(() => {
     setAccumulatedProducts([]);
     setPage(1);
-  }, [categoryId, minPrice, maxPrice, sortBy, sortOrder]);
+  }, [categoryId, minPrice, maxPrice, sortBy, sortOrder, searchQuery]);
 
   // Accumulate products when new data arrives
   useEffect(() => {
@@ -76,11 +81,17 @@ const Products = () => {
 
   // Read parameters from URL and sync state
   useEffect(() => {
-    if (!categoriesData?.data) return;
-
     const categorySlug = searchParams.get('category');
     const minParam = searchParams.get('min_price') || '';
     const maxParam = searchParams.get('max_price') || '';
+    const searchParam = searchParams.get('search') || searchParams.get('query') || searchParams.get('q') || '';
+
+    // Sync search query
+    if (searchParam !== searchQuery) {
+      setSearchQuery(searchParam);
+    }
+
+    if (!categoriesData?.data) return;
 
     // Sync category
     if (categorySlug) {
@@ -198,6 +209,17 @@ const Products = () => {
     setPage(1);
   };
 
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    updateUrlParams({
+      search: null,
+      query: null,
+      q: null
+    });
+    setPage(1);
+    setAccumulatedProducts([]);
+  };
+
   const totalProducts = (() => {
     // Check for total at root level (API response structure)
     if (data?.total !== undefined) return data.total;
@@ -214,8 +236,65 @@ const Products = () => {
   const hasMorePages = data && lastPage > 1 && currentPage < lastPage;
   const isLoadingMore = isFetching && page > 1;
 
+  const selectedCategoryObj = categoriesData?.data?.find((c: any) => c.id === categoryId);
+  const pageTitle = searchQuery
+    ? `Search Results for "${searchQuery}" - Browse Products`
+    : selectedCategoryObj
+    ? `${selectedCategoryObj.name} Products - Browse Catalog`
+    : 'All Products - Browse Our Complete Catalog';
+  const pageDescription = selectedCategoryObj?.description || `Discover ${totalProducts} high-quality products across all categories with fast shipping and special offers.`;
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': 'Home',
+        'item': `${window.location.origin}/`,
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': 'Products',
+        'item': `${window.location.origin}/products`,
+      },
+      ...(selectedCategoryObj ? [{
+        '@type': 'ListItem',
+        'position': 3,
+        'name': selectedCategoryObj.name,
+        'item': `${window.location.origin}/products?category=${selectedCategoryObj.slug}`,
+      }] : []),
+    ],
+  };
+
+  const itemListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    'numberOfItems': accumulatedProducts.length,
+    'itemListElement': accumulatedProducts.slice(0, 12).map((p: any, idx: number) => ({
+      '@type': 'ListItem',
+      'position': idx + 1,
+      'name': p.name,
+      'url': `${window.location.origin}/products/${p.slug || p.id}`,
+      'image': p.media?.[0]?.url || p.image_url,
+      'offers': {
+        '@type': 'Offer',
+        'price': p.price,
+        'priceCurrency': settings?.data?.currency || 'USD',
+      },
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10">
+      <SEO
+        title={pageTitle}
+        description={pageDescription}
+        keywords={selectedCategoryObj ? `${selectedCategoryObj.name}, buy ${selectedCategoryObj.name}, online store` : 'all products, ecommerce catalog, online store'}
+        jsonLd={[breadcrumbSchema, itemListSchema]}
+      />
       <div className="container mx-auto px-4 space-y-8">
         <section className="relative overflow-hidden rounded-3xl bg-slate-950 text-white border border-slate-800 p-8 sm:p-10 shadow-2xl">
           <div className="absolute top-0 right-0 h-80 w-80 bg-gradient-to-bl from-indigo-500/15 via-rose-500/15 to-transparent rounded-full blur-3xl pointer-events-none" />
@@ -412,8 +491,14 @@ const Products = () => {
 
           {/* Products Grid */}
           <div className="lg:col-span-3">
-            {(categoryId || minPrice || maxPrice) && (
+            {(categoryId || minPrice || maxPrice || searchQuery) && (
               <div className="mb-4 flex flex-wrap gap-3">
+                {searchQuery && (
+                  <Badge variant="secondary" className="gap-2 rounded-full px-4 py-2 text-sm bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    Search: "{searchQuery}"
+                    <button onClick={handleClearSearch} className="ml-1 text-slate-400 hover:text-rose-600 font-bold">×</button>
+                  </Badge>
+                )}
                 {categoryId && (
                   <Badge variant="secondary" className="gap-2 rounded-full px-4 py-2 text-sm">
                     {categoriesData?.data?.find((c: any) => c.id === categoryId)?.name}

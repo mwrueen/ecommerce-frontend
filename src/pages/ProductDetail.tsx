@@ -13,6 +13,8 @@ import { useGetPublicSettingsQuery } from '@/hooks/useApi';
 import { formatPrice } from '@/lib/currency';
 import { getStorageUrl } from '@/lib/utils';
 
+import SEO from '@/components/SEO';
+
 const ProductDetail = () => {
   const { identifier } = useParams();
   const dispatch = useDispatch();
@@ -81,8 +83,81 @@ const ProductDetail = () => {
     );
   }
 
+  const canonicalProductUrl = `${window.location.origin}/products/${product.slug || product.id}`;
+  const fullProductImageUrl = productImage ? getStorageUrl(productImage) : `${window.location.origin}/placeholder.svg`;
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': 'Home',
+        'item': `${window.location.origin}/`,
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': 'Products',
+        'item': `${window.location.origin}/products`,
+      },
+      ...(product.category ? [{
+        '@type': 'ListItem',
+        'position': 3,
+        'name': product.category.name,
+        'item': `${window.location.origin}/products?category=${product.category.slug}`,
+      }] : []),
+      {
+        '@type': 'ListItem',
+        'position': product.category ? 4 : 3,
+        'name': product.name,
+        'item': canonicalProductUrl,
+      },
+    ],
+  };
+
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    'name': product.name,
+    'description': product.meta_description || product.short_description || product.description || product.name,
+    'image': [fullProductImageUrl],
+    'sku': product.sku || product.id?.toString(),
+    'mpn': product.sku || product.id?.toString(),
+    'brand': {
+      '@type': 'Brand',
+      'name': settings?.data?.title || 'Store',
+    },
+    'offers': {
+      '@type': 'Offer',
+      'url': canonicalProductUrl,
+      'priceCurrency': settings?.data?.currency || 'USD',
+      'price': String(discountedPrice),
+      'priceValidUntil': '2028-12-31',
+      'itemCondition': 'https://schema.org/NewCondition',
+      'availability': product.stock_status === 'out_of_stock' ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
+      'seller': {
+        '@type': 'Organization',
+        'name': settings?.data?.title || 'Store',
+      },
+    },
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10">
+      <SEO
+        title={product.meta_title || `${product.name} - Buy Online`}
+        description={product.meta_description || product.short_description || product.description || `Order ${product.name} at the best price online.`}
+        keywords={product.meta_keywords || `${product.name}, buy ${product.name}, ${product.category?.name || 'electronics'}`}
+        canonicalUrl={canonicalProductUrl}
+        ogType="product"
+        ogImage={fullProductImageUrl}
+        price={discountedPrice}
+        currency={settings?.data?.currency}
+        availability={product.stock_status === 'out_of_stock' ? 'OutOfStock' : 'InStock'}
+        jsonLd={[breadcrumbSchema, productSchema]}
+      />
       <div className="container mx-auto px-4 max-w-6xl space-y-8">
         
         {/* Back Link & Breadcrumb */}
