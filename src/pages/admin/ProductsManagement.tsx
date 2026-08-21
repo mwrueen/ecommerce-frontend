@@ -183,9 +183,17 @@ export default function ProductsManagement() {
                     </TableCell>
                     <TableCell className="py-2">
                       <div className="text-sm font-medium">{product.name}</div>
-                      {product.category?.name && (
-                        <div className="text-xs text-muted-foreground">{product.category.name}</div>
-                      )}
+                      <div className="flex flex-wrap gap-1 mt-0.5">
+                        {product.all_categories && product.all_categories.length > 0 ? (
+                          product.all_categories.slice(0, 3).map((cat: any) => (
+                            <Badge key={cat.id} variant="outline" className="text-[10px] py-0 px-1.5 font-normal">
+                              {cat.name}
+                            </Badge>
+                          ))
+                        ) : product.category?.name ? (
+                          <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-normal">{product.category.name}</Badge>
+                        ) : null}
+                      </div>
                     </TableCell>
                     <TableCell className="py-2">
                       <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{product.sku}</code>

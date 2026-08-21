@@ -268,10 +268,18 @@ export default function ProductDetails() {
             </div>
             <Separator />
             <div>
-              <Label>Category</Label>
-              <p className="text-sm text-muted-foreground mt-2">
-                {product.category?.name || 'No category'}
-              </p>
+              <Label>Categories</Label>
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {product.all_categories && product.all_categories.length > 0 ? (
+                  product.all_categories.map((cat: any) => (
+                    <Badge key={cat.id} variant={cat.id === product.category_id ? "default" : "secondary"}>
+                      {cat.name}
+                    </Badge>
+                  ))
+                ) : (
+                  <Badge variant="outline">{product.category?.name || 'No category'}</Badge>
+                )}
+              </div>
             </div>
             <Separator />
             <div>

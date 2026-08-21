@@ -41,7 +41,7 @@ const Products = () => {
 
   const { data, isLoading, isFetching } = useGetProductsQuery({
     page,
-    per_page: 12,
+    per_page: 16,
     ...(categoryId && { category_id: categoryId }),
     ...(minPrice && { min_price: minPrice }),
     ...(maxPrice && { max_price: maxPrice }),
@@ -524,14 +524,14 @@ const Products = () => {
               </div>
             )}
 
-            <Card className="rounded-3xl border border-slate-100 bg-white/90 p-6 shadow-sm">
+            <Card className="rounded-3xl border border-slate-100 bg-white/90 p-5 shadow-sm">
               {isLoading && page === 1 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[...Array(12)].map((_, i) => (
-                    <Card key={i} className="overflow-hidden rounded-2xl border">
-                      <div className="aspect-[4/3] bg-slate-100 animate-pulse" />
-                      <CardContent className="p-4 space-y-2">
-                        <div className="h-4 bg-slate-100 rounded animate-pulse" />
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3.5 sm:gap-4">
+                  {[...Array(16)].map((_, i) => (
+                    <Card key={i} className="overflow-hidden rounded-xl border">
+                      <div className="aspect-[5/4] bg-slate-100 animate-pulse" />
+                      <CardContent className="p-3 space-y-2">
+                        <div className="h-3.5 bg-slate-100 rounded animate-pulse" />
                         <div className="h-3 bg-slate-100 rounded animate-pulse w-2/3" />
                       </CardContent>
                     </Card>
@@ -541,9 +541,9 @@ const Products = () => {
                 <>
                   {accumulatedProducts.length > 0 ? (
                     <>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3.5 sm:gap-4">
                         {accumulatedProducts.map((product: any) => (
-                          <ProductCard key={product.id} product={product} />
+                          <ProductCard key={product.id} product={product} compact />
                         ))}
                       </div>
 

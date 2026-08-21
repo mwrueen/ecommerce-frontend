@@ -197,35 +197,56 @@ const Index = () => {
                   <CarouselPrevious className="left-4 hidden sm:flex h-10 w-10 rounded-xl bg-white/90 hover:bg-white shadow-lg border-0" />
                   <CarouselNext className="right-4 hidden sm:flex h-10 w-10 rounded-xl bg-white/90 hover:bg-white shadow-lg border-0" />
                 </Carousel>
-              ) : (
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 text-white p-8 sm:p-10 shadow-2xl flex flex-col justify-between h-full min-h-[380px]">
-                  <div className="absolute -right-10 -bottom-10 h-64 w-64 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
-                  <div className="relative z-10 space-y-4 max-w-xl text-left">
-                    <Badge className="bg-white/10 text-indigo-200 border-white/20 font-bold px-3 py-1 gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                      <span>{heroSection?.tagline || 'Premium Quality Online Store'}</span>
-                    </Badge>
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
-                      {heroSection?.title || 'Discover Top Quality Products'}
-                    </h1>
-                    <p className="text-indigo-200/90 text-sm sm:text-base leading-relaxed line-clamp-3">
-                      Explore our hand-picked items, exclusive deals, and fast doorstep delivery.
-                    </p>
-                    <div className="flex flex-wrap gap-3 pt-2">
-                      <Link to="/products">
-                        <Button size="lg" className="rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold gap-2 shadow-xl shadow-indigo-500/30">
-                          <ShoppingBag className="h-4 w-4" /> Shop Catalog <ArrowRight className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                      <Link to="/deals">
-                        <Button size="lg" className="rounded-2xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold gap-2 backdrop-blur-md transition-all">
-                          View Deals
-                        </Button>
-                      </Link>
+              ) : (() => {
+                // Build background style from admin hero settings
+                const bgType = heroSection?.bg_type || 'color';
+                const bgImage = heroSection?.bg_image;
+                const bgColor = heroSection?.bg_color || 'linear-gradient(to bottom right, rgb(49 46 129), rgb(30 27 75), rgb(15 23 42))';
+                const heroBgStyle: React.CSSProperties = bgType === 'image' && bgImage
+                  ? {
+                      backgroundImage: `url(${bgImage})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }
+                  : { background: bgColor };
+
+                return (
+                  <div
+                    className="relative overflow-hidden rounded-3xl text-white p-8 sm:p-10 shadow-2xl flex flex-col justify-between h-full min-h-[380px]"
+                    style={heroBgStyle}
+                  >
+                    {/* Overlay for image backgrounds to ensure text legibility */}
+                    {bgType === 'image' && bgImage && (
+                      <div className="absolute inset-0 bg-gradient-to-br from-slate-950/70 via-slate-950/40 to-transparent pointer-events-none rounded-3xl" />
+                    )}
+                    <div className="absolute -right-10 -bottom-10 h-64 w-64 rounded-full bg-white/5 blur-3xl pointer-events-none" />
+                    <div className="relative z-10 space-y-4 max-w-xl text-left">
+                      <Badge className="bg-white/10 text-white/90 border-white/20 font-bold px-3 py-1 gap-1.5">
+                        <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                        <span>{heroSection?.tagline || 'Premium Quality Online Store'}</span>
+                      </Badge>
+                      <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight drop-shadow-lg">
+                        {heroSection?.title || 'Discover Top Quality Products'}
+                      </h1>
+                      <p className="text-white/80 text-sm sm:text-base leading-relaxed line-clamp-3 drop-shadow">
+                        {heroSection?.description || 'Explore our hand-picked items, exclusive deals, and fast doorstep delivery.'}
+                      </p>
+                      <div className="flex flex-wrap gap-3 pt-2">
+                        <Link to="/products">
+                          <Button size="lg" className="rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold gap-2 shadow-xl shadow-indigo-500/30">
+                            <ShoppingBag className="h-4 w-4" /> Shop Catalog <ArrowRight className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <Link to="/deals">
+                          <Button size="lg" className="rounded-2xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold gap-2 backdrop-blur-md transition-all">
+                            View Deals
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
 
             {/* Highlighted Deal / Special Offer Card (4 cols) */}
@@ -353,9 +374,11 @@ const Index = () => {
                               <Tag className="h-10 w-10" />
                             </div>
                           )}
-                          {deal.discount_percentage && (
+                          {(deal.discount_percentage || deal.discount_value) && (
                             <Badge className="absolute top-2.5 left-2.5 bg-rose-600 text-white border-0 font-extrabold text-[10px] px-2 py-0.5 shadow-md">
-                              -{deal.discount_percentage}% OFF
+                              {deal.discount_type === 'percentage' || deal.discount_percentage
+                                ? `${deal.discount_percentage || deal.discount_value}% OFF`
+                                : `SAVE ${formatPrice(deal.discount_value, siteInfo?.currency_symbol, 'before', siteInfo?.formatted_currency)}`}
                             </Badge>
                           )}
                         </div>
@@ -366,9 +389,21 @@ const Index = () => {
                         
                         <div className="mt-auto pt-3 flex items-center justify-between border-t border-white/10">
                           <div>
-                            <span className="text-base font-black text-amber-400">
-                              {formatPrice(deal.deal_price || deal.price, siteInfo?.currency_symbol, 'before', siteInfo?.formatted_currency)}
-                            </span>
+                            {deal.discount_value ? (
+                              <span className="text-sm sm:text-base font-black text-amber-400">
+                                {deal.discount_type === 'percentage'
+                                  ? `${deal.discount_value}% OFF`
+                                  : `SAVE ${formatPrice(deal.discount_value, siteInfo?.currency_symbol, 'before', siteInfo?.formatted_currency)}`}
+                              </span>
+                            ) : (deal.deal_price || deal.price) ? (
+                              <span className="text-sm sm:text-base font-black text-amber-400">
+                                {formatPrice(deal.deal_price || deal.price, siteInfo?.currency_symbol, 'before', siteInfo?.formatted_currency)}
+                              </span>
+                            ) : (
+                              <span className="text-xs font-extrabold text-amber-400">
+                                SPECIAL OFFER
+                              </span>
+                            )}
                             {deal.original_price && (
                               <span className="text-xs text-slate-500 line-through ml-1.5">
                                 {formatPrice(deal.original_price, siteInfo?.currency_symbol, 'before', siteInfo?.formatted_currency)}
@@ -538,24 +573,24 @@ const Index = () => {
 
               {/* Products Grid */}
               {isLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                  {[...Array(6)].map((_, i) => (
-                    <Card key={i} className="overflow-hidden rounded-2xl border-0 shadow-lg bg-card">
-                      <Skeleton className="aspect-[4/3] w-full" />
-                      <CardContent className="p-4 space-y-2">
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3.5 sm:gap-4">
+                  {[...Array(8)].map((_, i) => (
+                    <Card key={i} className="overflow-hidden rounded-xl border-0 shadow-md bg-card">
+                      <Skeleton className="aspect-[5/4] w-full" />
+                      <CardContent className="p-3 space-y-2">
+                        <Skeleton className="h-3.5 w-3/4" />
+                        <Skeleton className="h-3.5 w-1/2" />
                       </CardContent>
                     </Card>
                   ))}
                 </div>
               ) : filteredProducts.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3.5 sm:gap-4">
                   {filteredProducts.map((product) => (
                     <div key={product.id} className="relative group">
-                      <ProductCard product={product} />
+                      <ProductCard product={product} compact />
                       {product.total_sold > 0 && (
-                        <Badge className="absolute top-3 left-3 bg-emerald-500 text-white font-extrabold text-[10px] border-0 shadow-md rounded-lg px-2 py-0.5 pointer-events-none">
+                        <Badge className="absolute top-2 left-2 bg-emerald-500 text-white font-extrabold text-[9px] border-0 shadow-md rounded-lg px-2 py-0.5 pointer-events-none">
                           {product.total_sold} Sold
                         </Badge>
                       )}

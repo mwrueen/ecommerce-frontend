@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +30,13 @@ export default function HeroSettings({ settings }: { settings: any }) {
   const [bgImageFile, setBgImageFile] = useState<File | null>(null);
   const [bgImagePreview, setBgImagePreview] = useState<string>(additional.hero_bg_image || '');
   const [removeBgImage, setRemoveBgImage] = useState<boolean>(false);
+
+  // Sync preview when settings are refreshed from the server after save
+  useEffect(() => {
+    if (!bgImageFile) {
+      setBgImagePreview(additional.hero_bg_image || '');
+    }
+  }, [additional.hero_bg_image]);
 
   const { register, handleSubmit, watch, setValue } = useForm({
     defaultValues: {

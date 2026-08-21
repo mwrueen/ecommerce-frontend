@@ -8,10 +8,12 @@ import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Loader2, Upload, X, Star } from 'lucide-react';
+import { ArrowLeft, Loader2, Upload, X, Star, Search } from 'lucide-react';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 
 interface ProductFormData {
@@ -23,6 +25,7 @@ interface ProductFormData {
   stock_quantity: string;
   sku: string;
   category_id: string;
+  category_ids: number[];
   weight: string;
   dimensions: string;
   brand: string;
@@ -59,6 +62,7 @@ export default function ProductForm() {
     stock_quantity: '',
     sku: '',
     category_id: '',
+    category_ids: [],
     weight: '',
     dimensions: '',
     brand: '',
@@ -75,6 +79,10 @@ export default function ProductForm() {
 
   useEffect(() => {
     if (product) {
+      const loadedCategoryIds = Array.isArray(product.category_ids) && product.category_ids.length > 0
+        ? product.category_ids.map(Number)
+        : (product.category_id ? [Number(product.category_id)] : []);
+
       setFormData({
         name: product.name || '',
         slug: product.slug || '',
@@ -83,7 +91,8 @@ export default function ProductForm() {
         price: product.price || '',
         stock_quantity: product.stock_quantity?.toString() || '',
         sku: product.sku || '',
-        category_id: product.category_id?.toString() || '',
+        category_id: product.category_id?.toString() || (loadedCategoryIds[0]?.toString() || ''),
+        category_ids: loadedCategoryIds,
         weight: product.weight || '',
         dimensions: product.dimensions || '',
         brand: product.brand || '',
@@ -101,6 +110,21 @@ export default function ProductForm() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleToggleCategory = (catId: number) => {
+    setFormData((prev) => {
+      const exists = prev.category_ids.includes(catId);
+      const updatedIds = exists
+        ? prev.category_ids.filter((id) => id !== catId)
+        : [...prev.category_ids, catId];
+
+      return {
+        ...prev,
+        category_ids: updatedIds,
+        category_id: updatedIds.length > 0 ? updatedIds[0].toString() : prev.category_id,
+      };
+    });
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setSelectedFiles(Array.from(e.target.files));
@@ -110,12 +134,26 @@ export default function ProductForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (formData.category_ids.length === 0 && !formData.category_id) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please select at least one category for the product.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
+      const primaryCatId = formData.category_ids.length > 0
+        ? formData.category_ids[0]
+        : parseInt(formData.category_id || '0');
+
       const payload = {
         ...formData,
         price: parseFloat(formData.price),
         stock_quantity: parseInt(formData.stock_quantity),
-        category_id: parseInt(formData.category_id),
+        category_id: primaryCatId,
+        category_ids: formData.category_ids.length > 0 ? formData.category_ids : [primaryCatId],
         weight: formData.weight ? parseFloat(formData.weight) : undefined,
       };
 
@@ -292,20 +330,88 @@ export default function ProductForm() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="category_id">Category *</Label>
-                  <Select value={formData.category_id} onValueChange={(value) => handleChange('category_id', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category: any) => (
-                        <SelectItem key={category.id} value={category.id.toString()}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                {/* Multi-Category & Subcategory Selection */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="font-bold text-sm">Categories & Subcategories *</Label>
+                    <span className="text-xs text-muted-foreground">
+                      Select all categories this product belongs to
+                    </span>
+                  </div>
+
+                  {/* Selected Categories Badges */}
+                  {formData.category_ids.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
+                      {formData.category_ids.map((catId) => {
+                        const catObj = categories.find((c: any) => c.id === catId);
+                        if (!catObj) return null;
+                        const isPrimary = Number(formData.category_id) === catId;
+                        return (
+                          <Badge
+                            key={catId}
+                            variant={isPrimary ? "default" : "secondary"}
+                            className="flex items-center gap-1.5 text-xs py-1 px-2.5 rounded-lg font-semibold"
+                          >
+                            {catObj.name}
+                            {isPrimary && <span className="text-[10px] opacity-80">(Primary)</span>}
+                            <button
+                              type="button"
+                              onClick={() => handleToggleCategory(catId)}
+                              className="ml-1 text-slate-400 hover:text-rose-500 transition-colors"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Categories Tree Selector Container */}
+                  <div className="border border-slate-200 dark:border-slate-800 rounded-2xl p-4 bg-card max-h-[320px] overflow-y-auto space-y-3">
+                    {categories.length > 0 ? (
+                      categories
+                        .filter((cat: any) => !cat.parent_id)
+                        .map((parent: any) => {
+                          const subcats = categories.filter((sub: any) => sub.parent_id === parent.id);
+                          const isParentChecked = formData.category_ids.includes(parent.id);
+
+                          return (
+                            <div key={parent.id} className="space-y-2 border-b border-slate-100 dark:border-slate-800/80 pb-3 last:border-0 last:pb-0">
+                              <label className="flex items-center gap-2.5 font-extrabold text-xs cursor-pointer text-foreground hover:text-indigo-600 transition-colors">
+                                <Checkbox
+                                  checked={isParentChecked}
+                                  onCheckedChange={() => handleToggleCategory(parent.id)}
+                                />
+                                <span>{parent.name}</span>
+                                {subcats.length > 0 && (
+                                  <span className="text-[10px] font-normal text-muted-foreground">({subcats.length} subcategories)</span>
+                                )}
+                              </label>
+
+                              {subcats.length > 0 && (
+                                <div className="pl-6 grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                                  {subcats.map((sub: any) => {
+                                    const isSubChecked = formData.category_ids.includes(sub.id);
+                                    return (
+                                      <label key={sub.id} className="flex items-center gap-2 text-xs cursor-pointer text-slate-700 dark:text-slate-300 hover:text-indigo-600 transition-colors">
+                                        <Checkbox
+                                          checked={isSubChecked}
+                                          onCheckedChange={() => handleToggleCategory(sub.id)}
+                                        />
+                                        <span>{sub.name}</span>
+                                      </label>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                    ) : (
+                      <div className="text-xs text-muted-foreground text-center py-4">No categories available</div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center space-x-2">

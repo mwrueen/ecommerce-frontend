@@ -12,7 +12,8 @@ import {
   Sparkles, 
   X, 
   ArrowRight,
-  ChevronRight
+  ChevronRight,
+  ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,8 +33,8 @@ import { RootState } from '@/store';
 import { logout } from '@/store/slices/authSlice';
 import { useLogoutMutation } from '@/store/api/authApi';
 import { useLogoutCustomerMutation } from '@/store/api/customerAuthApi';
-import { useGetPublicSettingsQuery, useLazySearchQuery } from '@/hooks/useApi';
-import { getStorageUrl } from '@/lib/utils';
+import { useGetPublicSettingsQuery, useLazySearchQuery, useGetCategoriesQuery } from '@/hooks/useApi';
+import { getStorageUrl, cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 const Header = () => {
@@ -41,9 +42,13 @@ const Header = () => {
   const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
+  const megaMenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const [logoutMutation] = useLogoutMutation();
   const [logoutCustomerMutation] = useLogoutCustomerMutation();
   const [triggerSearch, { data: searchResults, isFetching }] = useLazySearchQuery();
+  const { data: allCategoriesData } = useGetCategoriesQuery({ active: 'true' });
   const searchRef = useRef<HTMLDivElement>(null);
   const { data: settingsData } = useGetPublicSettingsQuery({});
   const { items } = useSelector((state: RootState) => state.cart);
@@ -55,6 +60,29 @@ const Header = () => {
   const accentGradient = `linear-gradient(120deg, ${primaryColor}, ${secondaryColor})`;
   
   const cartItemsCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const rawCategories = allCategoriesData?.data || [];
+  const parentCategories = rawCategories.filter((cat: any) => !cat.parent_id);
+  const categoriesTree = parentCategories.map((parent: any) => {
+    const children = parent.children?.length > 0 
+      ? parent.children 
+      : rawCategories.filter((cat: any) => cat.parent_id === parent.id);
+    return {
+      ...parent,
+      children,
+    };
+  });
+
+  const handleMouseEnterCategory = () => {
+    if (megaMenuTimeoutRef.current) clearTimeout(megaMenuTimeoutRef.current);
+    setIsMegaMenuOpen(true);
+  };
+
+  const handleMouseLeaveCategory = () => {
+    megaMenuTimeoutRef.current = setTimeout(() => {
+      setIsMegaMenuOpen(false);
+    }, 200);
+  };
 
   const handleLogout = async () => {
     try {
@@ -162,13 +190,108 @@ const Header = () => {
                 <Package className="h-3.5 w-3.5 text-indigo-500" />
                 Products
               </Link>
-              <Link
-                to="/categories"
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-slate-700 hover:text-indigo-600 hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800 transition-all duration-200 shadow-xs hover:shadow-sm"
+              {/* Mega Menu Category Dropdown Trigger */}
+              <div 
+                className="relative"
+                onMouseEnter={handleMouseEnterCategory}
+                onMouseLeave={handleMouseLeaveCategory}
               >
-                <FolderOpen className="h-3.5 w-3.5 text-purple-500" />
-                Categories
-              </Link>
+                <Link
+                  to="/categories"
+                  className={cn(
+                    "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-slate-700 hover:text-indigo-600 hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800 transition-all duration-200 shadow-xs hover:shadow-sm cursor-pointer",
+                    isMegaMenuOpen && "bg-white text-indigo-600 dark:bg-slate-800 dark:text-white shadow-sm"
+                  )}
+                >
+                  <FolderOpen className="h-3.5 w-3.5 text-purple-500" />
+                  Categories
+                  <ChevronDown className="h-3 w-3 text-slate-400 transition-transform duration-200" style={{ transform: isMegaMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+                </Link>
+
+                {/* Floating Glassmorphic Mega Menu */}
+                {isMegaMenuOpen && (
+                  <div 
+                    className="absolute top-full left-0 mt-3 w-[720px] max-w-[90vw] rounded-3xl border border-slate-200/90 bg-white/95 backdrop-blur-2xl shadow-2xl p-6 z-50 text-slate-900 dark:bg-slate-900/95 dark:border-slate-800 dark:text-white animate-in fade-in slide-in-from-top-2 duration-200"
+                    onMouseEnter={handleMouseEnterCategory}
+                    onMouseLeave={handleMouseLeaveCategory}
+                  >
+                    <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
+                      <div className="flex items-center gap-2">
+                        <FolderOpen className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                        <h3 className="font-extrabold text-base tracking-tight">Product Categories & Subcategories</h3>
+                      </div>
+                      <Link 
+                        to="/categories" 
+                        onClick={() => setIsMegaMenuOpen(false)}
+                        className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                      >
+                        View All Categories <ChevronRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-6 max-h-[420px] overflow-y-auto pr-1">
+                      {categoriesTree.length > 0 ? (
+                        categoriesTree.map((parent: any) => (
+                          <div key={parent.id} className="space-y-2.5">
+                            {/* Parent Category Header */}
+                            <Link
+                              to={`/products?category=${parent.slug}`}
+                              onClick={() => setIsMegaMenuOpen(false)}
+                              className="group flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors"
+                            >
+                              {parent.image_url ? (
+                                <img
+                                  src={getStorageUrl(parent.image_url)}
+                                  alt={parent.name}
+                                  className="h-7 w-7 rounded-lg object-cover border border-slate-200 dark:border-slate-700 shrink-0 group-hover:scale-105 transition-transform"
+                                />
+                              ) : (
+                                <div className="h-7 w-7 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center font-bold text-xs shrink-0">
+                                  {parent.name.charAt(0)}
+                                </div>
+                              )}
+                              <div className="truncate">
+                                <h4 className="font-extrabold text-xs text-foreground group-hover:text-indigo-600 transition-colors truncate">
+                                  {parent.name}
+                                </h4>
+                                {parent.active_products_count !== undefined && (
+                                  <span className="text-[10px] text-muted-foreground">
+                                    {parent.active_products_count} Products
+                                  </span>
+                                )}
+                              </div>
+                            </Link>
+
+                            {/* Subcategories List */}
+                            {parent.children && parent.children.length > 0 ? (
+                              <div className="pl-4 border-l-2 border-slate-100 dark:border-slate-800 space-y-1">
+                                {parent.children.map((sub: any) => (
+                                  <Link
+                                    key={sub.id}
+                                    to={`/products?category=${sub.slug}`}
+                                    onClick={() => setIsMegaMenuOpen(false)}
+                                    className="block text-xs text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold py-1 px-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors truncate"
+                                  >
+                                    • {sub.name}
+                                  </Link>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="pl-4 text-[11px] text-muted-foreground italic">
+                                No subcategories
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="col-span-3 text-center py-6 text-xs text-muted-foreground">
+                          Loading categories...
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
               <Link
                 to="/deals"
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-slate-700 hover:text-indigo-600 hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800 transition-all duration-200 shadow-xs hover:shadow-sm"

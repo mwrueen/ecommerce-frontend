@@ -12,9 +12,10 @@ import { cn, getStorageUrl } from '@/lib/utils';
 
 interface ProductCardProps {
   product: any;
+  compact?: boolean;
 }
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard = ({ product, compact = false }: ProductCardProps) => {
   const dispatch = useDispatch();
   const { data: settings } = useGetPublicSettingsQuery({});
 
@@ -52,53 +53,53 @@ const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <Link to={`/products/${product.slug}`}>
       <Card className={cn(
-        "group overflow-hidden rounded-2xl border-0 bg-card shadow-lg",
-        "transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl"
+        "group overflow-hidden rounded-2xl border border-slate-100 bg-card shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1",
+        compact && "rounded-xl"
       )}>
-        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+        <div className={cn("relative overflow-hidden bg-muted", compact ? "aspect-[5/4]" : "aspect-[4/3]")}>
           {productImage ? (
             <img
               src={getStorageUrl(productImage)}
               alt={product.name}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-              <ShoppingCart className="h-12 w-12" />
+              <ShoppingCart className="h-8 w-8 opacity-40" />
             </div>
           )}
 
           {/* Overlay on hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
           {/* Quick action buttons */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+          <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200">
             <Button
               size="icon"
               variant="secondary"
-              className="h-9 w-9 rounded-xl bg-white/90 hover:bg-white shadow-lg"
+              className="h-7 w-7 rounded-lg bg-white/90 hover:bg-white shadow-md text-slate-700"
               onClick={(e) => { e.preventDefault(); }}
             >
-              <Heart className="h-4 w-4" />
+              <Heart className="h-3.5 w-3.5" />
             </Button>
             <Button
               size="icon"
               variant="secondary"
-              className="h-9 w-9 rounded-xl bg-white/90 hover:bg-white shadow-lg"
+              className="h-7 w-7 rounded-lg bg-white/90 hover:bg-white shadow-md text-slate-700"
               onClick={(e) => { e.preventDefault(); }}
             >
-              <Eye className="h-4 w-4" />
+              <Eye className="h-3.5 w-3.5" />
             </Button>
           </div>
 
-          {/* Stock badges */}
+          {/* Badges */}
           {isLowStock && (
-            <Badge className="absolute top-3 left-3 bg-amber-500 hover:bg-amber-600 border-0 shadow-lg text-[10px] font-semibold">
+            <Badge className="absolute top-2 left-2 bg-amber-500 hover:bg-amber-600 border-0 shadow-sm text-[9px] font-bold px-2 py-0.5">
               Only {product.stock_quantity} left
             </Badge>
           )}
           {isOutOfStock && (
-            <Badge className="absolute top-3 left-3 bg-slate-900 hover:bg-slate-800 border-0 shadow-lg text-[10px] font-semibold">
+            <Badge className="absolute top-2 left-2 bg-slate-900 hover:bg-slate-800 border-0 shadow-sm text-[9px] font-bold px-2 py-0.5">
               Out of Stock
             </Badge>
           )}
@@ -107,7 +108,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           {product.category && (
             <Badge
               variant="secondary"
-              className="absolute bottom-3 left-3 bg-white/90 text-foreground border-0 shadow-lg text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute bottom-2 left-2 bg-white/90 text-foreground border-0 shadow-md text-[9px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
             >
               {product.category.name}
             </Badge>
@@ -116,26 +117,26 @@ const ProductCard = ({ product }: ProductCardProps) => {
           {/* Deal badge */}
           {deal && (
             <Badge
-              className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 border-0 shadow-lg text-[10px] font-semibold"
+              className="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 border-0 shadow-sm text-[9px] font-bold px-2 py-0.5"
             >
               {deal.discount_type === 'percentage' ? `${deal.discount_value}% OFF` : `-${formatPrice(deal.discount_value, settings?.data?.currency_symbol, settings?.data?.currency_position, settings?.data?.formatted_currency)}`}
             </Badge>
           )}
         </div>
 
-        <CardContent className="p-4 space-y-3">
-          <h3 className="font-semibold line-clamp-1 group-hover:text-primary transition-colors">
+        <CardContent className={cn("p-3.5 space-y-1.5", compact && "p-2.5 sm:p-3 space-y-1")}>
+          <h3 className={cn("font-bold text-sm line-clamp-1 group-hover:text-primary transition-colors text-slate-900 dark:text-white", compact && "text-xs font-semibold")}>
             {product.name}
           </h3>
           {product.description && (
             <div
-              className="text-xs text-muted-foreground line-clamp-2 leading-relaxed"
+              className="text-[11px] text-muted-foreground line-clamp-1 leading-normal"
               dangerouslySetInnerHTML={{ __html: product.description }}
             />
           )}
-          <div className="flex items-center justify-between pt-1">
-            <div className="flex flex-col">
-              <span className="text-xl font-bold text-primary">
+          <div className="flex items-center justify-between pt-0.5">
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              <span className={cn("text-base font-black text-primary", compact && "text-sm sm:text-base font-extrabold")}>
                 {formatPrice(
                   discountedPrice,
                   settings?.data?.currency_symbol,
@@ -144,7 +145,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 )}
               </span>
               {deal && (
-                <span className="text-sm text-muted-foreground line-through">
+                <span className="text-[10px] sm:text-xs text-muted-foreground line-through">
                   {formatPrice(
                     product.price,
                     settings?.data?.currency_symbol,
@@ -157,16 +158,16 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </div>
         </CardContent>
 
-        <CardFooter className="p-4 pt-0">
+        <CardFooter className={cn("p-3.5 pt-0", compact && "p-2.5 pt-0")}>
           <Button
             className={cn(
-              "w-full gap-2 rounded-xl h-11 font-semibold transition-all",
-              "shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30"
+              "w-full gap-1.5 rounded-xl h-9 text-xs font-bold transition-all shadow-md shadow-primary/20 hover:shadow-lg",
+              compact && "h-8 text-[11px] rounded-lg"
             )}
             onClick={handleAddToCart}
             disabled={isOutOfStock}
           >
-            <ShoppingCart className="h-4 w-4" />
+            <ShoppingCart className="h-3.5 w-3.5" />
             {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
           </Button>
         </CardFooter>
